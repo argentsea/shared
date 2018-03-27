@@ -19,8 +19,8 @@ namespace ArgentSea
 		public enum SequenceLengthening
 		{
 			Linear,
-			Finonacci,
-			Cumluative,
+			Fibonacci,
+			Cumulative,
 			Doubling,
 			Squaring
 		}
@@ -28,7 +28,7 @@ namespace ArgentSea
 		/// <summary>
 		/// If a connection or command fails, this setting determines how much each subsequent retry should be further delayed.
 		/// </summary>
-		public SequenceLengthening RetryLengthening { get; set; } = SequenceLengthening.Finonacci;
+		public SequenceLengthening RetryLengthening { get; set; } = SequenceLengthening.Fibonacci;
 
 		/// <summary>
 		/// If a connection or command consistantly fails, the circuit breaker will reject all further connections until one suceeds.
@@ -47,7 +47,7 @@ namespace ArgentSea
 			long result;
 			switch (this.RetryLengthening)
 			{
-				case SequenceLengthening.Cumluative:
+				case SequenceLengthening.Cumulative:
 					result = attempt * (attempt + 1) / 2;
 					break;
 				case SequenceLengthening.Doubling:

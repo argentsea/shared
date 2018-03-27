@@ -21,7 +21,7 @@ namespace ArgentSea
 
         public ShardDataStores(IShardDataConfigurationOptions<TShard> config, 
             DataSecurityOptions security, 
-			DataResilienceConfigurationOptions resilienceStrategies,
+			DataResilienceOptions resilienceStrategies,
             IDataProviderServices dataProviderServices, 
             ILogger logger)
         {

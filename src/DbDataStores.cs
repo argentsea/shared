@@ -22,7 +22,7 @@ namespace ArgentSea
         public DbDataStores(
 			IDbDataConfigurationOptions config, 
             DataSecurityOptions security,
-			DataResilienceConfigurationOptions resilienceStrategies,
+			DataResilienceOptions resilienceStrategies,
 			IDataProviderServices dataProviderServices, 
             ILogger logger)
         {
