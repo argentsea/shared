@@ -7,40 +7,43 @@ using System.Threading.Tasks;
 using System.Data.Common;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using Polly;
 
 namespace ArgentSea
 {
-    public class ShardDataStores<TShard> where TShard : IComparable
-    {
+    public class ShardDataStores<TShard, TConfiguration> where TShard : IComparable where TConfiguration : class, IShardDataConfigurationOptions<TShard>, new()
+
+	{
         private readonly ImmutableDictionary<string, SecurityConfiguration> _credentials;
         private readonly ImmutableDictionary<string, DataResilienceConfiguration> _resilienceStrategies;
         private readonly IDataProviderServices _dataProviderServices;
         private readonly ILogger _logger;
 
-        public ShardDataStores(IShardDataConfigurationOptions<TShard> config, 
-            DataSecurityOptions security, 
-			DataResilienceOptions resilienceStrategies,
+        public ShardDataStores(
+			IOptions<TConfiguration> configOptions, 
+            IOptions<DataSecurityOptions> securityOptions,
+			IOptions<DataResilienceOptions> resilienceStrategiesOptions,
             IDataProviderServices dataProviderServices, 
-            ILogger logger)
+            ILogger<ShardDataStores<TShard, TConfiguration>> logger)
         {
             this._logger = logger;
             var sbdr = ImmutableDictionary.CreateBuilder<string, SecurityConfiguration>();
-            foreach (var crd in security.Credentials)
+            foreach (var crd in securityOptions.Value.Credentials)
             {
                 sbdr.Add(crd.SecurityKey, crd);
             }
             this._credentials = sbdr.ToImmutable();
 
             var rbdr = ImmutableDictionary.CreateBuilder<string, DataResilienceConfiguration>();
-            foreach (var rs in resilienceStrategies.DataResilienceStrategies)
+            foreach (var rs in resilienceStrategiesOptions.Value.DataResilienceStrategies)
             {
                 rbdr.Add(rs.DataResilienceKey, rs);
             }
             this._resilienceStrategies = rbdr.ToImmutable();
             this._dataProviderServices = dataProviderServices;
-            this.ShardSets = new ShardDataSets(this, config.ShardSetsInternal);
+            this.ShardSets = new ShardDataSets(this, configOptions.Value.ShardSetsInternal);
 
         }
 
@@ -69,7 +72,7 @@ namespace ArgentSea
                 //hide ctor
             }
 
-            public ShardDataSets(ShardDataStores<TShard> parent, IShardConnectionsConfiguration<TShard>[] config)
+            public ShardDataSets(ShardDataStores<TShard, TConfiguration> parent, IShardConnectionsConfiguration<TShard>[] config)
             {
                 var bdr = ImmutableDictionary.CreateBuilder<string, ShardDataSet>();
                 foreach (var set in config)
@@ -107,12 +110,14 @@ namespace ArgentSea
             {
                 //hid ctor
             }
-            public ShardDataSet(ShardDataStores<TShard> parent, IShardConnectionsConfiguration<TShard> config)
+            public ShardDataSet(ShardDataStores<TShard, TConfiguration> parent, IShardConnectionsConfiguration<TShard> config)
             {
                 var bdr = ImmutableDictionary.CreateBuilder<TShard, ShardInstance>();
                 foreach (var shd in config.ShardsInternal)
                 {
-                    bdr.Add(shd.ShardNumber, new ShardInstance(parent, shd.ShardNumber, config.DataResilienceKey, shd.ReadConnectionInternal, shd.WriteConnectionInternal));
+					shd.ReadConnectionInternal.SetSecurity(parent._credentials[config.SecurityKey]);
+					shd.WriteConnectionInternal.SetSecurity(parent._credentials[config.SecurityKey]);
+					bdr.Add(shd.ShardNumber, new ShardInstance(parent, shd.ShardNumber, config.DataResilienceKey, shd.ReadConnectionInternal, shd.WriteConnectionInternal));
                 }
                 this.dtn = bdr.ToImmutable();
             }
@@ -255,19 +260,19 @@ namespace ArgentSea
 
             private DataConnection() {  } //hid ctor
 
-            internal DataConnection(ShardDataStores<TShard> parent, string resilienceStrategyKey, IConnectionConfiguration config)
+            internal DataConnection(ShardDataStores<TShard, TConfiguration> parent, string resilienceStrategyKey, IConnectionConfiguration config)
                 : this(parent, default(TShard), resilienceStrategyKey, config.ConnectionDescription, config)
             {
 
             }
 
-            internal DataConnection(ShardDataStores<TShard> parent, TShard shardNumber, string resilienceStrategyKey, IConnectionConfiguration config)
+            internal DataConnection(ShardDataStores<TShard, TConfiguration> parent, TShard shardNumber, string resilienceStrategyKey, IConnectionConfiguration config)
                 : this(parent, default(TShard), resilienceStrategyKey, "shard number " + shardNumber.ToString() + " on connection " + config.ConnectionDescription, config)
             {
 
             }
 
-            private DataConnection(ShardDataStores<TShard> parent, TShard shardNumber,  string resilienceStrategyKey, string connectionName, IConnectionConfiguration config)
+            private DataConnection(ShardDataStores<TShard, TConfiguration> parent, TShard shardNumber,  string resilienceStrategyKey, string connectionName, IConnectionConfiguration config)
             {
                 //this._config = config;
                 this._logger = parent._logger;
@@ -370,11 +375,14 @@ namespace ArgentSea
             private static readonly double TimestampToMilliseconds = (double)TimeSpan.TicksPerSecond / (Stopwatch.Frequency * TimeSpan.TicksPerMillisecond);
 
 
-            //public async Task<Dictionary<string, object>> QueryAsync(string sprocName, IImmutableList<DbParameter> parameters, CancellationToken cancellationToken)
-            //{
-            //    return null;
-            //}
-            public async Task<TResult> QueryAsync<TResult, TPrm>(string sprocName, DbParameterCollection parameters, SqlShardObjectConverter<TShard, TResult, TPrm> sqlResultConverter, int shardNumberParameterIndex, bool isTopOne, TPrm dataObject, CancellationToken cancellationToken)
+			//public async Task<Dictionary<string, object>> QueryAsync(string sprocName, IImmutableList<DbParameter> parameters, CancellationToken cancellationToken)
+			//{
+			//    return null;
+			//}
+
+			public string ConnectionString { get => this._connectionString; }
+
+			public async Task<TResult> QueryAsync<TResult, TPrm>(string sprocName, DbParameterCollection parameters, SqlShardObjectConverter<TShard, TResult, TPrm> sqlResultConverter, int shardNumberParameterIndex, bool isTopOne, TPrm dataObject, CancellationToken cancellationToken)
             {
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -447,7 +455,7 @@ namespace ArgentSea
                 ReadOnly,
                 WriteAccess
             }
-            public ShardInstance(ShardDataStores<TShard> parent, TShard shardNumber, string resilienceStrategyKey, IConnectionConfiguration readConnection, IConnectionConfiguration writeConnection)
+            public ShardInstance(ShardDataStores<TShard, TConfiguration> parent, TShard shardNumber, string resilienceStrategyKey, IConnectionConfiguration readConnection, IConnectionConfiguration writeConnection)
             {
                 this.ShardNumber = shardNumber;
                 this.ReadConnection = new DataConnection(parent, shardNumber, resilienceStrategyKey, readConnection);

@@ -7,44 +7,62 @@ using System.Threading.Tasks;
 using System.Data.Common;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using Polly;
 
 namespace ArgentSea
 {
-    public class DbDataStores
-    {
+    public class DbDataStores<TConfiguration> where TConfiguration : class, IDbDataConfigurationOptions, new()
+	{
         private readonly ImmutableDictionary<string, SecurityConfiguration> _credentials;
         private readonly ImmutableDictionary<string, DataResilienceConfiguration> _resilienceStrategies;
         private readonly IDataProviderServices _dataProviderServices;
         private readonly ILogger _logger;
 
-        public DbDataStores(
-			IDbDataConfigurationOptions config, 
-            DataSecurityOptions security,
-			DataResilienceOptions resilienceStrategies,
-			IDataProviderServices dataProviderServices, 
-            ILogger logger)
-        {
-            this._logger = logger;
-            var sbdr = ImmutableDictionary.CreateBuilder<string, SecurityConfiguration>();
-            foreach (var crd in security.Credentials)
-            {
-                sbdr.Add(crd.SecurityKey, crd);
-            }
-            this._credentials = sbdr.ToImmutable();
+		public DbDataStores(
+			IOptions<TConfiguration> configOptions,
+			IOptions<DataSecurityOptions> securityOptions,
+			IOptions<DataResilienceOptions> resilienceStrategiesOptions,
+			IDataProviderServices dataProviderServices,
+			ILogger<DbDataStores<TConfiguration>> logger)
+		{
+			this._logger = logger;
+
+			if (configOptions?.Value?.DbConnectionsInternal is null)
+			{
+				throw new Exception("The DbDataStore object is missing required data connection information. Your application configuration may be missing a data configuration section.");
+			}
+			if (securityOptions?.Value?.Credentials is null)
+			{
+				throw new Exception("The DbDataStore object cannot obtain required security information. Your application configuration may be missing the “Credentials” section.");
+			}
+
+			var sbdr = ImmutableDictionary.CreateBuilder<string, SecurityConfiguration>();
+			foreach (var crd in securityOptions.Value.Credentials)
+			{
+				sbdr.Add(crd.SecurityKey, crd);
+			}
+			this._credentials = sbdr.ToImmutable();
 
 			var rbdr = ImmutableDictionary.CreateBuilder<string, DataResilienceConfiguration>();
-			foreach (var rs in resilienceStrategies.DataResilienceStrategies)
+			if (resilienceStrategiesOptions?.Value?.DataResilienceStrategies is null)
 			{
-				rbdr.Add(rs.DataResilienceKey, rs);
+				rbdr.Add(string.Empty, new DataResilienceConfiguration());
+			}
+			else
+			{
+				foreach (var rs in resilienceStrategiesOptions.Value.DataResilienceStrategies)
+				{
+					rbdr.Add(rs.DataResilienceKey, rs);
+				}
 			}
 			this._resilienceStrategies = rbdr.ToImmutable();
 			this._dataProviderServices = dataProviderServices;
-			this.DbConnections = new DbDataSets(this, config.DbConnectionsInternal);
+			this.DbConnections = new DbDataSets(this, configOptions.Value.DbConnectionsInternal);
         }
 
-        public DbDataSets DbConnections { get; }
+		public DbDataSets DbConnections { get; }
 
         #region Nested classes
 
@@ -63,13 +81,13 @@ namespace ArgentSea
 
             private DataConnection() {  } //hide ctor
 
-            internal DataConnection(DbDataStores parent, string resilienceStrategyKey, IConnectionConfiguration config)
+            internal DataConnection(DbDataStores<TConfiguration> parent, string resilienceStrategyKey, IConnectionConfiguration config)
                 : this(parent, resilienceStrategyKey, config.ConnectionDescription, config)
             {
 
             }
 
-            private DataConnection(DbDataStores parent, string resilienceStrategyKey, string connectionName, IConnectionConfiguration config)
+            private DataConnection(DbDataStores<TConfiguration> parent, string resilienceStrategyKey, string connectionName, IConnectionConfiguration config)
             {
                 //this._config = config;
                 this._logger = parent._logger;
@@ -77,11 +95,16 @@ namespace ArgentSea
                 this._connectionString = config.GetConnectionString();
                 this._connectionName = config.ConnectionDescription;
                 this._resilienceStrategy = new DataResilienceConfiguration(); //initialize to defaults
-                if (!string.IsNullOrEmpty(resilienceStrategyKey))
-                {
-                    this._resilienceStrategy = parent._resilienceStrategies[resilienceStrategyKey];
-                }
-                var retryPolicy = Policy.Handle<DbException>(ex =>
+				if (parent._resilienceStrategies != null && parent._resilienceStrategies.Count > 0 && !string.IsNullOrEmpty(resilienceStrategyKey))
+				{
+					if (!parent._resilienceStrategies.TryGetValue(resilienceStrategyKey, out var rstrategy))
+					{
+						_logger.LogWarning($"Connection {connectionName} specifies a resiliance strategy that could not be found in the list of configured strategies. Using a default strategy instead.");
+						rstrategy = new DataResilienceConfiguration();
+					}
+					this._resilienceStrategy = rstrategy;
+				}
+				var retryPolicy = Policy.Handle<DbException>(ex =>
                         parent._dataProviderServices.GetIsErrorTransient(ex)
                     )
                     .WaitAndRetryAsync(
@@ -145,8 +168,9 @@ namespace ArgentSea
  
             private static readonly double TimestampToMilliseconds = (double)TimeSpan.TicksPerSecond / (Stopwatch.Frequency * TimeSpan.TicksPerMillisecond);
 
+			public string ConnectionString { get => this._connectionString; }
 
-            public async Task<TResult> QueryAsync<TResult, TPrm>(string sprocName, DbParameterCollection parameters, SqlDbObjectConverter<TResult, TPrm> sqlResultConverter, bool isTopOne, TPrm dataObject, CancellationToken cancellationToken)
+			public async Task<TResult> QueryAsync<TResult, TPrm>(string sprocName, DbParameterCollection parameters, SqlDbObjectConverter<TResult, TPrm> sqlResultConverter, bool isTopOne, TPrm dataObject, CancellationToken cancellationToken)
             {
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -236,12 +260,17 @@ namespace ArgentSea
             {
                 //hide ctor
             }
-            public DbDataSets(DbDataStores parent, IDbConnectionConfiguration[] config)
+            public DbDataSets(DbDataStores<TConfiguration> parent, IDbConnectionConfiguration[] config)
             {
                 var bdr = ImmutableDictionary.CreateBuilder<string, DataConnection>();
 
                 foreach (var db in config)
                 {
+					if (!parent._credentials.TryGetValue(db.SecurityKey, out var secCfg))
+					{
+						throw new Exception($"Connection {db.DataConnectionInternal.ConnectionDescription} specifies a security key that could not be found in the “Credentials” list.");
+					}
+					db.DataConnectionInternal.SetSecurity(secCfg);
                     bdr.Add(db.DatabaseKey, new DataConnection(parent, db.DataResilienceKey, db.DataConnectionInternal));
                 }
                 this.dtn = bdr.ToImmutable();
