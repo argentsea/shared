@@ -19,13 +19,13 @@ namespace ArgentSea
         //    IsConcurrencyStamp
         //}
 
-        public ParameterMapAttribute(string parameterName, SqlDbType sqlType)
+        public ParameterMapAttribute(string parameterName, int sqlType)
         {
             ParameterName = parameterName;
             SqlType = sqlType;
         }
         public string ParameterName { get; private set; }
-        public SqlDbType SqlType { get; private set; }
+        public int SqlType { get; private set; }
 
         //public ShardUsage ShardPosition { get; set; } = ShardUsage.NotApplicable;
 
