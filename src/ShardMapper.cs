@@ -29,83 +29,83 @@ namespace ArgentSea
 		///// <summary>
 		///// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
 		///// </summary>
-		///// <typeparam name="modelT">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
-		///// <param name="prms">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+		///// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
+		///// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		///// <param name="model">An object model instance. The property values are use as parameter values.</param>
 		///// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		//public static DbParameterCollection MapToInParameters<T>(DbParameterCollection prms, T model, ILogger logger) where T : class
-		//	=> MapToInParameters<T>(prms, model, null, logger);
+		//public static DbParameterCollection MapToInParameters<T>(DbParameterCollection parameters, T model, ILogger logger) where T : class
+		//	=> MapToInParameters<T>(parameters, model, null, logger);
 
 		///// <summary>
 		///// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
 		///// </summary>
-		///// <typeparam name="modelT">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
-		///// <param name="prms">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+		///// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
+		///// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		///// <param name="model">An object model instance. The property values are use as parameter values.</param>
 		///// <param name="ignoreParameters">A lists of parameter names that should not be created. Parameter names should exactly match, including casing and prefix (if any).</param>
 		///// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		//public static DbParameterCollection MapToInParameters<T>(DbParameterCollection prms, T model, HashSet<string> ignoreParameters, ILogger logger) where T : class
+		//public static DbParameterCollection MapToInParameters<T>(DbParameterCollection parameters, T model, HashSet<string> ignoreParameters, ILogger logger) where T : class
 		//{
-		//	var modelT = typeof(T);
-		//	if (!_cacheInParamSet.TryGetValue(modelT, out var SqlParameterDelegates))
+		//	var TModel = typeof(T);
+		//	if (!_cacheInParamSet.TryGetValue(TModel, out var SqlParameterDelegates))
 		//	{
-		//		SqlLoggerExtensions.SqlInParametersCacheMiss(logger, modelT);
-		//		SqlParameterDelegates = BuildInMapDelegate(modelT, logger);
-		//		if (!_cacheInParamSet.TryAdd(modelT, SqlParameterDelegates))
+		//		SqlLoggerExtensions.SqlInParametersCacheMiss(logger, TModel);
+		//		SqlParameterDelegates = BuildInMapDelegate(TModel, logger);
+		//		if (!_cacheInParamSet.TryAdd(TModel, SqlParameterDelegates))
 		//		{
-		//			SqlParameterDelegates = _cacheInParamSet[modelT];
+		//			SqlParameterDelegates = _cacheInParamSet[TModel];
 		//		}
 		//	}
 		//	else
 		//	{
-		//		SqlLoggerExtensions.SqlInParametersCacheHit(logger, modelT);
+		//		SqlLoggerExtensions.SqlInParametersCacheHit(logger, TModel);
 		//	}
-		//	foreach (DbParameter prm in prms)
+		//	foreach (DbParameter prm in parameters)
 		//	{
 		//		if (!ignoreParameters.Contains(prm.ParameterName))
 		//		{
 		//			ignoreParameters.Add(prm.ParameterName);
 		//		}
 		//	}
-		//	SqlParameterDelegates(prms, ignoreParameters, logger, model);
-		//	return prms;
+		//	SqlParameterDelegates(parameters, ignoreParameters, logger, model);
+		//	return parameters;
 		//}
 
 		///// <summary>
 		///// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
 		///// </summary>
-		///// <typeparam name="modelT">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
-		///// <param name="prms">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+		///// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
+		///// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		///// <param name="model">The type of the model.</param>
 		///// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		//public static DbParameterCollection MapToOutParameters(DbParameterCollection prms, Type modelT, ILogger logger)
-		//	=> MapToOutParameters(prms, modelT, null, logger);
+		//public static DbParameterCollection MapToOutParameters(DbParameterCollection parameters, Type TModel, ILogger logger)
+		//	=> MapToOutParameters(parameters, TModel, null, logger);
 
 		///// <summary>
 		///// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
 		///// </summary>
-		///// <typeparam name="modelT">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
-		///// <param name="prms">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+		///// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
+		///// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		///// <param name="model">The type of the model.</param>
 		///// <param name="ignoreParameters">A lists of parameter names that should not be created. Parameter names should exactly match, including casing and prefix (if any).</param>
 		///// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		//public static DbParameterCollection MapToOutParameters(DbParameterCollection prms, Type modelT, HashSet<string> ignoreParameters, ILogger logger)
+		//public static DbParameterCollection MapToOutParameters(DbParameterCollection parameters, Type TModel, HashSet<string> ignoreParameters, ILogger logger)
 		//{
-		//	if (!_cacheOutParamSet.TryGetValue(modelT, out var SqlParameterDelegates))
+		//	if (!_cacheOutParamSet.TryGetValue(TModel, out var SqlParameterDelegates))
 		//	{
-		//		SqlLoggerExtensions.SqlSetOutParametersCacheMiss(logger, modelT);
-		//		SqlParameterDelegates = BuildOutSetDelegate(modelT, logger);
-		//		if (!_cacheOutParamSet.TryAdd(modelT, SqlParameterDelegates))
+		//		SqlLoggerExtensions.SqlSetOutParametersCacheMiss(logger, TModel);
+		//		SqlParameterDelegates = BuildOutSetDelegate(TModel, logger);
+		//		if (!_cacheOutParamSet.TryAdd(TModel, SqlParameterDelegates))
 		//		{
-		//			SqlParameterDelegates = _cacheOutParamSet[modelT];
-		//			SqlLoggerExtensions.SqlSetOutParametersCacheMiss(logger, modelT);
+		//			SqlParameterDelegates = _cacheOutParamSet[TModel];
+		//			SqlLoggerExtensions.SqlSetOutParametersCacheMiss(logger, TModel);
 		//		}
 		//	}
 		//	else
 		//	{
-		//		SqlLoggerExtensions.SqlSetOutParametersCacheHit(logger, modelT);
+		//		SqlLoggerExtensions.SqlSetOutParametersCacheHit(logger, TModel);
 		//	}
-		//	foreach (DbParameter prm in prms)
+		//	foreach (DbParameter prm in parameters)
 		//	{
 
 		//		if (!ignoreParameters.Contains(prm.ParameterName))
@@ -113,44 +113,44 @@ namespace ArgentSea
 		//			ignoreParameters.Add(prm.ParameterName);
 		//		}
 		//	}
-		//	SqlParameterDelegates(prms, ignoreParameters, logger);
-		//	return prms;
+		//	SqlParameterDelegates(parameters, ignoreParameters, logger);
+		//	return parameters;
 		//}
 
 		/// <summary>
 		/// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
 		/// </summary>
-		/// <typeparam name="modelT">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
-		/// <param name="prms">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
+		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
+		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
-		public static modelT ReadOutParameters<TShard, modelT>(this DbParameterCollection prms, TShard shardNumber, ILogger logger) where modelT : class, new() where TShard: IComparable
+		public static TModel ReadOutParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardNumber, ILogger logger) where TModel : class, new() where TShard: IComparable
 		{
-			var T = typeof(modelT);
+			var T = typeof(TModel);
 			if (!_getOutParamReadCache.TryGetValue(T, out var SqlRdrDelegate))
 			{
-				SqlLoggerExtensions.SqlReadOutParametersCacheMiss(logger, T);
-				SqlRdrDelegate = BuildOutGetDelegate<TShard>(prms, typeof(modelT), logger);
-				if (!_getOutParamReadCache.TryAdd(typeof(modelT), SqlRdrDelegate))
+				LoggingExtensions.SqlReadOutParametersCacheMiss(logger, T);
+				SqlRdrDelegate = BuildOutGetDelegate<TShard>(parameters, typeof(TModel), logger);
+				if (!_getOutParamReadCache.TryAdd(typeof(TModel), SqlRdrDelegate))
 				{
-					SqlRdrDelegate = _getOutParamReadCache[typeof(modelT)];
+					SqlRdrDelegate = _getOutParamReadCache[typeof(TModel)];
 				}
 			}
 			else
 			{
-				SqlLoggerExtensions.SqlReadOutParametersCacheHit(logger, T);
+				LoggingExtensions.SqlReadOutParametersCacheHit(logger, T);
 			}
-			return (modelT)SqlRdrDelegate(shardNumber, prms, logger);
+			return (TModel)SqlRdrDelegate(shardNumber, parameters, logger);
 		}
 
 		/// <summary>
 		/// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
 		/// </summary>
-		/// <typeparam name="modelT">The type of the list result</typeparam>
+		/// <typeparam name="TModel">The type of the list result</typeparam>
 		/// <param name="rdr">The data reader, set to the current result set.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>A list of objects of the specified type, one for each result.</returns>
-		public static IList<modelT> FromDataReader<TShard, modelT>(TShard shardNumber, DbDataReader rdr, ILogger logger) where modelT : class, new() where TShard: IComparable
+		public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardNumber, DbDataReader rdr, ILogger logger) where TModel : class, new() where TShard: IComparable
 		{
 			//Q: why don't we accept a List<T> argument and populate that, rather than create a new list?
 			//  This would allow us to pass in list properties of parent objects.
@@ -167,46 +167,46 @@ namespace ArgentSea
 			}
 			if (!rdr.HasRows)
 			{
-				return new List<modelT>();
+				return new List<TModel>();
 			}
-			var T = typeof(modelT);
-			if (!_getRdrParamCache.TryGetValue(typeof(modelT), out var SqlRdrDelegate))
+			var T = typeof(TModel);
+			if (!_getRdrParamCache.TryGetValue(typeof(TModel), out var SqlRdrDelegate))
 			{
-				SqlLoggerExtensions.SqlReaderCacheMiss(logger, T);
-				SqlRdrDelegate = BuildReaderMapDelegate<TShard, modelT>(logger);
-				if (!_getRdrParamCache.TryAdd(typeof(modelT), SqlRdrDelegate))
+				LoggingExtensions.SqlReaderCacheMiss(logger, T);
+				SqlRdrDelegate = BuildReaderMapDelegate<TShard, TModel>(logger);
+				if (!_getRdrParamCache.TryAdd(typeof(TModel), SqlRdrDelegate))
 				{
-					SqlRdrDelegate = _getRdrParamCache[typeof(modelT)];
+					SqlRdrDelegate = _getRdrParamCache[typeof(TModel)];
 				}
 			}
 			else
 			{
-				SqlLoggerExtensions.SqlReaderCacheHit(logger, T);
+				LoggingExtensions.SqlReaderCacheHit(logger, T);
 			}
-			return (List<modelT>)SqlRdrDelegate(shardNumber, rdr, logger);
+			return (List<TModel>)SqlRdrDelegate(shardNumber, rdr, logger);
 		}
 
 		#endregion
 		#region delegate builders
-		//private static Action<DbParameterCollection, HashSet<string>, ILogger, object> BuildInMapDelegate(Type modelT, ILogger logger)
+		//private static Action<DbParameterCollection, HashSet<string>, ILogger, object> BuildInMapDelegate(Type TModel, ILogger logger)
 		//{
 		//	var expressions = new List<Expression>();
 		//	//Create the two delegate parameters: in: sqlParametersCollection and model instance; out: sqlParametersCollection
-		//	ParameterExpression prmSqlPrms = Expression.Variable(typeof(DbParameterCollection), "prms");
+		//	ParameterExpression prmSqlPrms = Expression.Variable(typeof(DbParameterCollection), "parameters");
 		//	ParameterExpression prmObjInstance = Expression.Parameter(typeof(object), "model");
 		//	ParameterExpression expIgnoreParameters = Expression.Parameter(typeof(HashSet<string>), "ignoreParameters");
 		//	ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
 		//	var exprInPrms = new ParameterExpression[] { prmSqlPrms, expIgnoreParameters, expLogger, prmObjInstance };
 
-		//	using (logger.BuildInParameterScope(modelT))
+		//	using (logger.BuildInParameterScope(TModel))
 		//	{
-		//		var prmTypedInstance = Expression.TypeAs(prmObjInstance, modelT);  //Our cached delegates accept neither generic nor dynamic arguments. We have to pass object then cast.
+		//		var prmTypedInstance = Expression.TypeAs(prmObjInstance, TModel);  //Our cached delegates accept neither generic nor dynamic arguments. We have to pass object then cast.
 		//		var noDupPrmNameList = new HashSet<string>();
 		//		//var miLogTrace = typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.TraceInMapperProperty));
 		//		logger.SqlExpressionBlockStart(nameof(ShardMapper.MapToInParameters), exprInPrms);
 		//		expressions.Add(prmTypedInstance);
 		//		logger.SqlExpressionLog(prmTypedInstance);
-		//		IterateInMapProperties(modelT, expressions, prmSqlPrms, prmTypedInstance, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+		//		IterateInMapProperties(TModel, expressions, prmSqlPrms, prmTypedInstance, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
 		//		logger.SqlExpressionBlockEnd(nameof(ShardMapper.MapToInParameters));
 		//	}
 		//	var inBlock = Expression.Block(expressions);
@@ -228,10 +228,10 @@ namespace ArgentSea
 		//		return false;
 		//	}
 		//}
-		//private static void IterateInMapProperties(Type modelT, List<Expression> expressions, ParameterExpression prmSqlPrms, Expression prmTypedInstance, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
+		//private static void IterateInMapProperties(Type TModel, List<Expression> expressions, ParameterExpression prmSqlPrms, Expression prmTypedInstance, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
 		//{
 		//	var miLogTrace = typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.TraceInMapperProperty));
-		//	foreach (var prop in modelT.GetProperties())
+		//	foreach (var prop in TModel.GetProperties())
 		//	{
 		//		//Does property have our SqlMapAttribute attribute?
 		//		if (prop.IsDefined(typeof(ParameterMapAttribute), true))
@@ -259,23 +259,23 @@ namespace ArgentSea
 		//	}
 		//}
 
-		//private static Action<DbParameterCollection, HashSet<string>, ILogger> BuildOutSetDelegate(Type modelT, ILogger logger)
+		//private static Action<DbParameterCollection, HashSet<string>, ILogger> BuildOutSetDelegate(Type TModel, ILogger logger)
 		//{
 		//	var expressions = new List<Expression>();
 
 		//	//Create the two delegate parameters: in: sqlParametersCollection and model instance; out: sqlParametersCollection
-		//	ParameterExpression prmSqlPrms = Expression.Variable(typeof(DbParameterCollection), "prms");
+		//	ParameterExpression prmSqlPrms = Expression.Variable(typeof(DbParameterCollection), "parameters");
 		//	ParameterExpression expIgnoreParameters = Expression.Parameter(typeof(HashSet<string>), "ignoreParameters");
 		//	ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
 		//	var noDupPrmNameList = new HashSet<string>();
 
 		//	var exprOutPrms = new ParameterExpression[] { prmSqlPrms, expIgnoreParameters, expLogger };
 
-		//	IterateSetOutParameters(modelT, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+		//	IterateSetOutParameters(TModel, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
 
 		//	if (logger.IsEnabled(LogLevel.Debug))
 		//	{
-		//		using (logger.BuildSetOutParameterScope(modelT))
+		//		using (logger.BuildSetOutParameterScope(TModel))
 		//		{
 		//			logger.SqlExpressionBlockStart(nameof(ShardMapper.MapToOutParameters), exprOutPrms);
 		//			foreach (var exp in expressions)
@@ -289,11 +289,11 @@ namespace ArgentSea
 		//	var lmbOut = Expression.Lambda<Action<DbParameterCollection, HashSet<string>, ILogger>>(outBlock, exprOutPrms);
 		//	return lmbOut.Compile();
 		//}
-		//private static void IterateSetOutParameters(Type modelT, List<Expression> expressions, ParameterExpression prmSqlPrms, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
+		//private static void IterateSetOutParameters(Type TModel, List<Expression> expressions, ParameterExpression prmSqlPrms, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
 		//{
 		//	var miLogTrace = typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.TraceSetOutMapperProperty));
 		//	//Loop through all object properties:
-		//	foreach (var prop in modelT.GetProperties())
+		//	foreach (var prop in TModel.GetProperties())
 		//	{
 		//		//Does property have our SqlMapAttribute attribute?
 		//		if (prop.IsDefined(typeof(ParameterMapAttribute), true))
@@ -317,13 +317,13 @@ namespace ArgentSea
 		//}
 
 
-		private static Func<dynamic, DbParameterCollection, ILogger, object> BuildOutGetDelegate<TShard>(DbParameterCollection prms, Type modelT, ILogger logger) where TShard: IComparable
+		private static Func<dynamic, DbParameterCollection, ILogger, object> BuildOutGetDelegate<TShard>(DbParameterCollection parameters, Type TModel, ILogger logger) where TShard: IComparable
 		{
 			ParameterExpression prmShardNumber = Expression.Variable(typeof(TShard), "shardNumber");
-			ParameterExpression expPrms = Expression.Parameter(typeof(DbParameterCollection), "prms");
+			ParameterExpression expPrms = Expression.Parameter(typeof(DbParameterCollection), "parameters");
 			ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
 			var variableExpressions = new List<ParameterExpression>();
-			var expModel = Expression.Variable(modelT, "model"); //list result variable
+			var expModel = Expression.Variable(TModel, "model"); //list result variable
 			variableExpressions.Add(expModel);
 			var expPrm = Expression.Variable(typeof(DbParameter), "prm");
 			variableExpressions.Add(expPrm);
@@ -332,14 +332,14 @@ namespace ArgentSea
 
 			var expressions = new List<Expression>()
 			{
-				Expression.Assign(expModel, Expression.New(modelT)) // var result = new <T>;
+				Expression.Assign(expModel, Expression.New(TModel)) // var result = new <T>;
             };
-			using (logger.BuildGetOutParameterScope(modelT))
+			using (logger.BuildGetOutParameterScope(TModel))
 			{
 				logger.SqlExpressionBlockStart(nameof(ShardMapper.ReadOutParameters), expressionPrms);
 				//Loop through all object properties:
 
-				IterateGetOutParameters(modelT, prmShardNumber, expPrms, expPrm, variableExpressions, expressions, expModel, expLogger, logger);
+				IterateGetOutParameters(TModel, prmShardNumber, expPrms, expPrm, variableExpressions, expressions, expModel, expLogger, logger);
 
 				expressions.Add(expModel); //return value;
 				logger.SqlExpressionLog(expModel);
@@ -349,11 +349,11 @@ namespace ArgentSea
 			var lambda = Expression.Lambda<Func<dynamic, DbParameterCollection, ILogger, object>>(expBlock, expressionPrms);
 			return lambda.Compile();
 		}
-		private static void IterateGetOutParameters(Type modelT, ParameterExpression prmShardNumber, ParameterExpression expPrms, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> expressions, Expression expModel, ParameterExpression expLogger, ILogger logger)
+		private static void IterateGetOutParameters(Type TModel, ParameterExpression prmShardNumber, ParameterExpression expPrms, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> expressions, Expression expModel, ParameterExpression expLogger, ILogger logger)
 		{
-			var miLogTrace = typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.TraceGetOutMapperProperty));
+			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
 
-			foreach (var prop in modelT.GetProperties())
+			foreach (var prop in TModel.GetProperties())
 			{
 				if (prop.IsDefined(typeof(ParameterMapAttribute), true))
 				{
@@ -519,7 +519,7 @@ namespace ArgentSea
 
 		private static Func<dynamic, DbDataReader, ILogger, List<T>> BuildReaderMapDelegate<TShard, T>(ILogger logger)
 		{
-			var modelT = typeof(T);
+			var TModel = typeof(T);
 
 			var expressions = new List<Expression>();
 			var columnLookupExpressions = new List<MethodCallExpression>();
@@ -535,7 +535,7 @@ namespace ArgentSea
 			var miGetFieldValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFieldValue));
 			var miListAdd = typeof(List<T>).GetMethod(nameof(List<T>.Add));
 
-			//create List<modelT> result
+			//create List<TModel> result
 			var expModel = Expression.Parameter(typeof(T), "model"); //model variable
 			var expListResult = Expression.Parameter(typeof(List<T>), "result"); //list result variable
 			var expOrdinal = Expression.Variable(typeof(int), "ordinal");
@@ -544,7 +544,7 @@ namespace ArgentSea
 			var propIndex = 0;
 			var resultExpressions = new List<Expression>();
 			logger.SqlExpressionNote("while (rdr.Read())");
-			using (logger.BuildRdrScope(modelT))
+			using (logger.BuildRdrScope(TModel))
 			{
 				logger.SqlExpressionBlockStart(nameof(ShardMapper.FromDataReader), expressionPrms);
 				var expAssign = Expression.Assign(expModel, Expression.New(typeof(T)));
@@ -552,7 +552,7 @@ namespace ArgentSea
 				logger.SqlExpressionLog(expAssign);
 
 				//Loop through all object properties:
-				IterateRdrColumns(modelT, prmShardNumber, expModel, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
+				IterateRdrColumns(TModel, prmShardNumber, expModel, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
 
 				var expAddList = Expression.Call(expListResult, miListAdd, expModel);
 				expressions.Add(expAddList); //ResultList.Add(model);
@@ -578,10 +578,10 @@ namespace ArgentSea
 			var lambda = Expression.Lambda<Func<dynamic, DbDataReader, ILogger, List<T>>>(expBlock, expressionPrms);
 			return lambda.Compile();
 		}
-		private static void IterateRdrColumns(Type modelT, ParameterExpression prmShardNumber, Expression expModel, List<MethodCallExpression> columnLookupExpressions, List<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, ParameterExpression expLogger, ILogger logger)
+		private static void IterateRdrColumns(Type TModel, ParameterExpression prmShardNumber, Expression expModel, List<MethodCallExpression> columnLookupExpressions, List<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, ParameterExpression expLogger, ILogger logger)
 		{
-			var miLogTrace = typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.TraceRdrMapperProperty));
-			foreach (var prop in modelT.GetProperties())
+			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceRdrMapperProperty));
+			foreach (var prop in TModel.GetProperties())
 			{
 				if (prop.IsDefined(typeof(ParameterMapAttribute), true))
 				{
@@ -613,28 +613,28 @@ namespace ArgentSea
 		}
 		#endregion
 		#region Convert Sql result to object(s)
-		public static TResult SqlResultsToObject<TShard, TReaderResult, TOutParameters, TResult>
+		public static TResult SqlResultsHandler<TShard, TReaderResult, TOutParameters, TResult>
 			(
 			DataOrigin dataOrigin,
 			TShard shardNumber,
 			string proceedureName,
 			DbDataReader rdr,
-			DbParameterCollection prms,
+			DbParameterCollection parameters,
 			ILogger logger)
 			where TShard: IComparable
 			where TReaderResult : class, new()
 			where TOutParameters : class, new()
 			where TResult : class, new()
-			=> SqlResultsToObject<TShard, TReaderResult, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters, TResult>(dataOrigin, shardNumber, proceedureName, rdr, prms, logger);
+			=> SqlResultsHandler<TShard, TReaderResult, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TOutParameters, TResult>(dataOrigin, shardNumber, proceedureName, rdr, parameters, logger);
 
 
-		public static TResult SqlResultsToObject<TShard, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutParameters, TResult>
+		public static TResult SqlResultsHandler<TShard, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutParameters, TResult>
 			(
 			DataOrigin dataOrigin,
 			TShard shardNumber,
 			string procedureName,
 			DbDataReader rdr,
-			DbParameterCollection prms,
+			DbParameterCollection parameters,
 			ILogger logger)
 			where TShard: IComparable
 			where TReaderResult0 : class, new()
@@ -669,7 +669,7 @@ namespace ArgentSea
 			IList<TReaderResult7> resultList7 = null;
 			TOutParameters resultOutPrms = null;
 
-			var dummy = typeof(DummyType);
+			var dummy = typeof(Mapper.DummyType);
 			var hasNextResult = true;
 			if (typeof(TReaderResult0) != dummy)
 			{
@@ -713,14 +713,14 @@ namespace ArgentSea
 			}
 			if (typeof(TOutParameters) != dummy)
 			{
-				resultOutPrms = ShardMapper.ReadOutParameters<TShard, TOutParameters>(prms, shardNumber, logger);
+				resultOutPrms = ShardMapper.ReadOutParameters<TShard, TOutParameters>(parameters, shardNumber, logger);
 			}
 
 
 			var queryKey = typeof(TResult).ToString() + procedureName;
 			if (!_getObjectCache.TryGetValue(queryKey, out var sqlObjectDelegate))
 			{
-				sqlObjectDelegate = BuildExpressionSqlResultsToObject<TShard, TResult,
+				sqlObjectDelegate = BuildExpressionSqlResultsHandler<TShard, TResult,
 					TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6,
 					TReaderResult7, TOutParameters>(procedureName, logger);
 				if (!_getObjectCache.TryAdd(queryKey, sqlObjectDelegate))
@@ -754,7 +754,7 @@ namespace ArgentSea
 				return result;
 			}
 		}
-		private static Func<dynamic, string, object, object, object, object, object, object, object, object, object, ILogger, object> BuildExpressionSqlResultsToObject<
+		private static Func<dynamic, string, object, object, object, object, object, object, object, object, object, ILogger, object> BuildExpressionSqlResultsHandler<
 			TShard, TResult, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutParameters>
 			(string procedureName, ILogger logger)
 			where TShard: IComparable
@@ -784,7 +784,7 @@ namespace ArgentSea
 			var expResultSet6 = Expression.Parameter(typeof(TReaderResult6), "rst6");
 			var expResultSet7 = Expression.Parameter(typeof(TReaderResult7), "rst7");
 			var expLogger = Expression.Parameter(typeof(ILogger), "logger");
-			var expPrmOut = Expression.Parameter(typeof(TOutParameters), "prms");
+			var expPrmOut = Expression.Parameter(typeof(TOutParameters), "parameters");
 			var expResult = Expression.Variable(typeof(TResult), "result");
 			var expCount = Expression.Variable(typeof(int), "count");
 			var expExitTarget = Expression.Label("return");
@@ -806,7 +806,7 @@ namespace ArgentSea
 			var miFormat = typeof(string).GetMethod(nameof(string.Concat), BindingFlags.Static);
 			var resultType = typeof(TResult);
 
-			using (logger.BuildSqlResultsToObjectScope(procedureName, resultType))
+			using (logger.BuildSqlResultsHandlerScope(procedureName, resultType))
 			{
 				//Set base type to some result value, if we can.
 				if (resultType == typeof(TOutParameters))

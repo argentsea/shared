@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace ArgentSea
 {
-    public interface IDataProviderServices
+    public interface IDataProviderServiceFactory
     {
         bool GetIsErrorTransient(Exception exception);
 

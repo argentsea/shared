@@ -31,17 +31,17 @@ namespace ArgentSea
 		//        return (char)prm.Value;
 		//    }
 		//}
-		public static long GetLong(this DbParameter prm) => (long)prm.Value;
+		public static long GetLong(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(long), prm.ParameterName) : (long)prm.Value;
 		public static long? GetNullableLong(this DbParameter prm) => prm.Value as long?;
-		public static int GetInteger(this DbParameter prm) => (int)prm.Value;
+		public static int GetInteger(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(int), prm.ParameterName) : (int)prm.Value;
 		public static int? GetNullableInteger(this DbParameter prm) => prm.Value as int?;
-		public static short GetShort(this DbParameter prm) => (short)prm.Value;
+		public static short GetShort(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(short), prm.ParameterName) : (short)prm.Value;
 		public static short? GetNullableShort(this DbParameter prm) => prm.Value as short?;
-		public static byte GetByte(this DbParameter prm) => (byte)prm.Value;
+		public static byte GetByte(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(byte), prm.ParameterName) : (byte)prm.Value;
 		public static byte? GetNullableByte(this DbParameter prm) => prm.Value as byte?;
-		public static bool GetBoolean(this DbParameter prm) => (bool)prm.Value;
+		public static bool GetBoolean(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(bool), prm.ParameterName) : (bool)prm.Value;
 		public static bool? GetNullableBoolean(this DbParameter prm) => prm.Value as bool?;
-		public static decimal GetDecimal(this DbParameter prm) => (decimal)prm.Value;
+		public static decimal GetDecimal(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(decimal), prm.ParameterName) : (decimal)prm.Value;
 		public static decimal? GetNullableDecimal(this DbParameter prm) => prm.Value as decimal?;
 		/// <summary>
 		/// Returns a double (64-bit floating point) value from the parameter, or NaN (Not a Number) if the value is DbNull.
@@ -104,11 +104,11 @@ namespace ArgentSea
 				return (Guid?)prm.Value;
 			}
 		}
-		public static DateTime GetDateTime(this DbParameter prm) => (DateTime)prm.Value;
+		public static DateTime GetDateTime(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(DateTime), prm.ParameterName) : (DateTime)prm.Value;
 		public static DateTime? GetNullableDateTime(this DbParameter prm) => prm.Value as DateTime?;
-		public static DateTimeOffset GetDateTimeOffset(this DbParameter prm) => (DateTimeOffset)prm.Value;
+		public static DateTimeOffset GetDateTimeOffset(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(DateTimeOffset), prm.ParameterName) : (DateTimeOffset)prm.Value;
 		public static DateTimeOffset? GetNullableDateTimeOffset(this DbParameter prm) => prm.Value as DateTimeOffset?;
-		public static TimeSpan GetTimeSpan(this DbParameter prm) => (TimeSpan)prm.Value;
+		public static TimeSpan GetTimeSpan(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(TimeSpan), prm.ParameterName) : (TimeSpan)prm.Value;
 		public static TimeSpan? GetNullableTimeSpan(this DbParameter prm) => prm.Value as TimeSpan?;
 		#endregion
 	}

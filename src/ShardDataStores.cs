@@ -18,14 +18,14 @@ namespace ArgentSea
 	{
         private readonly ImmutableDictionary<string, SecurityConfiguration> _credentials;
         private readonly ImmutableDictionary<string, DataResilienceConfiguration> _resilienceStrategies;
-        private readonly IDataProviderServices _dataProviderServices;
+        private readonly IDataProviderServiceFactory _dataProviderServices;
         private readonly ILogger _logger;
 
         public ShardDataStores(
 			IOptions<TConfiguration> configOptions, 
             IOptions<DataSecurityOptions> securityOptions,
 			IOptions<DataResilienceOptions> resilienceStrategiesOptions,
-            IDataProviderServices dataProviderServices, 
+            IDataProviderServiceFactory dataProviderServices, 
             ILogger<ShardDataStores<TShard, TConfiguration>> logger)
         {
             this._logger = logger;
@@ -150,7 +150,7 @@ namespace ArgentSea
             //}
 
 
-            public async Task<TResult> QueryFirstAsync<TResult, TPrm>(string sprocName, TShard[] exclude, DbParameterCollection parameters, int shardNumberParameterIndex, SqlShardObjectConverter<TShard, TResult, TPrm> sqlResultConverter, TPrm dataObject, CancellationToken cancellationToken)
+            public async Task<TResult> QueryFirstAsync<TArg, TResult>(string sprocName, TShard[] exclude, DbParameterCollection parameters, int shardNumberParameterIndex, QueryResultModelHandler<TShard, TArg, TResult> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TResult: class, new()
             {
                 var result = default(TResult);
                 if (string.IsNullOrEmpty(sprocName))
@@ -175,11 +175,11 @@ namespace ArgentSea
                             parameters[shardNumberParameterIndex].Value = this.ShardNumber;
                         }
 
-                        tsks.Add(this.dtn[shardNumber].ReadConnection.QueryAsync<TResult, TPrm>(sprocName, parameters, sqlResultConverter, shardNumberParameterIndex, true, dataObject, queryCancelationToken.Token));
+                        tsks.Add(this.dtn[shardNumber].ReadConnection.QueryAsync<TArg, TResult>(sprocName, parameters, resultHandler, shardNumberParameterIndex, true, dataObject, queryCancelationToken.Token));
                     }
                     while (tsks.Count > 0)
                     {
-                        var tsk = await Task.WhenAny(tsks);
+                        var tsk = await Task.WhenAny(tsks).ConfigureAwait(false);
                         tsks.Remove(tsk);
                         if (cancellationToken.IsCancellationRequested)
                         {
@@ -188,7 +188,7 @@ namespace ArgentSea
                         }
                         try
                         {
-                            var tskResult = await tsk;
+                            var tskResult = await tsk.ConfigureAwait(false);
                             if (tskResult != null)
                             {
                                 result = tskResult;
@@ -206,9 +206,10 @@ namespace ArgentSea
                 }
                 return result;
             }
-            public async Task<List<TResult>> QueryAllAsync<TResult, TPrm>(string sprocName, TShard[] exclude, DbParameterCollection parameters, int shardNumberParameterIndex, SqlShardObjectConverter<TShard, TResult, TPrm> sqlResultConverter, TPrm dataObject, CancellationToken cancellationToken)
-            {
-                var result = new List<TResult>();
+            public async Task<List<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, TShard[] exclude, DbParameterCollection parameters, int shardNumberParameterIndex, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel: class, new()
+
+			{
+                var result = new List<TModel>();
                 if (string.IsNullOrEmpty(sprocName))
                 {
                     throw new ArgumentNullException(nameof(sprocName));
@@ -220,16 +221,16 @@ namespace ArgentSea
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var tsks = new List<Task<TResult>>();
+                var tsks = new List<Task<TModel>>();
                 foreach (var shardNumber in dtn.Keys)
                 {
                     if (shardNumberParameterIndex >= 0 && shardNumberParameterIndex < parameters.Count) // && cmd.Parameters[shardNumberParameterIndex].DbType == System.Data.DbType.Byte)
                     {
                         parameters[shardNumberParameterIndex].Value = this.ShardNumber;
                     }
-                    tsks.Add(this.dtn[shardNumber].ReadConnection.QueryAsync<TResult, TPrm>(sprocName, parameters, sqlResultConverter, shardNumberParameterIndex, false, dataObject, cancellationToken));
+                    tsks.Add(this.dtn[shardNumber].ReadConnection.QueryAsync<TArg, TModel>(sprocName, parameters, resultHandler, shardNumberParameterIndex, false, dataObject, cancellationToken));
                 }
-                await Task.WhenAll(tsks);
+                await Task.WhenAll(tsks).ConfigureAwait(false);
                 foreach (var tsk in tsks)
                 {
                     var tskResult = tsk.Result;
@@ -240,8 +241,8 @@ namespace ArgentSea
 				}
                 return result;
             }
-            public async Task<List<TResult>> QueryAllAsync<TResult>(string sprocName, TShard[] exclude, DbParameterCollection parameters, int shardNumberParameterIndex, SqlShardObjectConverter<TShard, TResult, object> sqlResultConverter, CancellationToken cancellationToken)
-                => await QueryAllAsync<TResult, object>(sprocName, exclude, parameters, shardNumberParameterIndex, sqlResultConverter, null, cancellationToken);
+            public async Task<List<TModel>> QueryAllAsync<TModel>(string sprocName, TShard[] exclude, DbParameterCollection parameters, int shardNumberParameterIndex, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+				=> await QueryAllAsync<object, TModel>(sprocName, exclude, parameters, shardNumberParameterIndex, resultHandler, null, cancellationToken).ConfigureAwait(false);
         }
 
         public class DataConnection
@@ -250,7 +251,7 @@ namespace ArgentSea
             private readonly Policy _connectPolicy;
             private readonly Dictionary<string, Policy> _commandPolicy = new Dictionary<string, Policy>();
             private readonly DataResilienceConfiguration _resilienceStrategy;
-            private readonly IDataProviderServices _dataProviderServices;
+            private readonly IDataProviderServiceFactory _dataProviderServices;
             private readonly string _connectionString;
             private readonly string _connectionName; //shardset key + shardNumber.ToString() || dataset key
             private readonly TShard _shardNumber;
@@ -346,33 +347,33 @@ namespace ArgentSea
 
             }
             public List<Exception> SqlExceptionsEncountered { get; } = new List<Exception>();
- 
-            //private async static Task<DbDataReader> ExecuteReaderWithRetryAsync(DbCommand command)
-            //{
-            //    //GuardConnectionIsNotNull(command);
 
-            //    var policy = Polly.Policy.Handle<Exception>().WaitAndRetryAsync(
-            //        retryCount: 3, // Retry 3 times
-            //        sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt - 1)), // Exponential backoff based on an initial 200ms delay.
-            //        onRetry: (exception, attempt) =>
-            //        {
-            //        // Capture some info for logging/telemetry.  
-            //        logger.LogWarn($"ExecuteReaderWithRetryAsync: Retry {attempt} due to {exception}.");
-            //        });
+			//private async static Task<DbDataReader> ExecuteReaderWithRetryAsync(DbCommand command)
+			//{
+			//    //GuardConnectionIsNotNull(command);
 
-            //    // Retry the following call according to the policy.
-            //    await policy.ExecuteAsync<SqlDataReader>(async token =>
-            //    {
-            //        // This code is executed within the Policy 
+			//    var policy = Polly.Policy.Handle<Exception>().WaitAndRetryAsync(
+			//        retryCount: 3, // Retry 3 times
+			//        sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt - 1)), // Exponential backoff based on an initial 200ms delay.
+			//        onRetry: (exception, attempt) =>
+			//        {
+			//        // Capture some info for logging/telemetry.  
+			//        logger.LogWarn($"ExecuteReaderWithRetryAsync: Retry {attempt} due to {exception}.");
+			//        });
 
-            //        if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(token);
-            //        return await command.ExecuteReaderAsync(System.Data.CommandBehavior.Default, token);
+			//    // Retry the following call according to the policy.
+			//    await policy.ExecuteAsync<SqlDataReader>(async token =>
+			//    {
+			//        // This code is executed within the Policy 
 
-            //    }, cancellationToken);
-            //}
+			//        if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(token).ConfigureAwait(false);
+			//        return await command.ExecuteReaderAsync(System.Data.CommandBehavior.Default, token).ConfigureAwait(false);
+
+			//    }, cancellationToken);
+			//}
 
 
-            private static readonly double TimestampToMilliseconds = (double)TimeSpan.TicksPerSecond / (Stopwatch.Frequency * TimeSpan.TicksPerMillisecond);
+			private static readonly double TimestampToMilliseconds = (double)TimeSpan.TicksPerSecond / (Stopwatch.Frequency * TimeSpan.TicksPerMillisecond);
 
 
 			//public async Task<Dictionary<string, object>> QueryAsync(string sprocName, IImmutableList<DbParameter> parameters, CancellationToken cancellationToken)
@@ -382,8 +383,9 @@ namespace ArgentSea
 
 			public string ConnectionString { get => this._connectionString; }
 
-			public async Task<TResult> QueryAsync<TResult, TPrm>(string sprocName, DbParameterCollection parameters, SqlShardObjectConverter<TShard, TResult, TPrm> sqlResultConverter, int shardNumberParameterIndex, bool isTopOne, TPrm dataObject, CancellationToken cancellationToken)
-            {
+			public async Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, int shardNumberParameterIndex, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+
+			{
 
                 cancellationToken.ThrowIfCancellationRequested();
                 var startTimestamp = Stopwatch.GetTimestamp();
@@ -393,21 +395,23 @@ namespace ArgentSea
                 {
                     this._commandPolicy.Add(sprocName, this.GetCommandResiliencePolicy(sprocName));
                 }
-                var result = await this._commandPolicy[sprocName].ExecuteAsync(newToken => this.QueryDatabaseAsync<TResult, TPrm>(sprocName, parameters, sqlResultConverter, shardNumberParameterIndex, isTopOne, dataObject, newToken), cancellationToken);
+                var result = await this._commandPolicy[sprocName].ExecuteAsync(newToken => 
+					this.QueryDatabaseAsync<TArg, TModel>(sprocName, parameters, resultHandler, shardNumberParameterIndex, isTopOne, optionalArgument, newToken), cancellationToken).ConfigureAwait(false);
 
                 var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
                 _logger.TraceDbCmdExecuted(sprocName, this._connectionName, elapsedMS);
                 return result;
             }
 
-            private async Task<TResult> QueryDatabaseAsync<TResult, TPrm>(string sprocName, DbParameterCollection parameters, SqlShardObjectConverter<TShard, TResult, TPrm> sqlResultConverter, int shardNumberParameterIndex, bool isTopOne, TPrm dataObject, CancellationToken cancellationToken)
-            {
-                TResult result = default(TResult);
+            private async Task<TModel> QueryDatabaseAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, int shardNumberParameterIndex, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+
+			{
+				TModel result = default(TModel);
                 cancellationToken.ThrowIfCancellationRequested();
                 SqlExceptionsEncountered.Clear();
                 using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
                 {
-                    await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken));
+                    await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
                     cancellationToken.ThrowIfCancellationRequested();
                     using (var cmd = this._dataProviderServices.NewCommand(sprocName, connection))
                     {
@@ -422,11 +426,11 @@ namespace ArgentSea
                         {
                             cmdType = System.Data.CommandBehavior.SingleRow;
                         }
-                        using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken))
+                        using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken).ConfigureAwait(false))
                         {
                             cancellationToken.ThrowIfCancellationRequested();
 
-							result = sqlResultConverter(this._shardNumber, dataObject, dataReader, parameters, this._logger);
+							result = resultHandler(this._shardNumber, sprocName, optionalArgument, dataReader, cmd.Parameters, _connectionName, this._logger);
                         }
                     }
                 }

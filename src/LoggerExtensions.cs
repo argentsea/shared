@@ -7,7 +7,7 @@ using System.Text;
 namespace ArgentSea
 {
 
-    public static class SqlLoggerExtensions
+    public static class LoggingExtensions
     {
         public enum EventIdentifier
         {
@@ -19,14 +19,13 @@ namespace ArgentSea
             MapperSetOutParameterCacheStatus,
             MapperReadOutParameterCacheStatus,
             MapperReaderCacheStatus,
-            MapperTvpCacheStatus,
             MapperInTrace,
-            MapperTvpTrace,
             MapperSetOutTrace,
             MapperGetOutTrace,
             MapperRdrTrace,
             MapperShardKeyNull,
             MapperShardChildNull,
+			MapperResultsReaderInvalid,
             LogCmdExecuted,
             LogConnectRetry,
             LogCommandRetry,
@@ -43,24 +42,20 @@ namespace ArgentSea
         private static readonly Action<ILogger, Type, Exception> _sqlReadOutParameterCacheHit;
         private static readonly Action<ILogger, Type, Exception> _sqlReaderCacheMiss;
         private static readonly Action<ILogger, Type, Exception> _sqlReaderCacheHit;
-        private static readonly Action<ILogger, Type, Exception> _sqlTvpCacheMiss;
-        private static readonly Action<ILogger, Type, Exception> _sqlTvpCacheHit;
-        //private static readonly Action<ILogger, string, Type, string, Exception> _sqlDelegateCreate;
-        private static readonly Action<ILogger, string, PropertyInfo, Exception> _sqlDelegateParameterNotFound;
-        private static readonly Action<ILogger, string, Type, Exception> _sqlDelegateFieldNotFound;
+        //private static readonly Action<ILogger, string, Type, string, Exception> _sqlCreate;
+        private static readonly Action<ILogger, string, Type, Exception> _sqlParameterNotFound;
+        private static readonly Action<ILogger, string, Type, Exception> _sqlFieldNotFound;
         private static readonly Action<ILogger, string, Exception> _sqlMapperInTrace;
-        private static readonly Action<ILogger, string, Exception> _sqlMapperTvpTrace;
         private static readonly Action<ILogger, string, Exception> _sqlMapperSetOutTrace;
         private static readonly Action<ILogger, string, Exception> _sqlMapperGetOutTrace;
         private static readonly Action<ILogger, string, Exception> _sqlMapperRdrTrace;
-        private static readonly Action<ILogger, string, byte?, int?, Exception> _sqlShardKeyNull;
-        private static readonly Action<ILogger, string, byte?, int?, short?, Exception> _sqlShardChildNull;
+        private static readonly Action<ILogger, string, string, Exception> _sqlShardKeyNull;
+        private static readonly Action<ILogger, string, string, Exception> _sqlShardChildNull;
         private static readonly Func<ILogger, Type, IDisposable> _buildInPrmExpressionsScope;
         private static readonly Func<ILogger, Type, IDisposable> _buildSetOutPrmExpressionsScope;
         private static readonly Func<ILogger, Type, IDisposable> _buildGetOutPrmExpressionsScope;
-        private static readonly Func<ILogger, Type, IDisposable> _buildTvpExpressionsScope;
         private static readonly Func<ILogger, Type, IDisposable> _buildRdrExpressionsScope;
-        private static readonly Func<ILogger, string, Type, IDisposable> _buildSqlResultsToObjectScope;
+        private static readonly Func<ILogger, string, Type, IDisposable> _buildSqlResultsHandlerScope;
         private static readonly Action<ILogger, Expression, Exception> _logExpression;
         private static readonly Action<ILogger, string, Exception> _logBlockStart;
         private static readonly Action<ILogger, string, Exception> _logBlockEnd;
@@ -76,37 +71,35 @@ namespace ArgentSea
         private static readonly Action<ILogger, string, Exception> _sqlConnectionCircuitBreakerOff;
         private static readonly Action<ILogger, string, string, Exception> _sqlCommandCircuitBreakerOff;
 
+		private static readonly Action<ILogger, string, string, Exception> _sqlMapperReaderIsNull;
+		private static readonly Action<ILogger, string, string, Exception> _sqlMapperReaderIsClosed;
 
-        static SqlLoggerExtensions()
+		static LoggingExtensions()
         {
-            //_sqlDelegateCreate = LoggerMessage.Define<string, Type, string>(LogLevel.Debug, new EventId((int)EventIdentifier.EventDelegate, nameof(SqlDelegateCreated)), "Created delegate for {source} for object type {type}: \r\n{{{text}}}");
+            //_sqlCreate = LoggerMessage.Define<string, Type, string>(LogLevel.Debug, new EventId((int)EventIdentifier.EventDelegate, nameof(SqlDelegateCreated)), "Created delegate for {source} for object type {type}: \r\n{{{text}}}");
 
-            _sqlInParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheMiss)), "No cached delegate for creating input parameters was found for type {modelT}; this is normal for the first execution.");
-            _sqlInParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheHit)), "The cached delegate for creating input parameters was found for type {modelT}.");
-            _sqlSetOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was found for type {modelT}; this is normal for the first execution."); 
-            _sqlSetOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was found for type {modelT}.");
-            _sqlReadOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperReadOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was found for type {modelT}; this is normal for the first execution."); 
-            _sqlReadOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReadOutParameterCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was found for type {modelT}.");
-            _sqlReaderCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheMiss)), "No cached delegate for mapping a data reader was found for type {modelT}; this is normal for the first execution.");
-            _sqlReaderCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheHit)), "The cached delegate for mapping a data reader was found for type {modelT}.");
-            _sqlTvpCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperTvpCacheStatus, nameof(SqlTvpCacheMiss)), "No cached delegate was found for mapping type {modelT} to Sql row metadata; this is normal for the first execution.");
-            _sqlTvpCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperTvpCacheStatus, nameof(SqlTvpCacheHit)), "A cached delegate for mapping type {modelT} to Sql row metadata was found.");
-            _sqlDelegateParameterNotFound = LoggerMessage.Define<string, PropertyInfo>(LogLevel.Information, new EventId((int)EventIdentifier.MapperSqlParameterNotFound, nameof(SqlParameterNotFound)), "Sql Parameter {parameterName} was defined on {PropertyInfo.ReflectedType} but was not found among the provided output parameters.");
-            _sqlDelegateFieldNotFound = LoggerMessage.Define<string, Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperSqlColumnNotFound, nameof(SqlFieldNotFound)), "Sql Parameter {parameterName} was defined on {modelT} but was not found in output parameters.");
-            _sqlMapperInTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperInTrace, nameof(TraceInMapperProperty)), "In-parameter mapper is now processing property {name}.");
-            _sqlMapperTvpTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperTvpTrace, nameof(TraceTvpMapperProperty)), "Tvp mapper is now processing property {name}.");
-            _sqlMapperSetOutTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSetOutTrace, nameof(TraceSetOutMapperProperty)), "Set out-parameter mapper is now processing property {name}.");
+            _sqlInParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheMiss)), "No cached delegate for creating input parameters was found for type {TModel}; this is normal for the first execution.");
+            _sqlInParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheHit)), "The cached delegate for creating input parameters was found for type {TModel}.");
+            _sqlSetOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was found for type {TModel}; this is normal for the first execution."); 
+            _sqlSetOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was found for type {TModel}.");
+            _sqlReadOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperReadOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was found for type {TModel}; this is normal for the first execution."); 
+            _sqlReadOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReadOutParameterCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was found for type {TModel}.");
+            _sqlReaderCacheMiss = LoggerMessage.Define<Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheMiss)), "No cached delegate for mapping a data reader was found for type {TModel}; this is normal for the first execution.");
+            _sqlReaderCacheHit = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheHit)), "The cached delegate for mapping a data reader was found for type {TModel}.");
+            _sqlParameterNotFound = LoggerMessage.Define<string, Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperSqlParameterNotFound, nameof(SqlParameterNotFound)), "Sql Parameter {parameterName} was defined on {Type} but was not found among the provided output parameters.");
+            _sqlFieldNotFound = LoggerMessage.Define<string, Type>(LogLevel.Information, new EventId((int)EventIdentifier.MapperSqlColumnNotFound, nameof(SqlFieldNotFound)), "Sql Parameter {parameterName} was defined on {TModel} but was not found in output parameters.");
+			_sqlMapperInTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperInTrace, nameof(TraceInMapperProperty)), "In-parameter mapper is now processing property {name}.");
+			_sqlMapperSetOutTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSetOutTrace, nameof(TraceSetOutMapperProperty)), "Set out-parameter mapper is now processing property {name}.");
             _sqlMapperGetOutTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperGetOutTrace, nameof(TraceGetOutMapperProperty)), "Get out-parameter mapper is now processing property {name}.");
             _sqlMapperRdrTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperRdrTrace, nameof(TraceRdrMapperProperty)), "Data reader field mapper is now processing property {name}.");
-            _sqlShardKeyNull = LoggerMessage.Define<string, byte?, int?>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardKeyNull, nameof(TraceRdrMapperProperty)), "The {name} shard key could not be built because one of the input values was dbNull. The Shard value was {shardNumber} and the record value was {recordID}.");
-            _sqlShardChildNull = LoggerMessage.Define<string, byte?, int?, short?>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardChildNull, nameof(TraceRdrMapperProperty)), "The {name} shard child could not be built because one or two of the input values was dbNull. The Shard value was {shardNumber}, the record value was {recordID}, and the child value was {childId}.");
+            _sqlShardKeyNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardKeyNull, nameof(TraceRdrMapperProperty)), "The {name} shard key could not be built because one of the input values was dbNull. The shard key value was {shardKey}.");
+            _sqlShardChildNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardChildNull, nameof(TraceRdrMapperProperty)), "The {name} shard child could not be built because one or two of the input values was dbNull. The shard child value was {shardChild}.");
             _buildInPrmExpressionsScope = LoggerMessage.DefineScope<Type>("Building logic to handle input parameters for model {type}");
             _buildSetOutPrmExpressionsScope = LoggerMessage.DefineScope<Type>("Building logic to set output parameters for model {type}");
             _buildGetOutPrmExpressionsScope = LoggerMessage.DefineScope<Type>("Building logic to read output parameters for model {type}");
-            _buildTvpExpressionsScope = LoggerMessage.DefineScope<Type>("Building SqlMetadata convertion logic for model {type}");
-            _buildRdrExpressionsScope = LoggerMessage.DefineScope<Type>("Build logic to handle a datareader for model {type}");
-            _buildSqlResultsToObjectScope = LoggerMessage.DefineScope<string, Type>("Build logic to convert sql procedure {name} results to result {type}");
-            _logExpression = LoggerMessage.Define<Expression>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionLog)), "{expression.ToString()}");
+			_buildRdrExpressionsScope = LoggerMessage.DefineScope<Type>("Build logic to handle a datareader for model {type}");
+			_buildSqlResultsHandlerScope = LoggerMessage.DefineScope<string, Type>("Build logic to convert sql procedure {name} results to result {type}");
+			_logExpression = LoggerMessage.Define<Expression>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionLog)), "{expression.ToString()}");
             _logBlockStart = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionBlockStart)), "{block}");
             _logBlockEnd = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionBlockEnd)), "================= END {block} =================");
             _logBlockNote = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionBlockEnd)), "{block}");
@@ -120,9 +113,11 @@ namespace ArgentSea
             _sqlCommandCircuitBreakerTest = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerTest, nameof(CiruitBrokenDbCommandTest)), "Circuit broken command {name} on Db connection {connectionName} is being retested.");
             _sqlConnectionCircuitBreakerOff = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerOff, nameof(CiruitBrokenDbConnectionRestored)), "Circuit broken connection {connectionName} is restored.");
             _sqlCommandCircuitBreakerOff = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerOff, nameof(CiruitBrokenDbCommandRestored)), "Circuit broken command {name} on Db connection {connectionName} is restored.");
+			_sqlMapperReaderIsNull = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsNull)), "Expected data reader object was null from procedure {sproc} on connection {connectionName}.");
+			_sqlMapperReaderIsClosed = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsClosed)), "Excpected data reader object was closed from procedure {sproc} on connection {connectionName}.");
 
-        }
-        public static void SqlExpressionLog(this ILogger logger, Expression expression)
+		}
+		public static void SqlExpressionLog(this ILogger logger, Expression expression)
         {
             _logExpression(logger, expression, null);
         }
@@ -155,61 +150,49 @@ namespace ArgentSea
         {
             _logBlockNote(logger, sectionName, null);
         }
-        public static void SqlParameterNotFound(this ILogger logger, string parameterName, PropertyInfo prop)
+        public static void SqlParameterNotFound(this ILogger logger, string parameterName, Type propertyType)
         {
-            _sqlDelegateParameterNotFound(logger, parameterName, prop, null);
+            _sqlParameterNotFound(logger, parameterName, propertyType, null);
         }
-        public static void SqlFieldNotFound(this ILogger logger, string columnName, Type modelT)
+        public static void SqlFieldNotFound(this ILogger logger, string columnName, Type TModel)
         {
-            _sqlDelegateFieldNotFound(logger, columnName, modelT, null);
+            _sqlFieldNotFound(logger, columnName, TModel, null);
         }
-        public static void SqlInParametersCacheHit(this ILogger logger, Type modelT)
+        public static void SqlInParametersCacheHit(this ILogger logger, Type TModel)
         {
-            _sqlInParameterCacheHit(logger, modelT, null);
+            _sqlInParameterCacheHit(logger, TModel, null);
         }
-        public static void SqlInParametersCacheMiss(this ILogger logger, Type modelT)
+        public static void SqlInParametersCacheMiss(this ILogger logger, Type TModel)
         {
-            _sqlInParameterCacheMiss(logger, modelT, null);
+            _sqlInParameterCacheMiss(logger, TModel, null);
         }
-        public static void SqlSetOutParametersCacheHit(this ILogger logger, Type modelT)
+        public static void SqlSetOutParametersCacheHit(this ILogger logger, Type TModel)
         {
-            _sqlSetOutParameterCacheHit(logger, modelT, null);
+            _sqlSetOutParameterCacheHit(logger, TModel, null);
         }
-        public static void SqlSetOutParametersCacheMiss(this ILogger logger, Type modelT)
+        public static void SqlSetOutParametersCacheMiss(this ILogger logger, Type TModel)
         {
-            _sqlSetOutParameterCacheMiss(logger, modelT, null);
+            _sqlSetOutParameterCacheMiss(logger, TModel, null);
         }
-        public static void SqlReadOutParametersCacheHit(this ILogger logger, Type modelT)
+        public static void SqlReadOutParametersCacheHit(this ILogger logger, Type TModel)
         {
-            _sqlReadOutParameterCacheHit(logger, modelT, null);
+            _sqlReadOutParameterCacheHit(logger, TModel, null);
         }
-        public static void SqlReadOutParametersCacheMiss(this ILogger logger, Type modelT)
+        public static void SqlReadOutParametersCacheMiss(this ILogger logger, Type TModel)
         {
-            _sqlReadOutParameterCacheMiss(logger, modelT, null);
+            _sqlReadOutParameterCacheMiss(logger, TModel, null);
         }
-        public static void SqlReaderCacheMiss(this ILogger logger, Type modelT)
+        public static void SqlReaderCacheMiss(this ILogger logger, Type TModel)
         {
-            _sqlReaderCacheMiss(logger, modelT, null);
+            _sqlReaderCacheMiss(logger, TModel, null);
         }
-        public static void SqlReaderCacheHit(this ILogger logger, Type modelT)
+        public static void SqlReaderCacheHit(this ILogger logger, Type TModel)
         {
-            _sqlReaderCacheHit(logger, modelT, null);
-        }
-        public static void SqlTvpCacheMiss(this ILogger logger, Type modelT)
-        {
-            _sqlTvpCacheMiss(logger, modelT, null);
-        }
-        public static void SqlTvpCacheHit(this ILogger logger, Type modelT)
-        {
-            _sqlTvpCacheHit(logger, modelT, null);
+            _sqlReaderCacheHit(logger, TModel, null);
         }
         public static void TraceInMapperProperty(this ILogger logger, string propertyName)
         {
             _sqlMapperInTrace(logger, propertyName, null);
-        }
-        public static void TraceTvpMapperProperty(this ILogger logger, string propertyName)
-        {
-            _sqlMapperTvpTrace(logger, propertyName, null);
         }
         public static void TraceSetOutMapperProperty(this ILogger logger, string propertyName)
         {
@@ -223,18 +206,18 @@ namespace ArgentSea
         {
             _sqlMapperRdrTrace(logger, propertyName, null);
         }
-        public static void NullShardKeyArguments(this ILogger logger, string propertyName, byte? shardNumber, int? recordID)
+        public static void NullShardKeyArguments<TShard, TRecord>(this ILogger logger, string propertyName, ShardKey<TShard, TRecord> shardKey) where TShard : IComparable where TRecord : IComparable
         {
-            if (shardNumber.HasValue != recordID.HasValue) //if some args have values and some do not, we should log (i.e. we'd expect all nulls or all values)
+            if (shardKey.ShardNumber.Equals(null) || shardKey.RecordID.Equals(null))
             {
-                _sqlShardKeyNull(logger, propertyName, shardNumber, recordID, null);
+                _sqlShardKeyNull(logger, propertyName, shardKey.ToString(), null);
             }
         }
-        public static void NullShardChildArguments(this ILogger logger, string propertyName, byte? shardNumber, int? recordID, short? childId)
-        {
-            if (!((shardNumber.HasValue && recordID.HasValue && childId.HasValue) || (!shardNumber.HasValue && !recordID.HasValue && !childId.HasValue))) //if some args have values and some do not, we should log (i.e. we'd expect all nulls or all values)
+        public static void NullShardChildArguments<TShard, TRecord, TChild>(this ILogger logger, string propertyName, ShardChild<TShard, TRecord, TChild> shardChild) where TShard : IComparable where TRecord : IComparable where TChild : IComparable
+		{
+			if (shardChild.Key.ShardNumber.Equals(null) || shardChild.Key.RecordID.Equals(null) || shardChild.ChildRecordId.Equals(null))
             {
-                _sqlShardChildNull(logger, propertyName, shardNumber, recordID, childId, null);
+                _sqlShardChildNull(logger, propertyName, shardChild.ToString(), null);
             }
         }
         public static IDisposable BuildInParameterScope (this ILogger logger, Type model)
@@ -249,17 +232,13 @@ namespace ArgentSea
         {
             return _buildGetOutPrmExpressionsScope(logger, model);
         }
-        public static IDisposable BuildTvpScope(this ILogger logger, Type model)
-        {
-            return _buildTvpExpressionsScope(logger, model);
-        }
         public static IDisposable BuildRdrScope(this ILogger logger, Type model)
         {
             return _buildRdrExpressionsScope(logger, model);
         }
-        public static IDisposable BuildSqlResultsToObjectScope(this ILogger logger, string procedureName, Type model)
+        public static IDisposable BuildSqlResultsHandlerScope(this ILogger logger, string procedureName, Type model)
         {
-            return _buildSqlResultsToObjectScope(logger, procedureName, model);
+            return _buildSqlResultsHandlerScope(logger, procedureName, model);
         }
         public static void TraceDbCmdExecuted(this ILogger logger, string commandName, string connectionName, long milliseconds)
         {
@@ -304,5 +283,13 @@ namespace ArgentSea
         {
             _sqlCommandCircuitBreakerOff(logger, commandName, connectionName, null);
         }
-    }
+		public static void DataReaderIsNull(this ILogger logger, string sprocName, string connectionName)
+		{
+			_sqlMapperReaderIsNull(logger, sprocName, connectionName, null);
+		}
+		public static void DataReaderIsClosed(this ILogger logger, string sprocName, string connectionName)
+		{
+			_sqlMapperReaderIsClosed(logger, sprocName, connectionName, null);
+		}
+	}
 }

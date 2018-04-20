@@ -251,7 +251,7 @@ namespace ArgentSea
                 var expSet = Expression.Assign(expProperty, Expression.Convert(Expression.Call(miEnumParse, Expression.Constant(propertyType, typeof(Type)), Expression.Call(miGetString, expPrm)), propertyType));
                 var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     expSet,
-                    Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) }));
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
                 expressions.Add(expIf);
                 logger.SqlExpressionLog(expIf);
             }
@@ -267,7 +267,7 @@ namespace ArgentSea
                     );
                 var expIfNull = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     Expression.Assign(expProperty, expIf),
-                    Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) }));
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
                 expressions.Add(expIfNull);
                 logger.SqlExpressionLog(expIfNull);
             }
@@ -293,7 +293,7 @@ namespace ArgentSea
                 var expGet = Expression.Call(miGet, expPrm);
                 var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     Expression.Assign(expProperty, Expression.Convert(expGet, propertyType)),
-                    Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) }));
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
                 expressions.Add(expIf);
                 logger.SqlExpressionLog(expIf);
             }
@@ -306,7 +306,7 @@ namespace ArgentSea
                 {
                     var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                         Expression.Assign(expProperty, Expression.Convert(expGetNl, propertyType)),
-                        Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) }));
+                        Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
                     expressions.Add(expIf);
                     logger.SqlExpressionLog(expIf);
                 }
@@ -314,7 +314,7 @@ namespace ArgentSea
                 {
                     var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                         Expression.Assign(expProperty, expGetNl),
-                        Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) }));
+                        Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
                     expressions.Add(expIf);
                     logger.SqlExpressionLog(expIf);
                 }
@@ -325,7 +325,7 @@ namespace ArgentSea
                 var expGet = Expression.Call(miGet, expPrm);
                 var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     Expression.Assign(expProperty, expGet),
-                    Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) })
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })
                     );
                 expressions.Add(expIf);
                 logger.SqlExpressionLog(expIf);
@@ -351,7 +351,7 @@ namespace ArgentSea
             }
             var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                 Expression.Assign(expProperty, expGet),
-                Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) })
+                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })
                 );
             expressions.Add(expIf);
             logger.SqlExpressionLog(expIf);
@@ -367,7 +367,7 @@ namespace ArgentSea
             var expIf = Expression.IfThenElse(
                 Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                 expSet,
-                Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo, typeof(PropertyInfo)) })
+                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })
                 );
             expressions.Add(expIf);
             logger.SqlExpressionLog(expIf);
@@ -841,7 +841,7 @@ namespace ArgentSea
 		//}
 		internal static bool DontIgnoreThisParameter(string parameterName, HashSet<string> ignoreParameters)
         {
-            return !(!(ignoreParameters is null) && !ignoreParameters.Contains(parameterName));
+			return !((ignoreParameters is null) || ignoreParameters.Contains(parameterName));
         }
 
         public static string ToFieldName(string parameterName)
@@ -861,31 +861,31 @@ namespace ArgentSea
             return parameterName;
         }
         //Return null if not found (rather than error, as DbParameterCollection does)
-        internal static DbParameter GetParameter(DbParameterCollection prms, string fieldName)
+        internal static DbParameter GetParameter(DbParameterCollection parameters, string fieldName)
         {
             fieldName = ToParameterName(fieldName);
-            for (int i = 0; i < prms.Count; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
-                if (fieldName == prms[i].ParameterName)
+                if (fieldName == parameters[i].ParameterName)
                 {
-                    return prms[i];
+                    return parameters[i];
                 }
             }
             var comparer = System.Globalization.CultureInfo.InvariantCulture.CompareInfo;
             CompareOptions co = CompareOptions.IgnoreCase;
-            for (int i = 0; i < prms.Count; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
-                if (comparer.Compare(fieldName, prms[i].ParameterName, co) == 0)
+                if (comparer.Compare(fieldName, parameters[i].ParameterName, co) == 0)
                 {
-                    return prms[i];
+                    return parameters[i];
                 }
             }
             co = CompareOptions.IgnoreCase | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth;
-            for (int i = 0; i < prms.Count; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
-                if (comparer.Compare(fieldName, prms[i].ParameterName, co) == 0)
+                if (comparer.Compare(fieldName, parameters[i].ParameterName, co) == 0)
                 {
-                    return prms[i];
+                    return parameters[i];
                 }
             }
             return null;

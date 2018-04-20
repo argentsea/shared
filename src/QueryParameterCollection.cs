@@ -158,7 +158,11 @@ namespace ArgentSea
         protected override DbParameter GetParameter(string parameterName)
         {
             var index = this.IndexOf(parameterName);
-            return this._lst[index];
+			if (index >= 0)
+			{
+				return this._lst[index];
+			}
+			return null;
         }
 
         protected override void SetParameter(int index, DbParameter value)
