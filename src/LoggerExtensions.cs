@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Text;
+using System.Globalization;
 
 namespace ArgentSea
 {
@@ -11,7 +12,7 @@ namespace ArgentSea
     {
         public enum EventIdentifier
         {
-            LogExpression,
+            LogExpressionTreeCreation,
             MapperSqlParameterNotFound,
             MapperSqlColumnNotFound,
             MapperInParameterCacheStatus,
@@ -31,7 +32,8 @@ namespace ArgentSea
             LogCommandRetry,
             LogCircuitBreakerOn,
             LogCircuitBreakerTest,
-            LogCircuitBreakerOff
+            LogCircuitBreakerOff,
+			RequiredPropertyIsDbNull
         }
 
         private static readonly Action<ILogger, Type, Exception> _sqlInParameterCacheMiss;
@@ -42,7 +44,6 @@ namespace ArgentSea
         private static readonly Action<ILogger, Type, Exception> _sqlReadOutParameterCacheHit;
         private static readonly Action<ILogger, Type, Exception> _sqlReaderCacheMiss;
         private static readonly Action<ILogger, Type, Exception> _sqlReaderCacheHit;
-        //private static readonly Action<ILogger, string, Type, string, Exception> _sqlCreate;
         private static readonly Action<ILogger, string, Type, Exception> _sqlParameterNotFound;
         private static readonly Action<ILogger, string, Type, Exception> _sqlFieldNotFound;
         private static readonly Action<ILogger, string, Exception> _sqlMapperInTrace;
@@ -51,15 +52,7 @@ namespace ArgentSea
         private static readonly Action<ILogger, string, Exception> _sqlMapperRdrTrace;
         private static readonly Action<ILogger, string, string, Exception> _sqlShardKeyNull;
         private static readonly Action<ILogger, string, string, Exception> _sqlShardChildNull;
-        private static readonly Func<ILogger, Type, IDisposable> _buildInPrmExpressionsScope;
-        private static readonly Func<ILogger, Type, IDisposable> _buildSetOutPrmExpressionsScope;
-        private static readonly Func<ILogger, Type, IDisposable> _buildGetOutPrmExpressionsScope;
-        private static readonly Func<ILogger, Type, IDisposable> _buildRdrExpressionsScope;
         private static readonly Func<ILogger, string, Type, IDisposable> _buildSqlResultsHandlerScope;
-        private static readonly Action<ILogger, Expression, Exception> _logExpression;
-        private static readonly Action<ILogger, string, Exception> _logBlockStart;
-        private static readonly Action<ILogger, string, Exception> _logBlockEnd;
-        private static readonly Action<ILogger, string, Exception> _logBlockNote;
         private static readonly Action<ILogger, string, string, long, Exception> _sqlDbCmdExecutedTrace;
         private static readonly Action<ILogger, string, string, string, long, Exception> _sqlShardCmdExecutedTrace;
         private static readonly Action<ILogger, string, int, Exception> _sqlConnectRetry;
@@ -73,6 +66,13 @@ namespace ArgentSea
 
 		private static readonly Action<ILogger, string, string, Exception> _sqlMapperReaderIsNull;
 		private static readonly Action<ILogger, string, string, Exception> _sqlMapperReaderIsClosed;
+		private static readonly Action<ILogger, string, string, Exception> _sqlRequiredValueIsDbNull;
+
+		private static readonly Action<ILogger, string, string, Exception> _sqlGetInExpressionTreeCreation;
+		private static readonly Action<ILogger, string, string, Exception> _sqlSetOutExpressionTreeCreation;
+		private static readonly Action<ILogger, string, string, Exception> _sqlReadOutExpressionTreeCreation;
+		private static readonly Action<ILogger, string, string, Exception> _sqlReaderExpressionTreeCreation;
+		private static readonly Action<ILogger, string, string, string, Exception> _sqlObjectExpressionTreeCreation;
 
 		static LoggingExtensions()
         {
@@ -94,15 +94,7 @@ namespace ArgentSea
             _sqlMapperRdrTrace = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperRdrTrace, nameof(TraceRdrMapperProperty)), "Data reader field mapper is now processing property {name}.");
             _sqlShardKeyNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardKeyNull, nameof(TraceRdrMapperProperty)), "The {name} shard key could not be built because one of the input values was dbNull. The shard key value was {shardKey}.");
             _sqlShardChildNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardChildNull, nameof(TraceRdrMapperProperty)), "The {name} shard child could not be built because one or two of the input values was dbNull. The shard child value was {shardChild}.");
-            _buildInPrmExpressionsScope = LoggerMessage.DefineScope<Type>("Building logic to handle input parameters for model {type}");
-            _buildSetOutPrmExpressionsScope = LoggerMessage.DefineScope<Type>("Building logic to set output parameters for model {type}");
-            _buildGetOutPrmExpressionsScope = LoggerMessage.DefineScope<Type>("Building logic to read output parameters for model {type}");
-			_buildRdrExpressionsScope = LoggerMessage.DefineScope<Type>("Build logic to handle a datareader for model {type}");
 			_buildSqlResultsHandlerScope = LoggerMessage.DefineScope<string, Type>("Build logic to convert sql procedure {name} results to result {type}");
-			_logExpression = LoggerMessage.Define<Expression>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionLog)), "{expression.ToString()}");
-            _logBlockStart = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionBlockStart)), "{block}");
-            _logBlockEnd = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionBlockEnd)), "================= END {block} =================");
-            _logBlockNote = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpression, nameof(SqlExpressionBlockEnd)), "{block}");
             _sqlDbCmdExecutedTrace = LoggerMessage.Define<string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceDbCmdExecuted)), "Executed command {name} on Db connection {connectionName} in {milliseconds} milliseconds.");
             _sqlShardCmdExecutedTrace = LoggerMessage.Define<string, string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceShardCmdExecuted)), "Executed command {name} on ShardSet {shardSet} connection {shardNumber} in {milliseconds} milliseconds.");
             _sqlConnectRetry = LoggerMessage.Define<string, int>(LogLevel.Information, new EventId((int)EventIdentifier.LogConnectRetry, nameof(RetryingDbConnection)), "Initiating automatic connection retry for transient error on Db connection {connectionName}. This is attempt number {attempt}.");
@@ -114,42 +106,15 @@ namespace ArgentSea
             _sqlConnectionCircuitBreakerOff = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerOff, nameof(CiruitBrokenDbConnectionRestored)), "Circuit broken connection {connectionName} is restored.");
             _sqlCommandCircuitBreakerOff = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerOff, nameof(CiruitBrokenDbCommandRestored)), "Circuit broken command {name} on Db connection {connectionName} is restored.");
 			_sqlMapperReaderIsNull = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsNull)), "Expected data reader object was null from procedure {sproc} on connection {connectionName}.");
-			_sqlMapperReaderIsClosed = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsClosed)), "Excpected data reader object was closed from procedure {sproc} on connection {connectionName}.");
+			_sqlMapperReaderIsClosed = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsClosed)), "Expected data reader object was closed from procedure {sproc} on connection {connectionName}.");
+			_sqlRequiredValueIsDbNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.RequiredPropertyIsDbNull, nameof(RequiredPropertyIsDbNull)), "Request for object {model} returned null because database parameter {parameterName} was null. This may mean the object was not found in the database.");
 
+			_sqlGetInExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForSetInParameters)), "Compiled code to map model {model} to input parameters as:\r\n{code}.");
+			_sqlSetOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForSetOutParameters)), "Compiled code to map model {model} to set output parameters as:\r\n{code}.");
+			_sqlReadOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReadOutParameters)), "Compiled code to map model {model} to read output parameters as:\r\n{code}.");
+			_sqlReaderExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReader)), "Compiled code to map model {model} to data reader values as:\r\n{code}.");
+			_sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
 		}
-		public static void SqlExpressionLog(this ILogger logger, Expression expression)
-        {
-            _logExpression(logger, expression, null);
-        }
-        public static void SqlExpressionBlockStart(this ILogger logger, string blockName, ParameterExpression[] parameters)
-        {
-            if (logger.IsEnabled(LogLevel.Debug))
-            {
-                var sb = new StringBuilder();
-                sb.Append("start procedure ");
-                sb.Append(blockName);
-                sb.Append(" (");
-                var seperator = string.Empty;
-                foreach(var prm in parameters)
-                {
-                    sb.Append(seperator);
-                    seperator = ", ";
-                    sb.Append(prm.Type.ToString());
-                    sb.Append(" ");
-                    sb.Append(prm.Name);
-                }
-                sb.Append(") {");
-                _logBlockStart(logger, sb.ToString(), null);
-            }
-        }
-        public static void SqlExpressionBlockEnd(this ILogger logger, string blockName)
-        {
-                _logBlockEnd(logger, blockName, null);
-        }
-        public static void SqlExpressionNote(this ILogger logger, string sectionName)
-        {
-            _logBlockNote(logger, sectionName, null);
-        }
         public static void SqlParameterNotFound(this ILogger logger, string parameterName, Type propertyType)
         {
             _sqlParameterNotFound(logger, parameterName, propertyType, null);
@@ -220,22 +185,6 @@ namespace ArgentSea
                 _sqlShardChildNull(logger, propertyName, shardChild.ToString(), null);
             }
         }
-        public static IDisposable BuildInParameterScope (this ILogger logger, Type model)
-        {
-            return _buildInPrmExpressionsScope(logger, model);
-        }
-        public static IDisposable BuildSetOutParameterScope(this ILogger logger, Type model)
-        {
-            return _buildSetOutPrmExpressionsScope(logger, model);
-        }
-        public static IDisposable BuildGetOutParameterScope(this ILogger logger, Type model)
-        {
-            return _buildGetOutPrmExpressionsScope(logger, model);
-        }
-        public static IDisposable BuildRdrScope(this ILogger logger, Type model)
-        {
-            return _buildRdrExpressionsScope(logger, model);
-        }
         public static IDisposable BuildSqlResultsHandlerScope(this ILogger logger, string procedureName, Type model)
         {
             return _buildSqlResultsHandlerScope(logger, procedureName, model);
@@ -290,6 +239,65 @@ namespace ArgentSea
 		public static void DataReaderIsClosed(this ILogger logger, string sprocName, string connectionName)
 		{
 			_sqlMapperReaderIsClosed(logger, sprocName, connectionName, null);
+		}
+		public static void RequiredPropertyIsDbNull(this ILogger logger, string modelName, string parameterName)
+		{
+			_sqlRequiredValueIsDbNull(logger, modelName, parameterName, null);
+		}
+		public static void CreatedExpressionTreeForSetInParameters(this ILogger logger, Type model, Expression codeBlock)
+		{
+			if (logger.IsEnabled(LogLevel.Information))
+			{
+				using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
+				{
+					DebugViewWriter.WriteTo(codeBlock, writer);
+					_sqlGetInExpressionTreeCreation(logger, model.ToString(), writer.ToString(), null);
+				}
+			}
+		}
+		public static void CreatedExpressionTreeForSetOutParameters(this ILogger logger, Type model, Expression codeBlock)
+		{
+			if (logger.IsEnabled(LogLevel.Information))
+			{
+				using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
+				{
+					DebugViewWriter.WriteTo(codeBlock, writer);
+					_sqlSetOutExpressionTreeCreation(logger, model.ToString(), writer.ToString(), null);
+				}
+			}
+		}
+		public static void CreatedExpressionTreeForReadOutParameters(this ILogger logger, Type model, Expression codeBlock)
+		{
+			if (logger.IsEnabled(LogLevel.Information))
+			{
+				using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
+				{
+					DebugViewWriter.WriteTo(codeBlock, writer);
+					_sqlReadOutExpressionTreeCreation(logger, model.ToString(), writer.ToString(), null);
+				}
+			}
+		}
+		public static void CreatedExpressionTreeForReader(this ILogger logger, Type model, Expression codeBlock)
+		{
+			if (logger.IsEnabled(LogLevel.Information))
+			{
+				using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
+				{
+					DebugViewWriter.WriteTo(codeBlock, writer);
+					_sqlReaderExpressionTreeCreation(logger, model.ToString(), writer.ToString(), null);
+				}
+			}
+		}
+		public static void CreatedExpressionTreeForModel(this ILogger logger, Type model, string procedureName, Expression codeBlock)
+		{
+			if (logger.IsEnabled(LogLevel.Information))
+			{
+				using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
+				{
+					DebugViewWriter.WriteTo(codeBlock, writer);
+					_sqlObjectExpressionTreeCreation(logger, model.ToString(), procedureName, writer.ToString(), null);
+				}
+			}
 		}
 	}
 }

@@ -23,9 +23,19 @@ namespace ArgentSea
         {
             ParameterName = parameterName;
             SqlType = sqlType;
+			IsRequired = false;
         }
-        public string ParameterName { get; private set; }
-        public int SqlType { get; private set; }
+		public ParameterMapAttribute(string parameterName, int sqlType, bool isRequired)
+		{
+			ParameterName = parameterName;
+			SqlType = sqlType;
+			IsRequired = isRequired;
+		}
+		public string ParameterName { get; private set; }
+
+		public int SqlType { get; private set; }
+
+		public bool IsRequired { get; private set; }
 
         //public ShardUsage ShardPosition { get; set; } = ShardUsage.NotApplicable;
 

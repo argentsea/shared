@@ -334,17 +334,9 @@ namespace ArgentSea
 			{
 				Expression.Assign(expModel, Expression.New(TModel)) // var result = new <T>;
             };
-			using (logger.BuildGetOutParameterScope(TModel))
-			{
-				logger.SqlExpressionBlockStart(nameof(ShardMapper.ReadOutParameters), expressionPrms);
-				//Loop through all object properties:
-
-				IterateGetOutParameters(TModel, prmShardNumber, expPrms, expPrm, variableExpressions, expressions, expModel, expLogger, logger);
-
-				expressions.Add(expModel); //return value;
-				logger.SqlExpressionLog(expModel);
-				logger.SqlExpressionBlockEnd(nameof(ShardMapper.ReadOutParameters));
-			}
+			//Loop through all object properties:
+			IterateGetOutParameters(TModel, prmShardNumber, expPrms, expPrm, variableExpressions, expressions, expModel, expLogger, logger);
+			expressions.Add(expModel); //return value;
 			var expBlock = Expression.Block(variableExpressions, expressions);
 			var lambda = Expression.Lambda<Func<dynamic, DbParameterCollection, ILogger, object>>(expBlock, expressionPrms);
 			return lambda.Compile();
@@ -430,9 +422,7 @@ namespace ArgentSea
 
 					foreach (var attrPM in attrPMs)
 					{
-						var expCallLog = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
-						expressions.Add(expCallLog);
-						logger.SqlExpressionLog(expCallLog);
+						expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
 
 						if (!attrPM.IsValidType(prop.PropertyType))
 						{
@@ -543,36 +533,22 @@ namespace ArgentSea
 
 			var propIndex = 0;
 			var resultExpressions = new List<Expression>();
-			logger.SqlExpressionNote("while (rdr.Read())");
-			using (logger.BuildRdrScope(TModel))
-			{
-				logger.SqlExpressionBlockStart(nameof(ShardMapper.FromDataReader), expressionPrms);
-				var expAssign = Expression.Assign(expModel, Expression.New(typeof(T)));
-				expressions.Add(expAssign); //var model = new T
-				logger.SqlExpressionLog(expAssign);
+			expressions.Add(Expression.Assign(expModel, Expression.New(typeof(T)))); //var model = new T
 
-				//Loop through all object properties:
-				IterateRdrColumns(TModel, prmShardNumber, expModel, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
+			//Loop through all object properties:
+			IterateRdrColumns(TModel, prmShardNumber, expModel, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
 
-				var expAddList = Expression.Call(expListResult, miListAdd, expModel);
-				expressions.Add(expAddList); //ResultList.Add(model);
-				logger.SqlExpressionLog(expAddList);
+			expressions.Add(Expression.Call(expListResult, miListAdd, expModel)); //ResultList.Add(model);
+			resultExpressions.Add(Expression.Assign(expOrdinals, Expression.NewArrayInit(typeof(int), columnLookupExpressions.ToArray())));
 
-				logger.SqlExpressionNote($"Out-of-order expressions which should appear at the beginning of {nameof(ShardMapper.FromDataReader)}:");
-				resultExpressions.Add(Expression.Assign(expOrdinals, Expression.NewArrayInit(typeof(int), columnLookupExpressions.ToArray())));
-				logger.SqlExpressionNote($"End Out-of-order expression");
-
-				var loopLabel = Expression.Label("readNextRow");
-				resultExpressions.Add(Expression.Assign(expListResult, Expression.New(typeof(List<T>)))); // var result = new List<T>;
-				resultExpressions.Add(Expression.Loop(
-						Expression.IfThenElse(Expression.Call(prmSqlRdr, miRead),
-							Expression.Block(expressions),
-							Expression.Break(loopLabel)
-						), loopLabel));
-				logger.SqlExpressionNote("end while");
-				resultExpressions.Add(expListResult); //return type
-				logger.SqlExpressionLog(expListResult);
-			}
+			var loopLabel = Expression.Label("readNextRow");
+			resultExpressions.Add(Expression.Assign(expListResult, Expression.New(typeof(List<T>)))); // var result = new List<T>;
+			resultExpressions.Add(Expression.Loop(
+					Expression.IfThenElse(Expression.Call(prmSqlRdr, miRead),
+						Expression.Block(expressions),
+						Expression.Break(loopLabel)
+					), loopLabel));
+			resultExpressions.Add(expListResult); //return type
 
 			var expBlock = Expression.Block(typeof(List<T>), new ParameterExpression[] { expModel, expListResult, expOrdinals, expOrdinal }, resultExpressions);
 			var lambda = Expression.Lambda<Func<dynamic, DbDataReader, ILogger, List<T>>>(expBlock, expressionPrms);
@@ -589,9 +565,7 @@ namespace ArgentSea
 					//TODO: if ShardKey/ShardChild create memory variables and add to expression
 					foreach (var attrPM in attrPMs)
 					{
-						var expTrace = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
-						expressions.Add(expTrace);
-						logger.SqlExpressionLog(expTrace);
+						expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
 
 						if (!attrPM.IsValidType(prop.PropertyType))
 						{
@@ -811,103 +785,65 @@ namespace ArgentSea
 				//Set base type to some result value, if we can.
 				if (resultType == typeof(TOutParameters))
 				{
-					var expAssign = Expression.Assign(expResult, expPrmOut);
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
+					expressions.Add(Expression.Assign(expResult, expPrmOut));
 					isPrmOutUsed = true;
 				}
 				else if (resultType == typeof(TReaderResult0))
 				{
 					//result = AssignRootToResult<TReaderResult0, TResult>(shardNumber, procedureName, resultList0, logger)
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult0), resultType }), expShardNumber, expProcName, expResultSet0, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-
-					var expIf = Expression.IfThen(
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult0), resultType }), expShardNumber, expProcName, expResultSet0, expLogger)));
+					expressions.Add(Expression.IfThen(
 						Expression.Equal(expResult, expNull), //if (result == null)
 						Expression.Return(expExitTarget, expNull, typeof(TResult)) //return null;
-						);
-
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+						));
 					isRdrResult0Used = true;
 				}
 				else if (result is TReaderResult1)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult1), resultType }), expShardNumber, expProcName, expResultSet1, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult1), resultType }), expShardNumber, expProcName, expResultSet1, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult1Used = true;
 				}
 				else if (result is TReaderResult2)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult2), resultType }), expShardNumber, expProcName, expResultSet2, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult2), resultType }), expShardNumber, expProcName, expResultSet2, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult2Used = true;
 				}
 				else if (result is TReaderResult3)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult3), resultType }), expShardNumber, expProcName, expResultSet3, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult3), resultType }), expShardNumber, expProcName, expResultSet3, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult3Used = true;
 				}
 				else if (result is TReaderResult4)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult4), resultType }), expShardNumber, expProcName, expResultSet4, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult4), resultType }), expShardNumber, expProcName, expResultSet4, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult4Used = true;
 				}
 				else if (result is TReaderResult5)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult5), resultType }), expShardNumber, expProcName, expResultSet5, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult5), resultType }), expShardNumber, expProcName, expResultSet5, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult5Used = true;
 				}
 				else if (result is TReaderResult6)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult6), resultType }), expShardNumber, expProcName, expResultSet6, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult6), resultType }), expShardNumber, expProcName, expResultSet6, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult6Used = true;
 				}
 				else if (result is TReaderResult7)
 				{
-					var expAssign = Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult7), resultType }), expShardNumber, expProcName, expResultSet7, expLogger));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
-					var expIf = Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult)));
-					expressions.Add(expIf);
-					logger.SqlExpressionLog(expIf);
+					expressions.Add(Expression.Assign(expResult, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult7), resultType }), expShardNumber, expProcName, expResultSet7, expLogger)));
+					expressions.Add(Expression.IfThen(Expression.Equal(expResult, expNull), Expression.Return(expExitTarget, expNull, typeof(TResult))));
 					isRdrResult7Used = true;
 				}
 				else
 				{
 					//match not found, so just create a new instance and we'll try again on properties
-					var expAssign = Expression.Assign(expResult, Expression.New(resultType));
-					expressions.Add(expAssign);
-					logger.SqlExpressionLog(expAssign);
+					expressions.Add(Expression.Assign(expResult, Expression.New(resultType)));
 				}
 
 				var props = resultType.GetProperties();
@@ -917,58 +853,42 @@ namespace ArgentSea
 				{
 					if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult0>)) && !isRdrResult0Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet0);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet0));
 						isRdrResult0Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult1>)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet1);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet1));
 						isRdrResult1Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult2>)) && !isRdrResult2Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet2);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet2));
 						isRdrResult2Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult3>)) && !isRdrResult3Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet3);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet3));
 						isRdrResult3Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult4>)) && !isRdrResult4Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet4);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet4));
 						isRdrResult4Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult5>)) && !isRdrResult5Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet5);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet5));
 						isRdrResult5Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult6>)) && !isRdrResult6Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet6);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet6));
 						isRdrResult6Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult7>)) && !isRdrResult7Used)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expResultSet7);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expResultSet7));
 						isRdrResult7Used = true;
 					}
 				}
@@ -977,159 +897,101 @@ namespace ArgentSea
 				{
 					if (prop.PropertyType.IsAssignableFrom(typeof(TOutParameters)) && !isPrmOutUsed)
 					{
-						var expAssign = Expression.Assign(Expression.Property(expResult, prop), expPrmOut);
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(Expression.Property(expResult, prop), expPrmOut));
 						isPrmOutUsed = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult0)) && !isRdrResult0Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));   //var count = 0;
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 
-						var expIfNotNull = Expression.IfThen(                                      //if (resultSet0 != null)
+						expressions.Add(Expression.IfThen(                                      //if (resultSet0 != null)
 							Expression.NotEqual(expResultSet0, expNull),                        //{ 
 							Expression.Assign(expCount, Expression.Property(expResultSet0, miCount))    //count = resultSet0.Count;
-							);                                                                 //}
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(                                  //if (count == 1)
+							));
+						expressions.Add(Expression.IfThenElse(                                  //if (count == 1)
 							Expression.Equal(expCount, expOne),                                 //{ result.prop = resultSet0[0]; }
 							Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet0, "Item", Expression.Constant(0))),
 							Expression.IfThen(                                                  //else if (count > 1)
 								Expression.GreaterThan(expCount, expOne),                       //{       logger.LogError("");
 								Expression.Call(miLogError, Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))
-								);                                                               //}
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								));
 						isRdrResult0Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult0)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet0, expNull), Expression.Assign(expCount, Expression.Property(expResultSet0, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet0, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet0, expNull), Expression.Assign(expCount, Expression.Property(expResultSet0, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet0, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult0Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult1)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet1, expNull), Expression.Assign(expCount, Expression.Property(expResultSet1, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet1, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet1, expNull), Expression.Assign(expCount, Expression.Property(expResultSet1, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet1, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult1Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult2)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet2, expNull), Expression.Assign(expCount, Expression.Property(expResultSet2, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet2, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet2, expNull), Expression.Assign(expCount, Expression.Property(expResultSet2, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet2, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult2Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult3)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet3, expNull), Expression.Assign(expCount, Expression.Property(expResultSet3, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet3, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet3, expNull), Expression.Assign(expCount, Expression.Property(expResultSet3, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet3, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult3Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult4)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet4, expNull), Expression.Assign(expCount, Expression.Property(expResultSet4, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet4, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet4, expNull), Expression.Assign(expCount, Expression.Property(expResultSet4, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet4, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult4Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult5)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet5, expNull), Expression.Assign(expCount, Expression.Property(expResultSet5, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet5, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet5, expNull), Expression.Assign(expCount, Expression.Property(expResultSet5, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet5, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult5Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult6)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet6, expNull), Expression.Assign(expCount, Expression.Property(expResultSet6, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet6, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet6, expNull), Expression.Assign(expCount, Expression.Property(expResultSet6, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet6, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult6Used = true;
 					}
 					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult7)) && !isRdrResult1Used)
 					{
-						var expAssign = Expression.Assign(expCount, Expression.Constant(0));
-						expressions.Add(expAssign);
-						logger.SqlExpressionLog(expAssign);
-						var expIfNotNull = Expression.IfThen(Expression.NotEqual(expResultSet7, expNull), Expression.Assign(expCount, Expression.Property(expResultSet7, miCount)));
-						expressions.Add(expIfNotNull);
-						logger.SqlExpressionLog(expIfNotNull);
-						var expErrIfMultiple = Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet7, "Item", Expression.Constant(0))),
+						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
+						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet7, expNull), Expression.Assign(expCount, Expression.Property(expResultSet7, miCount))));
+						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expResult, prop), Expression.Property(expResultSet7, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount))));
-						expressions.Add(expErrIfMultiple);
-						logger.SqlExpressionLog(expErrIfMultiple);
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on shard {{0}} unexpectedly returned {{1}} results instead of one."), expShardNumber, expCount)))));
 						isRdrResult7Used = true;
 					}
 
 				}
-				var expExit = Expression.Label(expExitTarget);
-				expressions.Add(expExit); //Exit procedure
-				logger.SqlExpressionLog(expExit);
+				expressions.Add(Expression.Label(expExitTarget)); //Exit procedure
 			}
 			var expBlock = Expression.Block(resultType, new ParameterExpression[] { expCount, expResult }, expressions); //+variables
 			var lambda = Expression.Lambda<Func<dynamic, string, object, object, object, object, object, object, object, object, object, ILogger, object>>
