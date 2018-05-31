@@ -12,16 +12,18 @@ using ArgentSea;
 
 namespace ArgentSea
 {
-    public static class Mapper
-    {
-		private static ConcurrentDictionary<Type, Action<DbParameterCollection, HashSet<string>, ILogger, object>> _cacheInParamSet = new ConcurrentDictionary<Type, Action<DbParameterCollection, HashSet<string>, ILogger, object>>();
+	public static class Mapper
+	{
+		private static ConcurrentDictionary<Type, Delegate> _cacheInParamSet = new ConcurrentDictionary<Type, Delegate>();
 		private static ConcurrentDictionary<Type, Action<DbParameterCollection, HashSet<string>, ILogger>> _cacheOutParamSet = new ConcurrentDictionary<Type, Action<DbParameterCollection, HashSet<string>, ILogger>>();
-		private static ConcurrentDictionary<Type, Func<DbDataReader, ILogger, object>> _getRdrParamCache = new ConcurrentDictionary<Type, Func<DbDataReader, ILogger, object>>();
-		private static ConcurrentDictionary<Type, Func<DbParameterCollection, ILogger, object>> _getOutParamReadCache = new ConcurrentDictionary<Type, Func<DbParameterCollection, ILogger, object>>();
-		//private static ConcurrentDictionary<string, Func<string, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, ILogger, dynamic>> _getObjectCache = new ConcurrentDictionary<string, Func<string, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, ILogger, dynamic>>();
+		private static ConcurrentDictionary<Type, Delegate> _getRdrParamCache = new ConcurrentDictionary<Type, Delegate>();
+		private static ConcurrentDictionary<Type, Delegate> _getOutParamReadCache = new ConcurrentDictionary<Type, Delegate>();
 		private static ConcurrentDictionary<string, Delegate> _getObjectCache = new ConcurrentDictionary<string, Delegate>();
 
 		#region Public methods
+
+
+		#region Map Input Parameters
 
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
@@ -30,8 +32,8 @@ namespace ArgentSea
 		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		public static DbParameterCollection MapToInParameters<T>(this DbParameterCollection parameters, T model, ILogger logger) where T : class
-			=> MapToInParameters<T>(parameters, model, null, logger);
+		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, ILogger logger) where TModel : class
+			=> MapToInParameters<BadShardType, TModel>(parameters, null, model, null, logger);
 
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
@@ -42,6 +44,28 @@ namespace ArgentSea
 		/// <param name="ignoreParameters">A lists of parameter names that should not be created. Each entry must exactly match the parameter name, including prefix and casing.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, HashSet<string> ignoreParameters, ILogger logger) where TModel : class
+			=> MapToInParameters<BadShardType, TModel>(parameters, null, model, ignoreParameters, logger);
+
+		/// <summary>
+		/// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
+		/// </summary>
+		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
+		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
+		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
+		public static DbParameterCollection MapToInParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, TModel model, ILogger logger) where TModel : class where TShard : IComparable
+			=> MapToInParameters<TShard, TModel>(parameters, shardId, model, null, logger);
+
+		/// <summary>
+		/// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
+		/// </summary>
+		/// <typeparam name="TShard">The type of the shard number.</typeparam>
+		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
+		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
+		/// <param name="ignoreParameters">A lists of parameter names that should not be created. Each entry must exactly match the parameter name, including prefix and casing.</param>
+		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
+		public static DbParameterCollection MapToInParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, TModel model, HashSet<string> ignoreParameters, ILogger logger) where TModel : class where TShard : IComparable
 		{
 			if (ignoreParameters is null)
 			{
@@ -51,7 +75,7 @@ namespace ArgentSea
 			if (!_cacheInParamSet.TryGetValue(typeModel, out var SqlParameterDelegates))
 			{
 				LoggingExtensions.SqlInParametersCacheMiss(logger, typeModel);
-				SqlParameterDelegates = BuildInMapDelegate(typeModel, logger);
+				SqlParameterDelegates = BuildInMapDelegate<TShard>(typeModel, logger);
 				if (!_cacheInParamSet.TryAdd(typeModel, SqlParameterDelegates))
 				{
 					SqlParameterDelegates = _cacheInParamSet[typeModel];
@@ -68,10 +92,12 @@ namespace ArgentSea
 					ignoreParameters.Add(prm.ParameterName);
 				}
 			}
-			SqlParameterDelegates(parameters, ignoreParameters, logger, model);
+			((Action<TShard, DbParameterCollection, HashSet<string>, ILogger, object>)SqlParameterDelegates)(shardId, parameters, ignoreParameters, logger, model);
 			return parameters;
 		}
+		#endregion
 
+		#region Set Mapped Output Parameters
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
 		/// </summary>
@@ -149,7 +175,9 @@ namespace ArgentSea
 			SqlParameterDelegates(parameters, ignoreParameters, logger);
 			return parameters;
 		}
+		#endregion
 
+		#region Get Map Output Parameters
 		/// <summary>
 		/// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
 		/// </summary>
@@ -158,12 +186,22 @@ namespace ArgentSea
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
 		public static TModel ReadOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) where TModel : class, new()
+			=> ReadOutParameters<BadShardType, TModel>(parameters, null, logger);
+
+		/// <summary>
+		/// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
+		/// </summary>
+		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
+		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
+		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
+		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
+		public static TModel ReadOutParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, ILogger logger) where TModel : class, new() where TShard : IComparable
 		{
 			var T = typeof(TModel);
 			if (!_getOutParamReadCache.TryGetValue(T, out var SqlOutDelegate))
 			{
 				LoggingExtensions.SqlReadOutParametersCacheMiss(logger, T);
-				SqlOutDelegate = BuildOutGetDelegate(parameters, typeof(TModel), logger);
+				SqlOutDelegate = BuildOutGetDelegate<TShard>(parameters, typeof(TModel), logger);
 				if (!_getOutParamReadCache.TryAdd(typeof(TModel), SqlOutDelegate))
 				{
 					SqlOutDelegate = _getOutParamReadCache[typeof(TModel)];
@@ -173,7 +211,7 @@ namespace ArgentSea
 			{
 				LoggingExtensions.SqlReadOutParametersCacheHit(logger, T);
 			}
-			return (TModel)SqlOutDelegate(parameters, logger);
+			return (TModel)((Func<TShard, DbParameterCollection, ILogger, object>)SqlOutDelegate)(shardId, parameters, logger);
 		}
 
 		/// <summary>
@@ -184,12 +222,17 @@ namespace ArgentSea
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>A list of objects of the specified type, one for each result.</returns>
 		public static IList<TModel> FromDataReader<TModel>(DbDataReader rdr, ILogger logger) where TModel : class, new()
+			=> FromDataReader<BadShardType, TModel>(null, rdr, logger);
+
+		/// <summary>
+		/// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
+		/// </summary>
+		/// <typeparam name="TModel">The type of the list result</typeparam>
+		/// <param name="rdr">The data reader, set to the current result set.</param>
+		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
+		/// <returns>A list of objects of the specified type, one for each result.</returns>
+		public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardId, DbDataReader rdr, ILogger logger) where TModel : class, new() where TShard : IComparable
 		{
-			//Q: why don't we accept a List<T> argument and populate that, rather than create a new list?
-			//  This would allow us to pass in list properties of parent objects.
-			//A: Because the parent object is probably created with output parameters, which come at the end of thd TDS stream.
-			//  So the parent object data wouldn't exist when we needed to populate the properties
-			//  This way: just collect the list data in a variable set the property when its ready.
 			if (rdr is null)
 			{
 				throw new ArgumentNullException(nameof(rdr));
@@ -206,7 +249,7 @@ namespace ArgentSea
 			if (!_getRdrParamCache.TryGetValue(typeof(TModel), out var SqlRdrDelegate))
 			{
 				LoggingExtensions.SqlReaderCacheMiss(logger, T);
-				SqlRdrDelegate = BuildReaderMapDelegate<TModel>(logger);
+				SqlRdrDelegate = BuildReaderMapDelegate<TShard, TModel>(logger);
 				if (!_getRdrParamCache.TryAdd(typeof(TModel), SqlRdrDelegate))
 				{
 					SqlRdrDelegate = _getRdrParamCache[typeof(TModel)];
@@ -216,55 +259,62 @@ namespace ArgentSea
 			{
 				LoggingExtensions.SqlReaderCacheHit(logger, T);
 			}
-			return (List<TModel>)SqlRdrDelegate(rdr, logger);
+			return ((Func<TShard, DbDataReader, ILogger, List<TModel>>)SqlRdrDelegate)(shardId, rdr, logger);
 		}
+		#endregion
 
 		#endregion
 		#region delegate builders
-		private static Action<DbParameterCollection, HashSet<string>, ILogger, object> BuildInMapDelegate(Type TModel, ILogger logger)
+		private static Action<TShard, DbParameterCollection, HashSet<string>, ILogger, object> BuildInMapDelegate<TShard>(Type tModel, ILogger logger) where TShard : IComparable
 		{
+			var tShard = typeof(TShard);
 			var expressions = new List<Expression>();
 			//Create the two delegate parameters: in: sqlParametersCollection and model instance; out: sqlParametersCollection
+			ParameterExpression expShard = Expression.Variable(tShard, "shardId");
 			ParameterExpression prmSqlPrms = Expression.Variable(typeof(DbParameterCollection), "parameters");
 			ParameterExpression prmObjInstance = Expression.Parameter(typeof(object), "model");
 			ParameterExpression expIgnoreParameters = Expression.Parameter(typeof(HashSet<string>), "ignoreParameters");
 			ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
-			var exprInPrms = new ParameterExpression[] { prmSqlPrms, expIgnoreParameters, expLogger, prmObjInstance };
-
-			var prmTypedInstance = Expression.TypeAs(prmObjInstance, TModel);  //Our cached delegates accept neither generic nor dynamic arguments. We have to pass object then cast.
+			var exprInPrms = new ParameterExpression[] { expShard, prmSqlPrms, expIgnoreParameters, expLogger, prmObjInstance };
+			var prmTypedInstance = Expression.TypeAs(prmObjInstance, tModel);  //Our cached delegates accept neither generic nor dynamic arguments. We have to pass object then cast.
 			var noDupPrmNameList = new HashSet<string>();
 			expressions.Add(prmTypedInstance);
-			IterateInMapProperties(TModel, expressions, prmSqlPrms, prmTypedInstance, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+			IterateInMapProperties(tShard, tModel, expressions, prmSqlPrms, prmTypedInstance, expIgnoreParameters, expShard, expLogger, noDupPrmNameList, logger);
 			var inBlock = Expression.Block(expressions);
-			var lmbIn = Expression.Lambda<Action<DbParameterCollection, HashSet<string>, ILogger, object>>(inBlock, exprInPrms);
-			logger.CreatedExpressionTreeForSetInParameters(TModel, inBlock);
+			var lmbIn = Expression.Lambda<Action<TShard, DbParameterCollection, HashSet<string>, ILogger, object>>(inBlock, exprInPrms);
+			logger.CreatedExpressionTreeForSetInParameters(tModel, inBlock);
 			return lmbIn.Compile();
 		}
-		private static void IterateInMapProperties(Type TModel, List<Expression> expressions, ParameterExpression prmSqlPrms, Expression prmTypedInstance, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
+		private static void IterateInMapProperties(Type tShard, Type tModel, List<Expression> expressions, ParameterExpression prmSqlPrms, Expression expModel, ParameterExpression expIgnoreParameters, ParameterExpression expShardArgument, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
 		{
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceInMapperProperty));
-			foreach (var prop in TModel.GetProperties())
+			foreach (var prop in tModel.GetProperties())
 			{
-				//Does property have our SqlMapAttribute attribute?
+				MemberExpression expProperty = Expression.Property(expModel, prop);
 				if (prop.IsDefined(typeof(ParameterMapAttribute), true))
 				{
-					//Instantiate our SqlMapAttribute attribute
+					bool alreadyFound = false;
 					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
 					foreach (var attrPM in attrPMs)
 					{
+						if (alreadyFound)
+						{
+							throw new MultipleMapAttributesException(prop);
+						}
+						alreadyFound = true;
 						expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
 						if (!attrPM.IsValidType(prop.PropertyType))
 						{
 							throw new InvalidMapTypeException(prop, attrPM.SqlType);
 						}
-						MemberExpression expProperty = Expression.Property(prmTypedInstance, prop);
+						//MemberExpression expProperty = Expression.Property(expModel, prop);
 						attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expProperty, prop.PropertyType, expLogger, logger);
 					}
 				}
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
-					MemberExpression expProperty = Expression.Property(prmTypedInstance, prop);
-					IterateInMapProperties(prop.PropertyType, expressions, prmSqlPrms, expProperty, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+					//MemberExpression expProperty = Expression.Property(expModel, prop);
+					IterateInMapProperties(tShard, prop.PropertyType, expressions, prmSqlPrms, expProperty, expIgnoreParameters, expShardArgument, expLogger, noDupPrmNameList, logger);
 				}
 			}
 		}
@@ -297,9 +347,15 @@ namespace ArgentSea
 				//Does property have our SqlMapAttribute attribute?
 				if (prop.IsDefined(typeof(ParameterMapAttribute), true))
 				{
+					bool alreadyFound = false;
 					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
 					foreach (var attrPM in attrPMs)
 					{
+						if (alreadyFound)
+						{
+							throw new MultipleMapAttributesException(prop);
+						}
+						alreadyFound = true;
 						expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
 						if (!attrPM.IsValidType(prop.PropertyType))
 						{
@@ -316,119 +372,442 @@ namespace ArgentSea
 		}
 
 
-		private static Func<DbParameterCollection, ILogger, object> BuildOutGetDelegate(DbParameterCollection parameters, Type TModel, ILogger logger)
+		private static Func<TShard, DbParameterCollection, ILogger, object> BuildOutGetDelegate<TShard>(DbParameterCollection parameters, Type tModel, ILogger logger) where TShard : IComparable
 		{
-			ParameterExpression expPrms = Expression.Parameter(typeof(DbParameterCollection), "parameters");
+			var tShard = typeof(TShard);
+			ParameterExpression expShardArgument = Expression.Variable(tShard, "shardId");
+			ParameterExpression expSprocParameters = Expression.Parameter(typeof(DbParameterCollection), "parameters");
 			ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
 			var variableExpressions = new List<ParameterExpression>();
-			var expModel = Expression.Variable(TModel, "model"); //result variable
+			var expModel = Expression.Variable(tModel, "model"); //result variable
 			variableExpressions.Add(expModel);
 			var expPrm = Expression.Variable(typeof(DbParameter), "prm");
 			variableExpressions.Add(expPrm);
-			var expressionPrms = new ParameterExpression[] { expPrms, expLogger };
-			var expExitLabel = Expression.Label(TModel);
+
+			var expressionPrms = new ParameterExpression[] { expShardArgument, expSprocParameters, expLogger };
+			var expExitLabel = Expression.Label(tModel);
 
 			var initialExpressions = new List<Expression>()
 			{
-				Expression.Assign(expModel, Expression.New(TModel)) // var result = new <T>;
+				Expression.Assign(expModel, Expression.New(tModel)) // var result = new <T>;
             };
 			var subsequentExpressions = new List<Expression>();
 
-			IterateGetOutParameters(TModel, expPrms, expPrm, variableExpressions, initialExpressions, subsequentExpressions, expModel, expLogger, expExitLabel, logger);
+			IterateGetOutParameters(tShard, tModel, expShardArgument, expSprocParameters, expPrm, variableExpressions, initialExpressions, subsequentExpressions, expModel, expLogger, expExitLabel, logger);
 
 			subsequentExpressions.Add(Expression.Goto(expExitLabel, expModel)); //return value;
 
 			initialExpressions.AddRange(subsequentExpressions);
-			initialExpressions.Add(Expression.Label(expExitLabel, Expression.Constant(null, TModel)));
+			initialExpressions.Add(Expression.Label(expExitLabel, Expression.Constant(null, tModel)));
 			var expBlock = Expression.Block(variableExpressions, initialExpressions);
-			var lambda = Expression.Lambda<Func<DbParameterCollection, ILogger, object>>(expBlock, expressionPrms);
-			logger.CreatedExpressionTreeForReadOutParameters(TModel, expBlock);
+			var lambda = Expression.Lambda<Func<TShard, DbParameterCollection, ILogger, object>>(expBlock, expressionPrms);
+			logger.CreatedExpressionTreeForReadOutParameters(tModel, expBlock);
 			return lambda.Compile();
 		}
-		private static void IterateGetOutParameters(Type TModel, ParameterExpression expPrms, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+		private static void IterateGetOutParameters(Type tShard, Type tModel, ParameterExpression expShardArgument, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
 		{
-			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
 
-			foreach (var prop in TModel.GetProperties())
+			foreach (var prop in tModel.GetProperties())
 			{
-				if (prop.IsDefined(typeof(ParameterMapAttribute), true))
+				if ((prop.IsDefined(typeof(MapShardKeyAttributeBase), true) || prop.IsDefined(typeof(MapShardChildAttributeBase), true)) && prop.IsDefined(typeof(ParameterMapAttribute), true))
 				{
+					HandleOutPrmShardKeyChild(prop, tShard, tModel, expShardArgument, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expModel, expLogger, exitLabel, logger);
+				}
+				else if (prop.IsDefined(typeof(ParameterMapAttribute), true))
+				{
+					bool alreadyFound = false;
 					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
-					MemberExpression expProperty = Expression.Property(expModel, prop);
 
 					foreach (var attrPM in attrPMs)
 					{
-						if (!attrPM.IsValidType(prop.PropertyType))
+						if (alreadyFound)
 						{
-							throw new InvalidMapTypeException(prop, attrPM.SqlType);
+							throw new MultipleMapAttributesException(prop);
 						}
-
-
-						var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
-						var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(attrPM.ParameterName, typeof(string))));
-
-						var expCallLog = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
-						if (attrPM.IsRequired)
-						{
-							requiredExpressions.Add(expCallLog);
-							requiredExpressions.Add(expAssign);
-							//Add quick exit if this parameter is dbNull
-							var miGetIsDbNull = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.IsRequiredParameterDbNull), BindingFlags.Static | BindingFlags.NonPublic);
-							var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expPrm, Expression.Constant(TModel.ToString(), typeof(string)), Expression.Constant(attrPM.ParameterName, typeof(string)), expLogger });
-							var expIfIsDbNull = Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, TModel)));
-							requiredExpressions.Add(expIfIsDbNull);
-
-							attrPM.AppendReadOutParameterExpressions(expProperty, requiredExpressions, expPrms, expPrm, prop, expLogger, logger);
-						}
-						else
-						{
-							nonrequiredExpressions.Add(expCallLog);
-							nonrequiredExpressions.Add(expAssign);
-							attrPM.AppendReadOutParameterExpressions(expProperty, nonrequiredExpressions, expPrms, expPrm, prop, expLogger, logger);
-						}
-
-
+						alreadyFound = true;
+						HandleOutProperty(attrPM, prop, tModel, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expModel, expLogger, exitLabel, logger);
 					}
 				}
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
 					MemberExpression expProperty = Expression.Property(expModel, prop);
-					IterateGetOutParameters(prop.PropertyType, expPrms, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expProperty, expLogger, exitLabel, logger);
+					IterateGetOutParameters(tShard, prop.PropertyType, expShardArgument, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expProperty, expLogger, exitLabel, logger);
 				}
 			}
 		}
 
-		private static Func<DbDataReader, ILogger, List<T>> BuildReaderMapDelegate<T>(ILogger logger)
+		private static void HandleOutProperty(ParameterMapAttribute attrPM, PropertyInfo prop, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
 		{
-			var TModel = typeof(T);
+			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
+			var expCallLog = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
+
+			if (!attrPM.IsValidType(prop.PropertyType))
+			{
+				throw new InvalidMapTypeException(prop, attrPM.SqlType);
+			}
+
+			MemberExpression expProperty = Expression.Property(expModel, prop);
+
+			var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
+			var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expSprocParameters, Expression.Constant(attrPM.ParameterName, typeof(string))));
+
+			if (attrPM.IsRequired)
+			{
+				requiredExpressions.Add(expCallLog);
+				requiredExpressions.Add(expAssign);
+				requiredExpressions.Add(ExpressionHelpers.ReturnNullIfDbNull(expPrm, attrPM.ParameterName, tModel, exitLabel, expLogger));
+
+				attrPM.AppendReadOutParameterExpressions(expProperty, requiredExpressions, expSprocParameters, expPrm, prop.PropertyType, expLogger, logger);
+			}
+			else
+			{
+				nonrequiredExpressions.Add(expCallLog);
+				nonrequiredExpressions.Add(expAssign);
+				attrPM.AppendReadOutParameterExpressions(expProperty, nonrequiredExpressions, expSprocParameters, expPrm, prop.PropertyType, expLogger, logger);
+			}
+
+		}
+		private static void HandleOutVariable(ParameterMapAttribute attrPM, ParameterExpression var, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+		{
+			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
+			if (!attrPM.IsValidType(var.Type))
+			{
+				throw new InvalidMapTypeException(var.Name, var.Type, attrPM.SqlType);
+			}
+
+			var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
+			var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expSprocParameters, Expression.Constant(attrPM.ParameterName, typeof(string))));
+			if (attrPM.IsRequired)
+			{
+				requiredExpressions.Add(expAssign);
+				attrPM.AppendReadOutParameterExpressions(var, requiredExpressions, expSprocParameters, expPrm, var.Type, expLogger, logger);
+				requiredExpressions.Add(ExpressionHelpers.ReturnNullIfDbNull(expPrm, attrPM.ParameterName, tModel, exitLabel, expLogger));
+			}
+			else
+			{
+				nonrequiredExpressions.Add(expAssign);
+				attrPM.AppendReadOutParameterExpressions(var, nonrequiredExpressions, expSprocParameters, expPrm, var.Type, expLogger, logger);
+			}
+
+		}
+
+		private static void HandleOutPrmShardKeyChild(PropertyInfo prop, Type tArgShard, Type tModel, ParameterExpression expShardArgument, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+		{
+			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
+
+			MemberExpression expShardProperty = Expression.Property(expModel, prop);
+			var propType = prop.PropertyType;
+			var isNullableShardType = (propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(Nullable<>));
+
+			if (isNullableShardType)
+			{
+				propType = Nullable.GetUnderlyingType(propType);
+			}
+			var isShardKey = propType.IsGenericType && propType.Name == "ShardKey`2" && prop.IsDefined(typeof(MapShardKeyAttributeBase), true);
+			var isShardChild = propType.IsGenericType && propType.Name == "ShardChild`3" && prop.IsDefined(typeof(MapShardChildAttributeBase), true);
+
+			if (isShardKey || isShardChild)
+			{
+				var tShardId = propType.GetProperty(nameof(ShardKey<int, int>.ShardId)).PropertyType;
+				var tRecordId = propType.GetProperty(nameof(ShardKey<int, int>.RecordId)).PropertyType;
+				Type tChildId = null;
+				if (tArgShard != tShardId)
+				{
+					throw new Exception($"The ShardId data type found in property {prop.Name} on model {tModel.Name} is of type {tShardId.Name } but the caller expected type {tArgShard.Name}.");
+				}
+				if (isShardChild)
+				{
+					tChildId = propType.GetProperty(nameof(ShardChild<int, int, int>.ChildId)).PropertyType;
+				}
+
+				ParameterExpression expDataShardId;
+				ParameterExpression expDataRecordId;
+				ParameterExpression expDataChildId = null;
+
+				if (tShardId.IsValueType)
+				{
+					expDataShardId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tShardId), prop.Name + "_ShardId");
+				}
+				else
+				{
+					expDataShardId = Expression.Variable(tShardId, "dataShardId_" + prop.Name);
+				}
+				variableExpressions.Add(expDataShardId);
+
+				if (tRecordId.IsValueType)
+				{
+					expDataRecordId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tRecordId), prop.Name + "_RecordId");
+				}
+				else
+				{
+					expDataRecordId = Expression.Variable(tRecordId, "dataRecordId_" + prop.Name);
+				}
+				variableExpressions.Add(expDataRecordId);
+
+				if (isShardChild)
+				{
+					if (tChildId.IsValueType)
+					{
+						expDataChildId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tChildId), prop.Name + "_ChildId");
+					}
+					else
+					{
+						expDataChildId = Expression.Variable(tChildId, "dataChildId_" + prop.Name);
+					}
+					variableExpressions.Add(expDataChildId);
+				}
+
+				string shardParameterName = null;
+				string recordParameterName = null;
+				string childParameterName = null;
+				NewExpression expDataOrigin;
+				if (isShardChild)
+				{
+					var shardPM = prop.GetCustomAttribute<MapShardChildAttributeBase>(true);
+					shardParameterName = shardPM.ShardIdParameterName;
+					recordParameterName = shardPM.RecordIdParameterName;
+					childParameterName = shardPM.ChildIdParameterName;
+					expDataOrigin = Expression.New(typeof(DataOrigin).GetConstructor(new[] { typeof(char) }), new[] { Expression.Constant(shardPM.Origin.SourceIndicator, typeof(char)) });
+				}
+				else
+				{
+					var shardPM = prop.GetCustomAttribute<MapShardKeyAttributeBase>(true);
+					shardParameterName = shardPM.ShardIdParameterName;
+					recordParameterName = shardPM.RecordIdParameterName;
+					expDataOrigin = Expression.New(typeof(DataOrigin).GetConstructor(new[] { typeof(char) }), new[] { Expression.Constant(shardPM.Origin.SourceIndicator, typeof(char)) });
+				}
+
+				//ShardId
+				var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+				bool shardIdFound = false;
+				if (!string.IsNullOrEmpty(shardParameterName))
+				{
+					foreach (var attrPM in attrPMs)
+					{
+						List<Expression> expressions;
+						if (attrPM.IsRequired)
+						{
+							expressions = requiredExpressions;
+						}
+						else
+						{
+							expressions = nonrequiredExpressions;
+						}
+						if (attrPM.ParameterName == shardParameterName)
+						{
+							expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(expDataShardId.Name)));
+							shardIdFound = true;
+							if (!attrPM.IsValidType(tShardId))
+							{
+								throw new InvalidMapTypeException(expDataShardId.Name, tShardId, attrPM.SqlType);
+							}
+							var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
+							var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expSprocParameters, Expression.Constant(attrPM.ParameterName, typeof(string))));
+							//var lstShardExp = new List<Expression>();
+							//lstShardExp.Add(expAssign);
+							expressions.Add(expAssign);
+
+							if (attrPM.IsRequired)
+							{
+								requiredExpressions.Add(ExpressionHelpers.ReturnNullIfDbNull(expPrm, attrPM.ParameterName, tModel, exitLabel, expLogger));
+							}
+							attrPM.AppendReadOutParameterExpressions(expDataShardId, expressions, expSprocParameters, expPrm, expDataShardId.Type, expLogger, logger);
+							if (tShardId.IsValueType)
+							{
+								expressions.Add(Expression.IfThen(
+									//if
+									Expression.Not(Expression.Property(expDataShardId, expDataShardId.Type.GetProperty(nameof(Nullable<int>.HasValue)))),
+									//then
+									Expression.Assign(expDataShardId, Expression.Convert(expShardArgument, expDataShardId.Type))
+									//Expression.Assign(Expression.Property(expDataShardId, expDataShardId.Type.GetProperty(nameof(Nullable<int>.Value))), expShardArgument)
+									));
+							}
+							else
+							{
+								expressions.Add(Expression.IfThen(
+									//if
+									Expression.Not(Expression.Property(expDataShardId, expDataShardId.Type.GetProperty(nameof(Nullable<int>.HasValue)))),
+									//then
+									Expression.Assign(expDataShardId, expShardArgument)
+									));
+							}
+							break;
+						}
+					}
+					if (!shardIdFound)
+					{
+						throw new Exception($"The shard map attribute specifies a ShardId parameter name of \"{ shardParameterName }\" but no corresponding MapTo attribute was found with this parameter name.");
+					}
+				}
+				else
+				{
+					if (tShardId.IsValueType)
+					{
+						nonrequiredExpressions.Add(Expression.Assign(expDataShardId, Expression.Convert(expShardArgument, expDataShardId.Type)));
+					}
+					else
+					{
+						nonrequiredExpressions.Add(Expression.Assign(expDataShardId, expShardArgument));
+					}
+				}
+				//RecordId
+				var recordIdFound = false;
+				foreach (var attrPM in attrPMs)
+				{
+					if (attrPM.ParameterName == recordParameterName)
+					{
+						recordIdFound = true;
+						if (attrPM.IsRequired)
+						{
+							requiredExpressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(expDataRecordId.Name)));
+						}
+						else
+						{
+							nonrequiredExpressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(expDataRecordId.Name)));
+						}
+						HandleOutVariable(attrPM, expDataRecordId, tModel, expSprocParameters, expPrm, requiredExpressions, nonrequiredExpressions, expLogger, exitLabel, logger);
+						break;
+					}
+				}
+				if (!recordIdFound)
+				{
+					throw new Exception($"The shard map attribute specifies a RecordId parameter name of \"{ recordParameterName }\" but no corresponding MapTo attribute was found with this parameter name.");
+				}
+				if (isShardChild)
+				{
+					var childIdFound = false;
+					foreach (var attrPM in attrPMs)
+					{
+						if (attrPM.ParameterName == childParameterName)
+						{
+							if (attrPM.IsRequired)
+							{
+								requiredExpressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(expDataChildId.Name)));
+							}
+							else
+							{
+								nonrequiredExpressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(expDataChildId.Name)));
+							}
+							childIdFound = true;
+							HandleOutVariable(attrPM, expDataChildId, tModel, expSprocParameters, expPrm, requiredExpressions, nonrequiredExpressions, expLogger, exitLabel, logger);
+							break;
+						}
+					}
+					if (!childIdFound)
+					{
+						throw new Exception($"The shard map attribute specifies a ChildId parameter name of \"{ childParameterName }\" but no corresponding MapTo attribute was found with this parameter name.");
+					}
+				}
+				var expHasNoNulls = Expression.AndAlso(Expression.NotEqual(expDataShardId, Expression.Constant(null, expDataShardId.Type)),
+						Expression.NotEqual(expDataRecordId, Expression.Constant(null, expDataRecordId.Type)));
+				if (isShardChild)
+				{
+					expHasNoNulls = Expression.AndAlso(expHasNoNulls,
+						Expression.NotEqual(expDataChildId, Expression.Constant(null, expDataChildId.Type)));
+				}
+
+				Type[] constructorTypes;
+				Expression[] constructorArgs;
+				//Type tShard;
+				if (isShardChild)
+				{
+					constructorTypes = new[] { typeof(DataOrigin), tShardId, tRecordId, tChildId };
+					constructorArgs = new Expression[4];
+					//tShard = typeof(ShardChild<,,>).MakeGenericType(new Type[] { tShardId, tRecordId, tChildId });
+				}
+				else
+				{
+					constructorTypes = new[] { typeof(DataOrigin), tShardId, tRecordId };
+					constructorArgs = new Expression[3];
+					//tShard = typeof(ShardKey<,>).MakeGenericType(new Type[] { tShardId, tRecordId });
+				}
+				constructorArgs[0] = expDataOrigin;
+
+				if (tShardId.IsValueType)
+				{
+					constructorArgs[1] = Expression.Property(expDataShardId, expDataShardId.Type.GetProperty(nameof(Nullable<int>.Value)));
+				}
+				else
+				{
+					constructorArgs[1] = expDataShardId;
+				}
+				if (tRecordId.IsValueType)
+				{
+					constructorArgs[2] = Expression.Property(expDataRecordId, expDataRecordId.Type.GetProperty(nameof(Nullable<int>.Value)));
+				}
+				else
+				{
+					constructorArgs[2] = expDataRecordId;
+				}
+				if (isShardChild)
+				{
+					if (tChildId.IsValueType)
+					{
+						constructorArgs[3] = Expression.Property(expDataChildId, expDataChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
+					}
+					else
+					{
+						constructorArgs[3] = expDataChildId;
+					}
+				}
+				var expNewShardInstance = Expression.New(propType.GetConstructor(constructorTypes), constructorArgs);
+				Expression expActionIfNull;
+				if (isNullableShardType)
+				{
+					expActionIfNull = Expression.Assign(expShardProperty, Expression.Constant(null, expShardProperty.Type));
+					expNewShardInstance = Expression.New(typeof(Nullable<>).MakeGenericType(propType).GetConstructor(new Type[] { propType }), new Expression[] { expNewShardInstance });
+				}
+				else
+				{
+					expActionIfNull = Expression.Assign(expShardProperty, Expression.Property(null, propType.GetProperty(nameof(ShardKey<int, int>.Empty))));
+				}
+				nonrequiredExpressions.Add(Expression.IfThenElse(
+					expHasNoNulls,
+					Expression.Assign(expShardProperty, expNewShardInstance),
+					expActionIfNull
+					));
+			}
+		}
+
+
+		private static Func<TShard, DbDataReader, ILogger, List<TModel>> BuildReaderMapDelegate<TShard, TModel>(ILogger logger) where TShard : IComparable
+		{
+			var tModel = typeof(TModel);
+			var tShard = typeof(TShard);
+			ParameterExpression expShardArgument = Expression.Variable(tShard, "shardId");
+			ParameterExpression prmSqlRdr = Expression.Parameter(typeof(DbDataReader), "rdr"); //input param
+			ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
+			var variableExpressions = new List<ParameterExpression>();
+			var expModel = Expression.Parameter(typeof(TModel), "model"); //model variable
+			variableExpressions.Add(expModel);
+			var expListResult = Expression.Parameter(typeof(List<TModel>), "result"); //list result variable
+			variableExpressions.Add(expListResult);
+			var expOrdinal = Expression.Variable(typeof(int), "ordinal");
+			variableExpressions.Add(expOrdinal);
+			var expOrdinals = Expression.Variable(typeof(int[]), "ordinals");
+			variableExpressions.Add(expOrdinals);
 
 			var expressions = new List<Expression>();
 			var columnLookupExpressions = new List<MethodCallExpression>();
+			var expressionPrms = new ParameterExpression[] { expShardArgument, prmSqlRdr, expLogger };
 
-			ParameterExpression prmSqlRdr = Expression.Parameter(typeof(DbDataReader), "rdr"); //input param
-			ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
-			var expressionPrms = new ParameterExpression[] { prmSqlRdr, expLogger };
 
 			//MethodInfos for subsequent Expression calls
 			var miGetFieldOrdinal = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetFieldOrdinal), BindingFlags.NonPublic | BindingFlags.Static);
 			var miRead = typeof(DbDataReader).GetMethod(nameof(DbDataReader.Read));
 			var miGetFieldValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFieldValue));
-			var miListAdd = typeof(List<T>).GetMethod(nameof(List<T>.Add));
+			var miListAdd = typeof(List<TModel>).GetMethod(nameof(List<TModel>.Add));
 
 			//create List<TModel> result
-			var expModel = Expression.Parameter(typeof(T), "model"); //model variable
-			var expListResult = Expression.Parameter(typeof(List<T>), "result"); //list result variable
-			var expOrdinal = Expression.Variable(typeof(int), "ordinal");
-			var expOrdinals = Expression.Variable(typeof(int[]), "ordinals");
 
 			var propIndex = 0;
 			var resultExpressions = new List<Expression>();
 
-			var expAssign = Expression.Assign(expModel, Expression.New(typeof(T)));
-			expressions.Add(expAssign); //var model = new T
+			var expAssign = Expression.Assign(expModel, Expression.New(typeof(TModel)));
+			expressions.Add(expAssign);
 
 			//Loop through all object properties:
-			IterateRdrColumns(TModel, expModel, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
+			IterateRdrColumns(tShard, tModel, expModel, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
 
 			var expAddList = Expression.Call(expListResult, miListAdd, expModel);
 			expressions.Add(expAddList); //ResultList.Add(model);
@@ -436,7 +815,7 @@ namespace ArgentSea
 			resultExpressions.Add(Expression.Assign(expOrdinals, Expression.NewArrayInit(typeof(int), columnLookupExpressions.ToArray())));
 
 			var loopLabel = Expression.Label("readNextRow");
-			resultExpressions.Add(Expression.Assign(expListResult, Expression.New(typeof(List<T>)))); // var result = new List<T>;
+			resultExpressions.Add(Expression.Assign(expListResult, Expression.New(typeof(List<TModel>)))); // var result = new List<T>;
 			resultExpressions.Add(Expression.Loop(
 					Expression.IfThenElse(Expression.Call(prmSqlRdr, miRead),
 						Expression.Block(expressions),
@@ -444,21 +823,28 @@ namespace ArgentSea
 					), loopLabel));
 			resultExpressions.Add(expListResult); //return type
 
-			var expBlock = Expression.Block(typeof(List<T>), new ParameterExpression[] { expModel, expListResult, expOrdinals, expOrdinal }, resultExpressions);
-			var lambda = Expression.Lambda<Func<DbDataReader, ILogger, List<T>>>(expBlock, expressionPrms);
-			logger.CreatedExpressionTreeForReader(TModel, expBlock);
+			var expBlock = Expression.Block(typeof(List<TModel>), variableExpressions, resultExpressions);
+			var lambda = Expression.Lambda<Func<TShard, DbDataReader, ILogger, List<TModel>>>(expBlock, expressionPrms);
+			logger.CreatedExpressionTreeForReader(tModel, expBlock);
 			return lambda.Compile();
 		}
-		private static void IterateRdrColumns(Type TModel, Expression expModel, List<MethodCallExpression> columnLookupExpressions, List<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, ParameterExpression expLogger, ILogger logger)
+		private static void IterateRdrColumns(Type tShard, Type TModel, Expression expModel, List<MethodCallExpression> columnLookupExpressions, List<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, ParameterExpression expLogger, ILogger logger)
 		{
+			//TODO: handle tShard
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceRdrMapperProperty));
 			foreach (var prop in TModel.GetProperties())
 			{
 				if (prop.IsDefined(typeof(ParameterMapAttribute), true))
 				{
+					var alreadyFound = false;
 					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
 					foreach (var attrPM in attrPMs)
 					{
+						if (alreadyFound)
+						{
+							throw new MultipleMapAttributesException(prop);
+						}
+						alreadyFound = true;
 						expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
 
 						if (!attrPM.IsValidType(prop.PropertyType))
@@ -473,7 +859,7 @@ namespace ArgentSea
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
 					MemberExpression expProperty = Expression.Property(expModel, prop);
-					IterateRdrColumns(prop.PropertyType, expProperty, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
+					IterateRdrColumns(tShard, prop.PropertyType, expProperty, columnLookupExpressions, expressions, prmSqlRdr, expOrdinals, expOrdinal, ref propIndex, expLogger, logger);
 				}
 			}
 
@@ -484,87 +870,93 @@ namespace ArgentSea
 		//Make model out of out parameters only
 		public static TModel QueryResultsHandler<TShard, TModel>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TModel>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TModel>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		//To Make model out of reader result, set TOutParamaters type to DummyType or something like it.
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult, TOutParameters>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult : class, new()
 			where TOutParameters : class, new()
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, TReaderResult, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, TReaderResult, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TOutParameters>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TOutParameters : class, new()
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TOutParameters>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TReaderResult2 : class, new()
 			where TOutParameters : class, new()
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, DummyType, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TOutParameters>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TReaderResult2 : class, new()
 			where TReaderResult3 : class, new()
 			where TOutParameters : class, new()
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, DummyType, DummyType, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TOutParameters>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TReaderResult2 : class, new()
@@ -572,17 +964,18 @@ namespace ArgentSea
 			where TReaderResult4 : class, new()
 			where TOutParameters : class, new()
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, DummyType, DummyType, DummyType, TOutParameters>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, DummyType, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TOutParameters>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TReaderResult2 : class, new()
@@ -591,11 +984,11 @@ namespace ArgentSea
 			where TReaderResult5 : class, new()
 			where TOutParameters : class, new()
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, TOutParameters>(shardNumber, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -603,11 +996,11 @@ namespace ArgentSea
 		//	string connectionDescription,
 		//	ILogger logger)
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -617,11 +1010,11 @@ namespace ArgentSea
 		//	where TReaderResult0 : class, new()
 		//	where TReaderResult1 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -632,11 +1025,11 @@ namespace ArgentSea
 		//	where TReaderResult1 : class, new()
 		//	where TReaderResult2 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -648,11 +1041,11 @@ namespace ArgentSea
 		//	where TReaderResult2 : class, new()
 		//	where TReaderResult3 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, DummyType, DummyType, DummyType, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -665,11 +1058,11 @@ namespace ArgentSea
 		//	where TReaderResult3 : class, new()
 		//	where TReaderResult4 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, DummyType, DummyType, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -683,11 +1076,11 @@ namespace ArgentSea
 		//	where TReaderResult4 : class, new()
 		//	where TReaderResult5 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -702,11 +1095,11 @@ namespace ArgentSea
 		//	where TReaderResult5 : class, new()
 		//	where TReaderResult6 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, DummyType, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
 		//	(
-		//	TShard shardNumber,
+		//	TShard shardId,
 		//	string sprocName,
 		//	TArg optionalArgument,
 		//	DbDataReader rdr,
@@ -722,14 +1115,14 @@ namespace ArgentSea
 		//	where TReaderResult6 : class, new()
 		//	where TReaderResult7 : class, new()
 		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, DummyType>(shardNumber, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
 		//Full implementation for up to 8 results (plus output) 
 
 		/// <summary>
 		/// A function whose signature cooresponds to delegate QueryResultModelHandler and is used to map the provided model type(s) to query results.
 		/// </summary>
-		/// <typeparam name="TShard">The type of the shardNumber value. Can be any value type if not used.</typeparam>
+		/// <typeparam name="TShard">The type of the shardId value. Can be any value type if not used.</typeparam>
 		/// <typeparam name="TModel">This is the expected return type of the handler.</typeparam>
 		/// <typeparam name="TReaderResult0">The first result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
 		/// <typeparam name="TReaderResult1">The second result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
@@ -740,7 +1133,7 @@ namespace ArgentSea
 		/// <typeparam name="TReaderResult6">The seventh result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
 		/// <typeparam name="TReaderResult7">The eighth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
 		/// <typeparam name="TOutResult">This must be either type TModel or Mapper.DummyType. If set to TModel the TModel properties will be mapped to cooresponding output parameters; if set to DummyType, the output parameters are ignored.</typeparam>
-		/// <param name="shardNumber">This value will be provided to ShardKey or ShardChild objects. If not using sharded data, any provided value will be ignored.</param>
+		/// <param name="shardId">This value will be provided to ShardKey or ShardChild objects. If not using sharded data, any provided value will be ignored.</param>
 		/// <param name="sprocName">The name of the stored procedure is used to cache the mapping metadata and also for provide richer logging information.</param>
 		/// <param name="notUsed">This parameter is required to conform to the QueryResultModelHandler delegate signature. This argument should be null.</param>
 		/// <param name="rdr">The data reader returned by the query.</param>
@@ -750,13 +1143,14 @@ namespace ArgentSea
 		/// <returns>An instance of TResult, with properties matching the provided data.</returns>
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
 			(
-			TShard shardNumber,
+			TShard shardId,
 			string sprocName,
 			object notUsed,
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
 			ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TReaderResult2 : class, new()
@@ -803,42 +1197,42 @@ namespace ArgentSea
 			var hasNextResult = true;
 			if (typeof(TReaderResult0) != dummy)
 			{
-				resultList0 = Mapper.FromDataReader<TReaderResult0>(rdr, logger);
+				resultList0 = Mapper.FromDataReader<TShard, TReaderResult0>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult1) != dummy)
 			{
-				resultList1 = Mapper.FromDataReader<TReaderResult1>(rdr, logger);
+				resultList1 = Mapper.FromDataReader<TShard, TReaderResult1>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult2) != dummy)
 			{
-				resultList2 = Mapper.FromDataReader<TReaderResult2>(rdr, logger);
+				resultList2 = Mapper.FromDataReader<TShard, TReaderResult2>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult3) != dummy)
 			{
-				resultList3 = Mapper.FromDataReader<TReaderResult3>(rdr, logger);
+				resultList3 = Mapper.FromDataReader<TShard, TReaderResult3>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult4) != dummy)
 			{
-				resultList4 = Mapper.FromDataReader<TReaderResult4>(rdr, logger);
+				resultList4 = Mapper.FromDataReader<TShard, TReaderResult4>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult5) != dummy)
 			{
-				resultList5 = Mapper.FromDataReader<TReaderResult5>(rdr, logger);
+				resultList5 = Mapper.FromDataReader<TShard, TReaderResult5>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult6) != dummy)
 			{
-				resultList6 = Mapper.FromDataReader<TReaderResult6>(rdr, logger);
+				resultList6 = Mapper.FromDataReader<TShard, TReaderResult6>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (hasNextResult && typeof(TReaderResult7) != dummy)
 			{
-				resultList7 = Mapper.FromDataReader<TReaderResult7>(rdr, logger);
+				resultList7 = Mapper.FromDataReader<TShard, TReaderResult7>(shardId, rdr, logger);
 				hasNextResult = rdr.NextResult();
 			}
 			if (typeof(TOutResult) != dummy)
@@ -850,15 +1244,15 @@ namespace ArgentSea
 			var queryKey = typeof(TModel).ToString() + sprocName;
 			if (!_getObjectCache.TryGetValue(queryKey, out var sqlObjectDelegate))
 			{
-				sqlObjectDelegate = BuildModelFromResultsExpressions<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(sprocName, logger);
+				sqlObjectDelegate = BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, logger);
 				if (!_getObjectCache.TryAdd(queryKey, sqlObjectDelegate))
 				{
 					sqlObjectDelegate = _getObjectCache[queryKey];
 				}
 			}
-			var sqlObjectDelegate2 = (Func<string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>)sqlObjectDelegate;
+			var sqlObjectDelegate2 = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>)sqlObjectDelegate;
 			//return (TModel)sqlObjectDelegate(sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
-			return (TModel)sqlObjectDelegate2(sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
+			return (TModel)sqlObjectDelegate2(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
 
 		}
 		private static TResult AssignRootToResult<TEval, TResult>(string procedureName, IList<TEval> resultList, ILogger logger) where TResult : class, new() where TEval : class, new()
@@ -884,11 +1278,11 @@ namespace ArgentSea
 				return result;
 			}
 		}
-		//private static Func<string, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, ILogger, dynamic> BuildModelFromResultsExpressions<
-		//	TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
-		private static Func<string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel> BuildModelFromResultsExpressions<
-			TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
-			(string procedureName, ILogger logger)
+
+		private static Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel> BuildModelFromResultsExpressions<
+			TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
+			(TShard shardId, string procedureName, ILogger logger)
+			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
 			where TReaderResult2 : class, new()
@@ -1156,11 +1550,45 @@ namespace ArgentSea
 			expressions.Add(expModel); //return model
 			var expBlock = Expression.Block(resultType, new ParameterExpression[] { expModel, expCount }, expressions); //+variables
 
-			var lambda = Expression.Lambda<Func<string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>>
+			var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>>
 				(expBlock, new ParameterExpression[] { expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expResultOut, expLogger }); //+parameters
 			return lambda.Compile();
 		}
+
+		//private static ShardChild<TShard, TRecord, TChild> HandleShardChildInParameters<TShard, TRecord, TChild>(string shardParameterName, string recordParameterName, string childParameterName, DbParameterCollection parameters, TShard shardIdArgument) where TShard : IComparable where TRecord : IComparable where TChild : IComparable
+		//{
+		//	if (!string.IsNullOrEmpty(shardParameterName) && parameters.Contains(shardParameterName))
+		//	{
+
+		//	}
+
+		//	var result = new ShardChild<TShard, TRecord, TChild>();
+
+		//	return result;
+		//}
+
+		//private static TShard FindShardParameterOrUseArgument<TShard>(TShard shardArgument, DbParameterCollection parameters, string shardParameterName)
+		//{
+		//	TShard shardId;
+		//	if (parameters.Contains(shardParameterName))
+		//	{
+		//		shardId = parameters[shardParameterName].Value;
+		//	}
+		//	else
+		//	{
+		//		shardId = shardArgument;
+		//	}
+		//}
+
 		#endregion
+		private class BadShardType : IComparable
+		{
+			public int CompareTo(object obj)
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		public class DummyType
 		{
 		}

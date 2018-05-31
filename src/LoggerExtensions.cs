@@ -96,7 +96,7 @@ namespace ArgentSea
             _sqlShardChildNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardChildNull, nameof(TraceRdrMapperProperty)), "The {name} shard child could not be built because one or two of the input values was dbNull. The shard child value was {shardChild}.");
 			_buildSqlResultsHandlerScope = LoggerMessage.DefineScope<string, Type>("Build logic to convert sql procedure {name} results to result {type}");
             _sqlDbCmdExecutedTrace = LoggerMessage.Define<string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceDbCmdExecuted)), "Executed command {name} on Db connection {connectionName} in {milliseconds} milliseconds.");
-            _sqlShardCmdExecutedTrace = LoggerMessage.Define<string, string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceShardCmdExecuted)), "Executed command {name} on ShardSet {shardSet} connection {shardNumber} in {milliseconds} milliseconds.");
+            _sqlShardCmdExecutedTrace = LoggerMessage.Define<string, string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceShardCmdExecuted)), "Executed command {name} on ShardSet {shardSet} connection {shardId} in {milliseconds} milliseconds.");
             _sqlConnectRetry = LoggerMessage.Define<string, int>(LogLevel.Information, new EventId((int)EventIdentifier.LogConnectRetry, nameof(RetryingDbConnection)), "Initiating automatic connection retry for transient error on Db connection {connectionName}. This is attempt number {attempt}.");
             _sqlCommandRetry = LoggerMessage.Define<string, string, int>(LogLevel.Information, new EventId((int)EventIdentifier.LogCommandRetry, nameof(RetryingDbCommand)), "Initiating automatic command retry for transient error on command {name} on Db connection {connectionName}. This is attempt number {attempt}.");
             _sqlConnectionCircuitBreakerOn = LoggerMessage.Define<string>(LogLevel.Warning, new EventId((int)EventIdentifier.LogCircuitBreakerOn, nameof(CiruitBreakingDbConnection)), "Circuit breaking failing connection on Db connection {connectionName}. Most subsequent calls to this connection will fail.");
@@ -173,14 +173,14 @@ namespace ArgentSea
         }
         public static void NullShardKeyArguments<TShard, TRecord>(this ILogger logger, string propertyName, ShardKey<TShard, TRecord> shardKey) where TShard : IComparable where TRecord : IComparable
         {
-            if (shardKey.ShardNumber.Equals(null) || shardKey.RecordID.Equals(null))
+            if (shardKey.ShardId.Equals(null) || shardKey.RecordId.Equals(null))
             {
                 _sqlShardKeyNull(logger, propertyName, shardKey.ToString(), null);
             }
         }
         public static void NullShardChildArguments<TShard, TRecord, TChild>(this ILogger logger, string propertyName, ShardChild<TShard, TRecord, TChild> shardChild) where TShard : IComparable where TRecord : IComparable where TChild : IComparable
 		{
-			if (shardChild.Key.ShardNumber.Equals(null) || shardChild.Key.RecordID.Equals(null) || shardChild.ChildRecordId.Equals(null))
+			if (shardChild.Key.ShardId.Equals(null) || shardChild.Key.RecordId.Equals(null) || shardChild.ChildId.Equals(null))
             {
                 _sqlShardChildNull(logger, propertyName, shardChild.ToString(), null);
             }
@@ -193,11 +193,11 @@ namespace ArgentSea
         {
             _sqlDbCmdExecutedTrace(logger, commandName, connectionName, milliseconds, null);
         }
-        public static void TraceShardCmdExecuted<TShard>(this ILogger logger, string commandName, string shardSetKey, TShard shardNumber, long milliseconds)
+        public static void TraceShardCmdExecuted<TShard>(this ILogger logger, string commandName, string shardSetKey, TShard shardId, long milliseconds)
         {
             if (logger.IsEnabled(LogLevel.Trace))
             {
-                _sqlShardCmdExecutedTrace(logger, commandName, shardSetKey, shardNumber.ToString(), milliseconds, null);
+                _sqlShardCmdExecutedTrace(logger, commandName, shardSetKey, shardId.ToString(), milliseconds, null);
             }
         }
         public static void RetryingDbConnection(this ILogger logger, string connectionName, int attemptCount, Exception exception)

@@ -5,997 +5,933 @@ using System.Threading.Tasks;
 
 namespace ArgentSea
 {
-    /// <summary>
-    /// Immutable class representing a sharded record.
-    /// </summary>
-    public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>> where TShard : IComparable where TRecord : IComparable
-    {
-        private TShard _shardNumber;
-        private TRecord _recordId;
-        private DataOrigin _origin;
-        private const char cSeperator = ':';
-        private Nullable<DateTime> _concurrencyStamp;
+	/// <summary>
+	/// Immutable class representing a sharded record.
+	/// </summary>
+	public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>> where TShard : IComparable where TRecord : IComparable
+	{
+		private TShard _shardId;
+		private TRecord _recordId;
+		private DataOrigin _origin;
+		private const char cSeperator = ':';
 
-        //internal delegate dynamic ValueFromBytes(byte[] data, ref int position, Type valueType);
-        //internal static Dictionary<Type, ValueFromBytes> _byteConverter = null;
 
-        public ShardKey(DataOrigin dataOrigin, TShard shardNumber, TRecord recordId)
-        {
-            if (dataOrigin.SourceIndicator == '0' && (shardNumber.CompareTo(default(TShard)) != 0 || recordId.CompareTo(default(TRecord)) != 0))
-            {
-                throw new InvalidShardArgumentsException();
-            }
-            _origin = dataOrigin;
-            _shardNumber = shardNumber;
-            _recordId = recordId;
-            _concurrencyStamp = null;
-        }
-        public ShardKey(DataOrigin dataOrigin, TShard shardNumber, TRecord recordId, DateTime? concurrencyStamp)
-        {
-            if (dataOrigin.SourceIndicator == '0' && (shardNumber.CompareTo(default(TShard)) == 0 || recordId.CompareTo(default(TRecord)) != 0))
-            {
-                throw new InvalidShardArgumentsException();
-            }
-            _origin = dataOrigin;
-            _shardNumber = shardNumber;
-            _recordId = recordId;
-            _concurrencyStamp = concurrencyStamp;
-        }
+		#region Constructors
+		public ShardKey(DataOrigin origin, TShard shardId, TRecord recordId)
+		{
+			if (origin.SourceIndicator == '0' && (shardId.CompareTo(default(TShard)) != 0 || recordId.CompareTo(default(TRecord)) != 0))
+			{
+				throw new InvalidShardArgumentsException();
+			}
+			_origin = origin;
+			_shardId = shardId;
+			_recordId = recordId;
+		}
+		public ShardKey(char dataOrigin, TShard shardId, TRecord recordId) : this(new DataOrigin(dataOrigin), shardId, recordId)
+		{
 
-        public DateTime? ConcurrencyStamp
-        {
-            get { return _concurrencyStamp; }
-        }
+		}
 
-        public TShard ShardNumber
-        {
-            get { return _shardNumber; }
-        }
-        public TRecord RecordID
-        {
-            get { return _recordId; }
-        }
-        public DataOrigin DataOrigin
-        {
-            get
-            {
-                return this._origin;
-            }
-        }
-        public bool IsEmpty
-        {
-            get
-            {
-                return this._origin.SourceIndicator == '0' && this.RecordID.CompareTo(default(TRecord)) == 0 && this.ShardNumber.CompareTo(default(TShard)) == 0;
-            }
-        }
-        public override string ToString()
-        {
-            return $"{{ \"origin\": \"{_origin.SourceIndicator}\", \"shardNumber\": \"{_shardNumber.ToString()}\", \"recordId\": \"{_recordId.ToString()}\"}}";
-        }
+			#endregion
+		#region Public Properties and Method
 
-        /// <summary>
-        /// Serializes ShardKey data into a URL-safe string with a checksum
-        /// </summary>
-        /// <returns></returns>
-        public string ToExternalString()
-            => ToExternalString(false);
+		public TShard ShardId
+		{
+			get { return _shardId; }
+		}
+		public TRecord RecordId
+		{
+			get { return _recordId; }
+		}
+		public DataOrigin Origin
+		{
+			get
+			{
+				return this._origin;
+			}
+		}
+		public bool IsEmpty
+		{
+			get
+			{
+				return this._origin.SourceIndicator == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId.CompareTo(default(TShard)) == 0;
+			}
+		}
+		public override string ToString()
+		{
+			return $"{{ \"origin\": \"{_origin.SourceIndicator}\", \"shardId\": \"{_shardId.ToString()}\", \"recordId\": \"{_recordId.ToString()}\"}}";
+		}
 
-        internal static byte[] GetValueBytes(IComparable value)
-        {
-            switch (value)
-            {
-                case int i:
-                    return BitConverter.GetBytes(i);
-                case byte b:
-                    return new byte[1] { b };
-                case short s:
-                    return BitConverter.GetBytes(s);
-                case long l:
-                    return BitConverter.GetBytes(l);
-                case char c:
-                    return BitConverter.GetBytes(c);
-                case decimal d:
-                    var aid = Decimal.GetBits(d);
-                    var i0 = BitConverter.GetBytes(aid[0]);
-                    var i1 = BitConverter.GetBytes(aid[1]);
-                    var i2 = BitConverter.GetBytes(aid[2]);
-                    var i3 = BitConverter.GetBytes(aid[3]);
-                    return new byte[16] { i0[0], i0[1], i0[2], i0[3], i1[0], i1[1], i1[2], i1[3], i2[0], i2[1], i2[2], i2[3], i3[0], i3[1], i3[2], i3[3] };
-                case double o:
-                    return BitConverter.GetBytes(o);
-                case float f:
-                    return BitConverter.GetBytes(f);
-                case uint ui:
-                    return BitConverter.GetBytes(ui);
-                case ulong ul:
-                    return BitConverter.GetBytes(ul);
-                case ushort us:
-                    return BitConverter.GetBytes(us);
-                case sbyte sb:
-                    return new byte[1] { (byte)((int)sb + 128) };
-                //case bool bln:
-                //    return BitConverter.GetBytes(bln);
-                case DateTime dt:
-                    return BitConverter.GetBytes(dt.Ticks);
-                case string str:
-                    if (str is null)
-                    {
-                        return new byte[1] { 0 };
-                    }
-                    else
-                    {
-                        var aStr = System.Text.Encoding.UTF8.GetBytes(str);
-                        if (aStr.Length > 128)
-                        {
-                            throw new Exception("Shard values cannot serialize strings longer than 128 bytes.");
-                        }
-                        var aResult = new byte[aStr.Length + 1];
-                        aResult[0] = Convert.ToByte((aStr.Length << 1) + 1);
-                        aStr.CopyTo(aResult, 1);
-                        return aResult;
-                    }
-                case Enum e:
-                    var type = Enum.GetUnderlyingType(value.GetType());
-                    var newValue = Convert.ChangeType(value, type);
-                    return ShardKey<TShard, TRecord>.GetValueBytes(newValue as IComparable);
-                case DateTimeOffset dto:
-                    var adt = BitConverter.GetBytes(dto.Ticks);
-                    var tsp = BitConverter.GetBytes(dto.Offset.Ticks);
-                    return new byte[] { adt[0], adt[1], adt[2], adt[3], adt[4], adt[5], adt[6], adt[7], tsp[0], tsp[1], tsp[2], tsp[3], tsp[4], tsp[5], tsp[6], tsp[7] };
-                case TimeSpan ts:
-                    return BitConverter.GetBytes(ts.Ticks);
-                case Guid g:
-                    return g.ToByteArray();
-                //case null:
-                //    return new byte[0];
-                default:
-                    if (value is Nullable)
-                    {
-                        if (value == null)
-                        {
-                            return BitConverter.GetBytes(true);
-                        }
-                        var shdType = Nullable.GetUnderlyingType(value.GetType());
-                        var nonNullValue = Convert.ChangeType(value, shdType);
-                        var aVal = GetValueBytes(nonNullValue as IComparable);
-                        var valResult = new byte[1 + aVal.Length];
-                        valResult[0] = BitConverter.GetBytes(false)[0];
-                        aVal.CopyTo(valResult, 1);
-                        return valResult;
-                    }
-                    else
-                    {
-                        throw new Exception("Cannot serialize this type.");
-                    }
-            }
-        }
-        //#region Value parsing overloads to manage types
-        //        internal static void ParseValue(byte[] data, ref int position, out int value)
-        //        {
-        //            value = BitConverter.ToInt32(data, position);
-        //            position += 4;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out byte value)
-        //        {
-        //            value = data[position];
-        //            position += 1;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out short value)
-        //        {
-        //            value = BitConverter.ToInt16(data, position);
-        //            position += 4;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out long value)
-        //        {
-        //            value = BitConverter.ToInt64(data, position);
-        //            position += 8;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out char value)
-        //        {
-        //            value = BitConverter.ToChar(data, position);
-        //            position += 2;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out decimal value)
-        //        {
-        //            var i0 = BitConverter.ToInt32(data, position);
-        //            var i1 = BitConverter.ToInt32(data, position + 4);
-        //            var i2 = BitConverter.ToInt32(data, position + 8);
-        //            var i3 = BitConverter.ToInt32(data, position + 12);
-        //            value = new Decimal(new int[] { i0, i1, i2, i3 });
-        //            position += 16;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out double value)
-        //        {
-        //            value = BitConverter.ToDouble(data, position);
-        //            position += 8;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out float value)
-        //        {
-        //            value = BitConverter.ToSingle(data, position);
-        //            position += 4;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out uint value)
-        //        {
-        //            value = BitConverter.ToUInt32(data, position);
-        //            position += 4;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out ulong value)
-        //        {
-        //            value = BitConverter.ToUInt64(data, position);
-        //            position += 8;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out ushort value)
-        //        {
-        //            value = BitConverter.ToUInt16(data, position);
-        //            position += 2;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out sbyte value)
-        //        {
-        //            value = (sbyte)((int)data[position] - 128);
-        //            position += 1;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out bool value)
-        //        {
-        //            value = BitConverter.ToBoolean(data, position);
-        //            position += 1;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out DateTime value)
-        //        {
-        //            var val = BitConverter.ToInt64(data, position);
-        //            value = new DateTime(val);
-        //            position += 8;
-        //        }
-        //        internal static void ParseValue(byte[] data, ref int position, out string value)
-        //        {
-        //            var len = data[position];
-        //            value = System.Text.Encoding.UTF8.GetString(data, position + 1, len);
-        //            position += len + 1;
-        //        }
-        //internal static void ParseValue(byte[] data, ref int position, out Enum value)
-        //{
-        //    value = 0;
-        //    return true;
-        //}
-        //internal static void ParseValue(byte[] data, ref int position, out IValueSerializer value)
-        //{
-        //    value = value.FromBytes<T>();
-        //    position =+ value.IsFixedSize
-        //}
-        //        internal static void ParseValue(byte[] data, ref int position, out DateTimeOffset value)
-        //        {
-        //            value = new DateTimeOffset(BitConverter.ToInt64(data, position), new TimeSpan(BitConverter.ToInt64(data, position + 8)));
-        //            position += 16;
-        //        }
-        //internal static void ParseValue(byte[] data, ref int position, out Nullable value)
-        //{
-        //    value = 0;
-        //    return true;
-        //}
-        //        #endregion
-        //internal static T GetValue<T>(byte[] data, ref int position) where T: IComparable
-        //{
-        //    var valType = typeof(T);
-        //    if (valType == typeof(int))
-        //    {
-        //        position += 4;
-        //        return (dynamic)BitConverter.ToInt32(data, position);
-        //    }
-        //    else if (valType == typeof(byte))
-        //    {
-        //        position += 1;
-        //        return (dynamic)data[position];
-        //    }
-        //    else if (valType == typeof(short))
-        //    {
-        //        position += 2;
-        //        return (dynamic)BitConverter.ToInt16(data, position);
+		/// <summary>
+		/// Serializes ShardKey data into a URL-safe string with a checksum
+		/// </summary>
+		/// <returns></returns>
+		public string ToExternalString()
+			=> ToExternalString(false);
+		#endregion
 
-        //    }
-        //    else if (valType == typeof(long))
-        //    {
-        //        position += 8;
-        //        return (dynamic)BitConverter.ToInt64(data, position);
+		internal static byte[] GetValueBytes(IComparable value)
+		{
+			switch (value)
+			{
+				case int i:
+					return BitConverter.GetBytes(i);
+				case byte b:
+					return new byte[1] { b };
+				case short s:
+					return BitConverter.GetBytes(s);
+				case long l:
+					return BitConverter.GetBytes(l);
+				case char c:
+					return BitConverter.GetBytes(c);
+				case decimal d:
+					var aid = Decimal.GetBits(d);
+					var i0 = BitConverter.GetBytes(aid[0]);
+					var i1 = BitConverter.GetBytes(aid[1]);
+					var i2 = BitConverter.GetBytes(aid[2]);
+					var i3 = BitConverter.GetBytes(aid[3]);
+					return new byte[16] { i0[0], i0[1], i0[2], i0[3], i1[0], i1[1], i1[2], i1[3], i2[0], i2[1], i2[2], i2[3], i3[0], i3[1], i3[2], i3[3] };
+				case double o:
+					return BitConverter.GetBytes(o);
+				case float f:
+					return BitConverter.GetBytes(f);
+				case uint ui:
+					return BitConverter.GetBytes(ui);
+				case ulong ul:
+					return BitConverter.GetBytes(ul);
+				case ushort us:
+					return BitConverter.GetBytes(us);
+				case sbyte sb:
+					return new byte[1] { (byte)((int)sb + 128) };
+				//case bool bln:
+				//    return BitConverter.GetBytes(bln);
+				case DateTime dt:
+					return BitConverter.GetBytes(dt.Ticks);
+				case string str:
+					if (str is null)
+					{
+						return new byte[1] { 0 };
+					}
+					else
+					{
+						var aStr = System.Text.Encoding.UTF8.GetBytes(str);
+						if (aStr.Length > 128)
+						{
+							throw new Exception("Shard values cannot serialize strings longer than 128 bytes.");
+						}
+						var aResult = new byte[aStr.Length + 1];
+						aResult[0] = Convert.ToByte((aStr.Length << 1) + 1);
+						aStr.CopyTo(aResult, 1);
+						return aResult;
+					}
+				case Enum e:
+					var type = Enum.GetUnderlyingType(value.GetType());
+					var newValue = Convert.ChangeType(value, type);
+					return ShardKey<TShard, TRecord>.GetValueBytes(newValue as IComparable);
+				case DateTimeOffset dto:
+					var adt = BitConverter.GetBytes(dto.Ticks);
+					var tsp = BitConverter.GetBytes(dto.Offset.Ticks);
+					return new byte[] { adt[0], adt[1], adt[2], adt[3], adt[4], adt[5], adt[6], adt[7], tsp[0], tsp[1], tsp[2], tsp[3], tsp[4], tsp[5], tsp[6], tsp[7] };
+				case TimeSpan ts:
+					return BitConverter.GetBytes(ts.Ticks);
+				case Guid g:
+					return g.ToByteArray();
+				//case null:
+				//    return new byte[0];
+				default:
+					if (value is Nullable)
+					{
+						if (value == null)
+						{
+							return BitConverter.GetBytes(true);
+						}
+						var shdType = Nullable.GetUnderlyingType(value.GetType());
+						var nonNullValue = Convert.ChangeType(value, shdType);
+						var aVal = GetValueBytes(nonNullValue as IComparable);
+						var valResult = new byte[1 + aVal.Length];
+						valResult[0] = BitConverter.GetBytes(false)[0];
+						aVal.CopyTo(valResult, 1);
+						return valResult;
+					}
+					else
+					{
+						throw new Exception("Cannot serialize this type.");
+					}
+			}
+		}
+		//#region Value parsing overloads to manage types
+		//        internal static void ParseValue(byte[] data, ref int position, out int value)
+		//        {
+		//            value = BitConverter.ToInt32(data, position);
+		//            position += 4;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out byte value)
+		//        {
+		//            value = data[position];
+		//            position += 1;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out short value)
+		//        {
+		//            value = BitConverter.ToInt16(data, position);
+		//            position += 4;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out long value)
+		//        {
+		//            value = BitConverter.ToInt64(data, position);
+		//            position += 8;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out char value)
+		//        {
+		//            value = BitConverter.ToChar(data, position);
+		//            position += 2;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out decimal value)
+		//        {
+		//            var i0 = BitConverter.ToInt32(data, position);
+		//            var i1 = BitConverter.ToInt32(data, position + 4);
+		//            var i2 = BitConverter.ToInt32(data, position + 8);
+		//            var i3 = BitConverter.ToInt32(data, position + 12);
+		//            value = new Decimal(new int[] { i0, i1, i2, i3 });
+		//            position += 16;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out double value)
+		//        {
+		//            value = BitConverter.ToDouble(data, position);
+		//            position += 8;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out float value)
+		//        {
+		//            value = BitConverter.ToSingle(data, position);
+		//            position += 4;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out uint value)
+		//        {
+		//            value = BitConverter.ToUInt32(data, position);
+		//            position += 4;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out ulong value)
+		//        {
+		//            value = BitConverter.ToUInt64(data, position);
+		//            position += 8;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out ushort value)
+		//        {
+		//            value = BitConverter.ToUInt16(data, position);
+		//            position += 2;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out sbyte value)
+		//        {
+		//            value = (sbyte)((int)data[position] - 128);
+		//            position += 1;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out bool value)
+		//        {
+		//            value = BitConverter.ToBoolean(data, position);
+		//            position += 1;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out DateTime value)
+		//        {
+		//            var val = BitConverter.ToInt64(data, position);
+		//            value = new DateTime(val);
+		//            position += 8;
+		//        }
+		//        internal static void ParseValue(byte[] data, ref int position, out string value)
+		//        {
+		//            var len = data[position];
+		//            value = System.Text.Encoding.UTF8.GetString(data, position + 1, len);
+		//            position += len + 1;
+		//        }
+		//internal static void ParseValue(byte[] data, ref int position, out Enum value)
+		//{
+		//    value = 0;
+		//    return true;
+		//}
+		//internal static void ParseValue(byte[] data, ref int position, out IValueSerializer value)
+		//{
+		//    value = value.FromBytes<T>();
+		//    position =+ value.IsFixedSize
+		//}
+		//        internal static void ParseValue(byte[] data, ref int position, out DateTimeOffset value)
+		//        {
+		//            value = new DateTimeOffset(BitConverter.ToInt64(data, position), new TimeSpan(BitConverter.ToInt64(data, position + 8)));
+		//            position += 16;
+		//        }
+		//internal static void ParseValue(byte[] data, ref int position, out Nullable value)
+		//{
+		//    value = 0;
+		//    return true;
+		//}
+		//        #endregion
+		//internal static T GetValue<T>(byte[] data, ref int position) where T: IComparable
+		//{
+		//    var valType = typeof(T);
+		//    if (valType == typeof(int))
+		//    {
+		//        position += 4;
+		//        return (dynamic)BitConverter.ToInt32(data, position);
+		//    }
+		//    else if (valType == typeof(byte))
+		//    {
+		//        position += 1;
+		//        return (dynamic)data[position];
+		//    }
+		//    else if (valType == typeof(short))
+		//    {
+		//        position += 2;
+		//        return (dynamic)BitConverter.ToInt16(data, position);
 
-        //    }
-        //    else if (valType == typeof(char))
-        //    {
-        //        position += 2;
-        //        return (dynamic)BitConverter.ToChar(data, position);
+		//    }
+		//    else if (valType == typeof(long))
+		//    {
+		//        position += 8;
+		//        return (dynamic)BitConverter.ToInt64(data, position);
 
-        //    }
-        //    else if (valType == typeof(decimal))
-        //    {
-        //        var i0 = BitConverter.ToInt32(data, position);
-        //        var i1 = BitConverter.ToInt32(data, position + 4);
-        //        var i2 = BitConverter.ToInt32(data, position + 8);
-        //        var i3 = BitConverter.ToInt32(data, position + 12);
-        //        position += 16;
-        //        return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
+		//    }
+		//    else if (valType == typeof(char))
+		//    {
+		//        position += 2;
+		//        return (dynamic)BitConverter.ToChar(data, position);
 
-        //    }
-        //    else if (valType == typeof(double))
-        //    {
-        //        position += 8;
-        //        return (dynamic)BitConverter.ToDouble(data, position);
+		//    }
+		//    else if (valType == typeof(decimal))
+		//    {
+		//        var i0 = BitConverter.ToInt32(data, position);
+		//        var i1 = BitConverter.ToInt32(data, position + 4);
+		//        var i2 = BitConverter.ToInt32(data, position + 8);
+		//        var i3 = BitConverter.ToInt32(data, position + 12);
+		//        position += 16;
+		//        return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
 
-        //    }
-        //    else if (valType == typeof(float))
-        //    {
-        //        position += 4;
-        //        return (dynamic)BitConverter.ToSingle(data, position);
+		//    }
+		//    else if (valType == typeof(double))
+		//    {
+		//        position += 8;
+		//        return (dynamic)BitConverter.ToDouble(data, position);
 
-        //    }
-        //    else if (valType == typeof(uint))
-        //    {
-        //        position += 4;
-        //        return (dynamic)BitConverter.ToUInt32(data, position);
+		//    }
+		//    else if (valType == typeof(float))
+		//    {
+		//        position += 4;
+		//        return (dynamic)BitConverter.ToSingle(data, position);
 
-        //    }
-        //    else if (valType == typeof(ulong))
-        //    {
-        //        position += 8;
-        //        return (dynamic)BitConverter.ToUInt64(data, position);
+		//    }
+		//    else if (valType == typeof(uint))
+		//    {
+		//        position += 4;
+		//        return (dynamic)BitConverter.ToUInt32(data, position);
 
-        //    }
-        //    else if (valType == typeof(ushort))
-        //    {
-        //        position += 2;
-        //        return (dynamic)BitConverter.ToUInt16(data, position);
+		//    }
+		//    else if (valType == typeof(ulong))
+		//    {
+		//        position += 8;
+		//        return (dynamic)BitConverter.ToUInt64(data, position);
 
-        //    }
-        //    else if (valType == typeof(sbyte))
-        //    {
-        //        position += 1;
-        //        return (dynamic)(sbyte)((int)data[position] - 128);
+		//    }
+		//    else if (valType == typeof(ushort))
+		//    {
+		//        position += 2;
+		//        return (dynamic)BitConverter.ToUInt16(data, position);
 
-        //    }
-        //    else if (valType == typeof(bool))
-        //    {
-        //        position += 1;
-        //        return (dynamic)BitConverter.ToBoolean(data, position);
+		//    }
+		//    else if (valType == typeof(sbyte))
+		//    {
+		//        position += 1;
+		//        return (dynamic)(sbyte)((int)data[position] - 128);
 
-        //    }
-        //    else if (valType == typeof(DateTime))
-        //    {
-        //        position += 4;
-        //        return (dynamic)new DateTime(BitConverter.ToInt64(data, position));
+		//    }
+		//    else if (valType == typeof(bool))
+		//    {
+		//        position += 1;
+		//        return (dynamic)BitConverter.ToBoolean(data, position);
 
-        //    }
-        //    else if (valType == typeof(string))
-        //    {
-        //        var len = data[position];
-        //        position += len + 1;
-        //        return (dynamic)System.Text.Encoding.UTF8.GetString(data, position + 1, len);
+		//    }
+		//    else if (valType == typeof(DateTime))
+		//    {
+		//        position += 4;
+		//        return (dynamic)new DateTime(BitConverter.ToInt64(data, position));
 
-        //    }
-        //    else if (valType == typeof(Enum))
-        //    {
-        //        var baseType = Enum.GetUnderlyingType(valType);
-        //        if (baseType == typeof(int))
-        //        {
-        //            position += 4;
-        //            return (dynamic)BitConverter.ToInt32(data, position);
-        //        }
-        //        else if (baseType == typeof(short))
-        //        {
-        //            position += 2;
-        //            return (dynamic)BitConverter.ToInt16(data, position);
-        //        }
-        //        else if (baseType == typeof(byte))
-        //        {
-        //            position += 1;
-        //            return (dynamic)data[position];
-        //        }
-        //        else if (baseType == typeof(ushort))
-        //        {
-        //            position += 2;
-        //            return (dynamic)BitConverter.ToUInt16(data, position);
-        //        }
-        //        else if (baseType == typeof(uint))
-        //        {
-        //            position += 4;
-        //            return (dynamic)BitConverter.ToUInt32(data, position);
-        //        }
-        //        else if (baseType == typeof(long))
-        //        {
-        //            position += 8;
-        //            return (dynamic)BitConverter.ToInt64(data, position);
-        //        }
-        //        else if (baseType == typeof(ulong))
-        //        {
-        //            position += 8;
-        //            return (dynamic)BitConverter.ToUInt64(data, position);
-        //        }
-        //        else if (baseType == typeof(sbyte))
-        //        {
-        //            position += 1;
-        //            return (dynamic)(sbyte)((int)data[position] - 128);
-        //        }
-        //    }
-        //    else if (valType == typeof(IValueSerializer))
-        //    {
-        //        var vs = new T();
-        //        position += 4;
-        //        return (dynamic)(((IValueSerializer).(data, position);
+		//    }
+		//    else if (valType == typeof(string))
+		//    {
+		//        var len = data[position];
+		//        position += len + 1;
+		//        return (dynamic)System.Text.Encoding.UTF8.GetString(data, position + 1, len);
 
-        //    }
-        //    else if (valType == typeof(DateTimeOffset))
-        //    {
-        //        position += 16;
-        //        return (dynamic)new DateTimeOffset(BitConverter.ToInt64(data, position), new TimeSpan(BitConverter.ToInt64(data, position + 8)));
+		//    }
+		//    else if (valType == typeof(Enum))
+		//    {
+		//        var baseType = Enum.GetUnderlyingType(valType);
+		//        if (baseType == typeof(int))
+		//        {
+		//            position += 4;
+		//            return (dynamic)BitConverter.ToInt32(data, position);
+		//        }
+		//        else if (baseType == typeof(short))
+		//        {
+		//            position += 2;
+		//            return (dynamic)BitConverter.ToInt16(data, position);
+		//        }
+		//        else if (baseType == typeof(byte))
+		//        {
+		//            position += 1;
+		//            return (dynamic)data[position];
+		//        }
+		//        else if (baseType == typeof(ushort))
+		//        {
+		//            position += 2;
+		//            return (dynamic)BitConverter.ToUInt16(data, position);
+		//        }
+		//        else if (baseType == typeof(uint))
+		//        {
+		//            position += 4;
+		//            return (dynamic)BitConverter.ToUInt32(data, position);
+		//        }
+		//        else if (baseType == typeof(long))
+		//        {
+		//            position += 8;
+		//            return (dynamic)BitConverter.ToInt64(data, position);
+		//        }
+		//        else if (baseType == typeof(ulong))
+		//        {
+		//            position += 8;
+		//            return (dynamic)BitConverter.ToUInt64(data, position);
+		//        }
+		//        else if (baseType == typeof(sbyte))
+		//        {
+		//            position += 1;
+		//            return (dynamic)(sbyte)((int)data[position] - 128);
+		//        }
+		//    }
+		//    else if (valType == typeof(IValueSerializer))
+		//    {
+		//        var vs = new T();
+		//        position += 4;
+		//        return (dynamic)(((IValueSerializer).(data, position);
 
-        //    }
-        //    else if (valType == typeof(Nullable))
-        //    {
-        //        var baseType = Nullable.GetUnderlyingType(valType);
+		//    }
+		//    else if (valType == typeof(DateTimeOffset))
+		//    {
+		//        position += 16;
+		//        return (dynamic)new DateTimeOffset(BitConverter.ToInt64(data, position), new TimeSpan(BitConverter.ToInt64(data, position + 8)));
+
+		//    }
+		//    else if (valType == typeof(Nullable))
+		//    {
+		//        var baseType = Nullable.GetUnderlyingType(valType);
 
 
 
-        //    }
-        //    else
-        //    {
-        //        throw new Exception(""); 
-        //    }
-        //}
+		//    }
+		//    else
+		//    {
+		//        throw new Exception(""); 
+		//    }
+		//}
 
-        internal byte[] ToArray()
-        {
-            var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this.DataOrigin.SourceIndicator });
-            var shardData = GetValueBytes(this._shardNumber);
-            var recordData = GetValueBytes(this._recordId);
-            byte[] aStamp = null;
-            if (!this._concurrencyStamp.HasValue)
-            {
-                aStamp = BitConverter.GetBytes(this._concurrencyStamp.Value.Ticks);
-            }
-            var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + aStamp.Length + 1];
-            aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
-            var resultIndex = 1;
-            aOrigin.CopyTo(aResult, resultIndex);
-            resultIndex += aOrigin.Length;
-            shardData.CopyTo(aResult, resultIndex);
-            resultIndex += shardData.Length;
-            recordData.CopyTo(aResult, resultIndex);
-            resultIndex += recordData.Length;
-            if (!(aStamp is null))
-            {
-                aStamp.CopyTo(recordData, resultIndex);
-            }
-            return aResult;
-        }
+		internal byte[] ToArray()
+		{
+			var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin.SourceIndicator });
+			var shardData = GetValueBytes(this._shardId);
+			var recordData = GetValueBytes(this._recordId);
+			var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + 1];
+			aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
+			var resultIndex = 1;
+			aOrigin.CopyTo(aResult, resultIndex);
+			resultIndex += aOrigin.Length;
+			shardData.CopyTo(aResult, resultIndex);
+			resultIndex += shardData.Length;
+			recordData.CopyTo(aResult, resultIndex);
+			resultIndex += recordData.Length;
+			return aResult;
+		}
 
 
-        internal static dynamic ConvertFromBytes(byte[] data, ref int position, Type valueType)
-        {
-            if (valueType == typeof(int))
-            {
-                position += 4;
-                return BitConverter.ToInt32(data, position - 4);
-            }
-            if (valueType == typeof(long))
-            {
-                position += 8;
-                return BitConverter.ToInt64(data, position - 8);
-            }
-            if (valueType == typeof(byte))
-            {
-                position += 1;
-                return data[position - 1];
-            }
-            if (valueType == typeof(short))
-            {
-                position += 2;
-                return BitConverter.ToInt16(data, position - 2);
-            }
-            if (valueType == typeof(char))
-            {
-                position += 2;
-                return BitConverter.ToChar(data, position - 2);
-            }
-            if (valueType == typeof(decimal))
-            {
-                var i0 = BitConverter.ToInt32(data, position);
-                var i1 = BitConverter.ToInt32(data, position + 4);
-                var i2 = BitConverter.ToInt32(data, position + 8);
-                var i3 = BitConverter.ToInt32(data, position + 12);
-                position += 16;
-                return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
-            }
-            if (valueType == typeof(double))
-            {
-                position += 8;
-                return BitConverter.ToDouble(data, position - 8);
-            }
-            if (valueType == typeof(float))
-            {
-                position += 4;
-                return BitConverter.ToSingle(data, position - 4);
-            }
-            if (valueType == typeof(uint))
-            {
-                position += 4;
-                return BitConverter.ToUInt32(data, position - 4);
-            }
-            if (valueType == typeof(ulong))
-            {
-                position += 8;
-                return BitConverter.ToUInt64(data, position - 8);
-            }
-            if (valueType == typeof(ushort))
-            {
-                position += 2;
-                return BitConverter.ToUInt16(data, position - 2);
-            }
-            if (valueType == typeof(sbyte))
-            {
-                position += 1;
-                return (sbyte)((int)data[position - 1] - 128);
-            }
-            if (valueType == typeof(bool))
-            {
-                position += 1;
-                return BitConverter.ToBoolean(data, position - 1);
-            }
-            if (valueType == typeof(DateTime))
-            {
-                position += 8;
-                return new DateTime(BitConverter.ToInt64(data, position - 8));
-            }
-            if (valueType == typeof(string))
-            {
-                if (data[position] == 0)
-                {
-                    position += 1;
-                    return (string)null;
-                }
-                var len = (int)data[position] >> 1;
-                position += len + 1;
-                return System.Text.Encoding.UTF8.GetString(data, position - len, len);
-            }
-            if (valueType == typeof(Enum))
-            {
-                var baseType = Enum.GetUnderlyingType(valueType);
-                return ShardKey<TShard, TRecord>.ConvertFromBytes(data, ref position, baseType);
-            }
-            if(valueType == typeof(Nullable))
-            {
-                var isNull = BitConverter.ToBoolean(data, position);
-                position += 1;
-                if (isNull)
-                {
-                    return null;
-                }
-                var baseType = Nullable.GetUnderlyingType(valueType);
-                return ConvertFromBytes(data, ref position, baseType);
-            }
-            else
-            {
-                throw new Exception($"Could not recognized the type {valueType.ToString()}.");
-            }
-        }
+		internal static dynamic ConvertFromBytes(byte[] data, ref int position, Type valueType)
+		{
+			if (valueType == typeof(int))
+			{
+				position += 4;
+				return BitConverter.ToInt32(data, position - 4);
+			}
+			if (valueType == typeof(long))
+			{
+				position += 8;
+				return BitConverter.ToInt64(data, position - 8);
+			}
+			if (valueType == typeof(byte))
+			{
+				position += 1;
+				return data[position - 1];
+			}
+			if (valueType == typeof(short))
+			{
+				position += 2;
+				return BitConverter.ToInt16(data, position - 2);
+			}
+			if (valueType == typeof(char))
+			{
+				position += 2;
+				return BitConverter.ToChar(data, position - 2);
+			}
+			if (valueType == typeof(decimal))
+			{
+				var i0 = BitConverter.ToInt32(data, position);
+				var i1 = BitConverter.ToInt32(data, position + 4);
+				var i2 = BitConverter.ToInt32(data, position + 8);
+				var i3 = BitConverter.ToInt32(data, position + 12);
+				position += 16;
+				return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
+			}
+			if (valueType == typeof(double))
+			{
+				position += 8;
+				return BitConverter.ToDouble(data, position - 8);
+			}
+			if (valueType == typeof(float))
+			{
+				position += 4;
+				return BitConverter.ToSingle(data, position - 4);
+			}
+			if (valueType == typeof(uint))
+			{
+				position += 4;
+				return BitConverter.ToUInt32(data, position - 4);
+			}
+			if (valueType == typeof(ulong))
+			{
+				position += 8;
+				return BitConverter.ToUInt64(data, position - 8);
+			}
+			if (valueType == typeof(ushort))
+			{
+				position += 2;
+				return BitConverter.ToUInt16(data, position - 2);
+			}
+			if (valueType == typeof(sbyte))
+			{
+				position += 1;
+				return (sbyte)((int)data[position - 1] - 128);
+			}
+			if (valueType == typeof(bool))
+			{
+				position += 1;
+				return BitConverter.ToBoolean(data, position - 1);
+			}
+			if (valueType == typeof(DateTime))
+			{
+				position += 8;
+				return new DateTime(BitConverter.ToInt64(data, position - 8));
+			}
+			if (valueType == typeof(string))
+			{
+				if (data[position] == 0)
+				{
+					position += 1;
+					return (string)null;
+				}
+				var len = (int)data[position] >> 1;
+				position += len + 1;
+				return System.Text.Encoding.UTF8.GetString(data, position - len, len);
+			}
+			if (valueType == typeof(Enum))
+			{
+				var baseType = Enum.GetUnderlyingType(valueType);
+				return ShardKey<TShard, TRecord>.ConvertFromBytes(data, ref position, baseType);
+			}
+			if (valueType == typeof(Nullable))
+			{
+				var isNull = BitConverter.ToBoolean(data, position);
+				position += 1;
+				if (isNull)
+				{
+					return null;
+				}
+				var baseType = Nullable.GetUnderlyingType(valueType);
+				return ConvertFromBytes(data, ref position, baseType);
+			}
+			else
+			{
+				throw new Exception($"Could not recognized the type {valueType.ToString()}.");
+			}
+		}
 
-        //internal static void SetConverterDictionary()
-        //{
-        //    ShardKey<TShard, TRecord>._byteConverter = new Dictionary<Type, ValueFromBytes>();
-        //    var dtn = ShardKey<TShard, TRecord>._byteConverter;
-        //    dtn.Add(typeof(int), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 4;
-        //        return BitConverter.ToInt32(data, position - 4);
-        //    });
-        //    dtn.Add(typeof(long), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 8;
-        //        return BitConverter.ToInt64(data, position - 8);
-        //    });
-        //    dtn.Add(typeof(byte), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 1;
-        //        return data[position - 1];
-        //    });
-        //    dtn.Add(typeof(short), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 2;
-        //        return BitConverter.ToInt16(data, position - 2);
-        //    });
-        //    dtn.Add(typeof(char), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 2;
-        //        return BitConverter.ToChar(data, position - 2);
-        //    });
-        //    dtn.Add(typeof(decimal), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        var i0 = BitConverter.ToInt32(data, position);
-        //        var i1 = BitConverter.ToInt32(data, position + 4);
-        //        var i2 = BitConverter.ToInt32(data, position + 8);
-        //        var i3 = BitConverter.ToInt32(data, position + 12);
-        //        position += 16;
-        //        return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
-        //    });
-        //    dtn.Add(typeof(double), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 8;
-        //        return BitConverter.ToDouble(data, position - 8);
-        //    });
-        //    dtn.Add(typeof(float), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 4;
-        //        return BitConverter.ToSingle(data, position - 4);
-        //    });
-        //    dtn.Add(typeof(uint), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 4;
-        //        return BitConverter.ToUInt32(data, position - 4);
-        //    });
-        //    dtn.Add(typeof(ulong), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 8;
-        //        return BitConverter.ToUInt64(data, position - 8);
-        //    });
-        //    dtn.Add(typeof(ushort), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 2;
-        //        return BitConverter.ToUInt16(data, position - 2);
-        //    });
-        //    dtn.Add(typeof(sbyte), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 1;
-        //        return (sbyte)((int)data[position - 1] - 128);
-        //    });
-        //    dtn.Add(typeof(bool), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 1;
-        //        return BitConverter.ToBoolean(data, position - 1);
-        //    });
-        //    dtn.Add(typeof(DateTime), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        position += 8;
-        //        return new DateTime(BitConverter.ToInt64(data, position - 8));
-        //    });
-        //    dtn.Add(typeof(string), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        if (data[position] == 0)
-        //        {
-        //            position += 1;
-        //            return (string)null;
-        //        }
-        //        var len = (int)data[position] >> 1;
-        //        position += len + 1;
-        //        return System.Text.Encoding.UTF8.GetString(data, position - len, len);
-        //    });
-        //    dtn.Add(typeof(Enum), (byte[] data, ref int position, Type valueType) =>
-        //    {
+		//internal static void SetConverterDictionary()
+		//{
+		//    ShardKey<TShard, TRecord>._byteConverter = new Dictionary<Type, ValueFromBytes>();
+		//    var dtn = ShardKey<TShard, TRecord>._byteConverter;
+		//    dtn.Add(typeof(int), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 4;
+		//        return BitConverter.ToInt32(data, position - 4);
+		//    });
+		//    dtn.Add(typeof(long), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 8;
+		//        return BitConverter.ToInt64(data, position - 8);
+		//    });
+		//    dtn.Add(typeof(byte), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 1;
+		//        return data[position - 1];
+		//    });
+		//    dtn.Add(typeof(short), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 2;
+		//        return BitConverter.ToInt16(data, position - 2);
+		//    });
+		//    dtn.Add(typeof(char), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 2;
+		//        return BitConverter.ToChar(data, position - 2);
+		//    });
+		//    dtn.Add(typeof(decimal), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        var i0 = BitConverter.ToInt32(data, position);
+		//        var i1 = BitConverter.ToInt32(data, position + 4);
+		//        var i2 = BitConverter.ToInt32(data, position + 8);
+		//        var i3 = BitConverter.ToInt32(data, position + 12);
+		//        position += 16;
+		//        return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
+		//    });
+		//    dtn.Add(typeof(double), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 8;
+		//        return BitConverter.ToDouble(data, position - 8);
+		//    });
+		//    dtn.Add(typeof(float), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 4;
+		//        return BitConverter.ToSingle(data, position - 4);
+		//    });
+		//    dtn.Add(typeof(uint), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 4;
+		//        return BitConverter.ToUInt32(data, position - 4);
+		//    });
+		//    dtn.Add(typeof(ulong), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 8;
+		//        return BitConverter.ToUInt64(data, position - 8);
+		//    });
+		//    dtn.Add(typeof(ushort), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 2;
+		//        return BitConverter.ToUInt16(data, position - 2);
+		//    });
+		//    dtn.Add(typeof(sbyte), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 1;
+		//        return (sbyte)((int)data[position - 1] - 128);
+		//    });
+		//    dtn.Add(typeof(bool), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 1;
+		//        return BitConverter.ToBoolean(data, position - 1);
+		//    });
+		//    dtn.Add(typeof(DateTime), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        position += 8;
+		//        return new DateTime(BitConverter.ToInt64(data, position - 8));
+		//    });
+		//    dtn.Add(typeof(string), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        if (data[position] == 0)
+		//        {
+		//            position += 1;
+		//            return (string)null;
+		//        }
+		//        var len = (int)data[position] >> 1;
+		//        position += len + 1;
+		//        return System.Text.Encoding.UTF8.GetString(data, position - len, len);
+		//    });
+		//    dtn.Add(typeof(Enum), (byte[] data, ref int position, Type valueType) =>
+		//    {
 
-        //        var baseType = Enum.GetUnderlyingType(valueType);
-        //        if (dtn.TryGetValue(baseType, out var converter))
-        //        {
-        //            return converter(data, ref position, baseType);
-        //        }
-        //        throw new Exception("Enum base type not recognized.");
-        //    });
-        //    dtn.Add(typeof(Nullable), (byte[] data, ref int position, Type valueType) =>
-        //    {
-        //        var isNull = BitConverter.ToBoolean(data, position);
-        //        position += 1;
-        //        if (isNull)
-        //        {
-        //            return null;
-        //        }
-        //        var baseType = Nullable.GetUnderlyingType(valueType);
-        //        if (dtn.TryGetValue(baseType, out var converter))
-        //        {
-        //            return converter(data, ref position, baseType);
-        //        }
-        //        throw new Exception("Nullable base type not recognized.");
-        //    });
+		//        var baseType = Enum.GetUnderlyingType(valueType);
+		//        if (dtn.TryGetValue(baseType, out var converter))
+		//        {
+		//            return converter(data, ref position, baseType);
+		//        }
+		//        throw new Exception("Enum base type not recognized.");
+		//    });
+		//    dtn.Add(typeof(Nullable), (byte[] data, ref int position, Type valueType) =>
+		//    {
+		//        var isNull = BitConverter.ToBoolean(data, position);
+		//        position += 1;
+		//        if (isNull)
+		//        {
+		//            return null;
+		//        }
+		//        var baseType = Nullable.GetUnderlyingType(valueType);
+		//        if (dtn.TryGetValue(baseType, out var converter))
+		//        {
+		//            return converter(data, ref position, baseType);
+		//        }
+		//        throw new Exception("Nullable base type not recognized.");
+		//    });
 
-        //}
+		//}
 
-        /// <summary>
-        /// Serializes ShardKey data into a URL-safe string with a checksum
-        /// </summary>
-        /// <param name="includeConcurrencyStamp">Indicates whether the string should include concurrency stamp data, if defined.</param>
-        /// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
-        public string ToExternalString(bool includeConcurrencyStamp)
-        {
-            var aResult = ToArray();
+		/// <summary>
+		/// Serializes ShardKey data into a URL-safe string with a checksum
+		/// </summary>
+		/// <param name="includeConcurrencyStamp">Indicates whether the string should include concurrency stamp data, if defined.</param>
+		/// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
+		public string ToExternalString(bool includeConcurrencyStamp)
+		{
+			var aResult = ToArray();
 
-            int checkSum = 0;
-            foreach (var chr in aResult)
-            {
-                checkSum += chr;
-                checkSum &= 0x3f;
-            }
-            char checkSumChr;
-            if (checkSum < 26)
-            {
-                checkSumChr = (char)(0x41 + checkSum);
-            }
-            else if (checkSum < 52)
-            {
-                checkSumChr = (char)(0x61 + (checkSum - 26));
-            }
-            else if (checkSum < 62)
-            {
-                checkSumChr = (char)(0x30 + (checkSum - 52));
-            }
-            else if (checkSum == 62)
-            {
-                checkSumChr = '+';
-            }
-            else
-            {
-                checkSumChr = '/';
-            }
-            for (int i = 0; i < aResult.Length; i++)
-            {
-                if (i % 6 == 0)
-                {
-                    aResult[i] ^= 119;
-                }
-                else if (i % 6 == 1)
-                {
-                    aResult[i] ^= 78;
-                }
-                else if (i % 6 == 2)
-                {
-                    aResult[i] ^= 180;
-                }
-                else if (i % 6 == 3)
-                {
-                    aResult[i] ^= 92;
-                }
-                else if (i % 6 == 4)
-                {
-                    aResult[i] ^= 83;
-                }
-                else if (i % 6 == 5)
-                {
-                    aResult[i] ^= 77;
-                }
-            }
-            return checkSumChr + Convert.ToBase64String(aResult).Replace('+', '_').Replace('/', '~');
-        }
-        public static ShardKey<TShard, TRecord> FromExternalString(string value)
-        {
+			int checkSum = 0;
+			foreach (var chr in aResult)
+			{
+				checkSum += chr;
+				checkSum &= 0x3f;
+			}
+			char checkSumChr;
+			if (checkSum < 26)
+			{
+				checkSumChr = (char)(0x41 + checkSum);
+			}
+			else if (checkSum < 52)
+			{
+				checkSumChr = (char)(0x61 + (checkSum - 26));
+			}
+			else if (checkSum < 62)
+			{
+				checkSumChr = (char)(0x30 + (checkSum - 52));
+			}
+			else if (checkSum == 62)
+			{
+				checkSumChr = '+';
+			}
+			else
+			{
+				checkSumChr = '/';
+			}
+			for (int i = 0; i < aResult.Length; i++)
+			{
+				if (i % 6 == 0)
+				{
+					aResult[i] ^= 119;
+				}
+				else if (i % 6 == 1)
+				{
+					aResult[i] ^= 78;
+				}
+				else if (i % 6 == 2)
+				{
+					aResult[i] ^= 180;
+				}
+				else if (i % 6 == 3)
+				{
+					aResult[i] ^= 92;
+				}
+				else if (i % 6 == 4)
+				{
+					aResult[i] ^= 83;
+				}
+				else if (i % 6 == 5)
+				{
+					aResult[i] ^= 77;
+				}
+			}
+			return checkSumChr + Convert.ToBase64String(aResult).Replace('+', '_').Replace('/', '~');
+		}
+		public static ShardKey<TShard, TRecord> FromExternalString(string value)
+		{
 
-            if (value is null)
-            {
-                throw new ArgumentException(nameof(value));
-            }
-            var aValues = Convert.FromBase64String(value.Substring(1).Replace('_', '+').Replace('~', '/'));
-            for (int i = 0; i < aValues.Length; i++)
-            {
-                if (i % 6 == 0)
-                {
-                    aValues[0] ^= 119;
-                }
-                else if (i % 6 == 1)
-                {
-                    aValues[1] ^= 78;
-                }
-                else if (i % 6 == 2)
-                {
-                    aValues[2] ^= 180;
-                }
-                else if (i % 6 == 3)
-                {
-                    aValues[3] ^= 92;
-                }
-                else if (i % 6 == 4)
-                {
-                    aValues[4] ^= 83;
-                }
-                else if (i % 6 == 5)
-                {
-                    aValues[5] ^= 77;
-                }
-            }
+			if (value is null)
+			{
+				throw new ArgumentException(nameof(value));
+			}
+			var aValues = Convert.FromBase64String(value.Substring(1).Replace('_', '+').Replace('~', '/'));
+			for (int i = 0; i < aValues.Length; i++)
+			{
+				if (i % 6 == 0)
+				{
+					aValues[0] ^= 119;
+				}
+				else if (i % 6 == 1)
+				{
+					aValues[1] ^= 78;
+				}
+				else if (i % 6 == 2)
+				{
+					aValues[2] ^= 180;
+				}
+				else if (i % 6 == 3)
+				{
+					aValues[3] ^= 92;
+				}
+				else if (i % 6 == 4)
+				{
+					aValues[4] ^= 83;
+				}
+				else if (i % 6 == 5)
+				{
+					aValues[5] ^= 77;
+				}
+			}
 
-            var charCheckSum = value.ToCharArray()[0];
-            int origCheckSum;
-            if ('A' <= charCheckSum && charCheckSum <= 'Z')
-            {
-                origCheckSum = (int)charCheckSum - 0x41;
-            }
-            else if ('a' <= charCheckSum && charCheckSum <= 'z')
-            {
-                origCheckSum = ((int)charCheckSum - 0x61) + 26;
-            }
-            else if ('0' <= charCheckSum && charCheckSum <= '9')
-            {
-                origCheckSum = ((int)charCheckSum - 0x30) + 52;
-            }
-            else if ('+' == charCheckSum)
-            {
-                origCheckSum = 62;
-            }
-            else if ('/' == charCheckSum)
-            {
-                origCheckSum = 63;
-            }
-            else
-            {
-                throw new Exception("External key string has been corrupted.");
-            }
-            int checkSum = 0;
-            foreach (var chr in aValues)
-            {
-                checkSum += chr;
-                checkSum &= 0x3f;
-            }
-            if (origCheckSum != checkSum)
-            {
-                throw new Exception("External key string is not valid.");
-            }
+			var charCheckSum = value.ToCharArray()[0];
+			int origCheckSum;
+			if ('A' <= charCheckSum && charCheckSum <= 'Z')
+			{
+				origCheckSum = (int)charCheckSum - 0x41;
+			}
+			else if ('a' <= charCheckSum && charCheckSum <= 'z')
+			{
+				origCheckSum = ((int)charCheckSum - 0x61) + 26;
+			}
+			else if ('0' <= charCheckSum && charCheckSum <= '9')
+			{
+				origCheckSum = ((int)charCheckSum - 0x30) + 52;
+			}
+			else if ('+' == charCheckSum)
+			{
+				origCheckSum = 62;
+			}
+			else if ('/' == charCheckSum)
+			{
+				origCheckSum = 63;
+			}
+			else
+			{
+				throw new Exception("External key string has been corrupted.");
+			}
+			int checkSum = 0;
+			foreach (var chr in aValues)
+			{
+				checkSum += chr;
+				checkSum &= 0x3f;
+			}
+			if (origCheckSum != checkSum)
+			{
+				throw new Exception("External key string is not valid.");
+			}
 
-            if ((aValues[0] & 12) != (1 << 3))
-            {
-                throw new Exception("The serialization version is invalid. Cannot deserialize this external string.");
-            }
+			if ((aValues[0] & 12) != (1 << 3))
+			{
+				throw new Exception("The serialization version is invalid. Cannot deserialize this external string.");
+			}
 
-            TShard shardNumber = default(TShard);
-            TRecord recordId = default(TRecord);
-            DateTime? concurrancyStamp = null;
+			TShard shardId = default(TShard);
+			TRecord recordId = default(TRecord);
 
-            int orgnLen = aValues[0] & 3;
-            var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
-            var pos = orgnLen + 1;
+			int orgnLen = aValues[0] & 3;
+			var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
+			var pos = orgnLen + 1;
 
-            var typeShard = typeof(TShard);
-            shardNumber = ConvertFromBytes(aValues, ref pos, typeShard);
-            var typeRecord = typeof(TRecord);
-            recordId = ConvertFromBytes(aValues, ref pos, typeRecord);
-            if (pos == aValues.Length - 8)
-            {
-                concurrancyStamp = new DateTime(BitConverter.ToInt64(aValues, pos));
-                return new ShardKey<TShard, TRecord>(orgn, shardNumber, recordId, concurrancyStamp);
-            }
-            else
-            {
-                return new ShardKey<TShard, TRecord>(orgn, shardNumber, recordId);
-            }
-        }
-        public bool Equals(ShardKey<TShard, TRecord> other)
-        {
-            if (_concurrencyStamp is null && other.ConcurrencyStamp is null)
-            {
-                return (other.DataOrigin.SourceIndicator == _origin.SourceIndicator) && (other.ShardNumber.CompareTo(_shardNumber) == 0) && (other.RecordID.CompareTo(_recordId) == 0);
-            }
-            else if (_concurrencyStamp is null && !(other.ConcurrencyStamp is null))
-            {
-                return false;
-            }
-            else if (!(_concurrencyStamp is null) && other.ConcurrencyStamp is null)
-            {
-                return false;
-            }
-            else
-            {
-                return (other.DataOrigin.SourceIndicator == _origin.SourceIndicator) && (other.ShardNumber.CompareTo(_shardNumber) == 0) && (other.RecordID.CompareTo(_recordId) == 0) && this._concurrencyStamp.Value == other.ConcurrencyStamp.Value;
-            }
-        }
-        public override bool Equals(object obj)
-        {
-            if (obj is null || GetType() != obj.GetType())
-            {
-                return false;
-            }
+			var typeShard = typeof(TShard);
+			shardId = ConvertFromBytes(aValues, ref pos, typeShard);
+			var typeRecord = typeof(TRecord);
+			recordId = ConvertFromBytes(aValues, ref pos, typeRecord);
+			return new ShardKey<TShard, TRecord>(orgn, shardId, recordId);
+		}
+		public bool Equals(ShardKey<TShard, TRecord> other)
+		{
+			return (other.Origin.SourceIndicator == _origin.SourceIndicator) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
+		}
+		public override bool Equals(object obj)
+		{
+			if (obj is null || GetType() != obj.GetType())
+			{
+				return false;
+			}
 
-            var other = (ShardKey<TShard, TRecord>)obj;
-            if (_concurrencyStamp is null && other.ConcurrencyStamp is null)
-            {
-                return (other.DataOrigin.SourceIndicator == _origin.SourceIndicator) && (other.ShardNumber.CompareTo(_shardNumber) == 0) && (other.RecordID.CompareTo(_recordId) == 0);
-            }
-            else if (_concurrencyStamp is null && !(other.ConcurrencyStamp is null))
-            {
-                return false;
-            }
-            else if (!(_concurrencyStamp is null) && other.ConcurrencyStamp is null)
-            {
-                return false;
-            }
-            else
-            {
-                return (other.DataOrigin.SourceIndicator == _origin.SourceIndicator) && (other.ShardNumber.CompareTo(_shardNumber) == 0) && (other.RecordID.CompareTo(_recordId) == 0) && _concurrencyStamp == other.ConcurrencyStamp;
-            }
-        }
-        public override int GetHashCode()
-        {
+			var other = (ShardKey<TShard, TRecord>)obj;
+			return (other.Origin.SourceIndicator == _origin.SourceIndicator) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
+		}
+		public override int GetHashCode()
+		{
 
-            var aOgn = System.Text.Encoding.UTF8.GetBytes(new[] { this.DataOrigin.SourceIndicator });
-            var aShd = GetValueBytes(this._shardNumber);
-            var aRec = GetValueBytes(this._recordId);
-            byte[] aDtm = null;
-            if (this._concurrencyStamp.HasValue)
-            {
-                aDtm = BitConverter.GetBytes(this._concurrencyStamp.Value.Ticks);
-            }
+			var aOgn = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin.SourceIndicator });
+			var aShd = GetValueBytes(this._shardId);
+			var aRec = GetValueBytes(this._recordId);
+			byte[] aDtm = null;
 
-            var result1 = 0;
-            var result2 = 0;
-            var result3 = 0;
-            var result4 = 0;
-            if (!(aOgn is null))
-            {
-                if (aOgn.Length > 0)
-                {
-                    result1 |= aOgn[0];
-                }
-                if (aOgn.Length > 1)
-                {
-                    result2 |= aOgn[1];
-                }
-                if (aOgn.Length > 2)
-                {
-                    result3 |= aOgn[2];
-                }
-            }
-            if (!(aShd is null))
-                {
-                if (aShd.Length > 0)
-                {
-                    result1 |= aShd[0];
-                }
-                if (aShd.Length > 1)
-                {
-                    result2 |= aShd[1];
-                }
-                if (aShd.Length > 2)
-                {
-                    result3 |= aShd[2];
-                }
-                if (aShd.Length > 3)
-                {
-                    result4 |= aShd[3];
-                }
-            }
-            if (!(aRec is null))
-            {
-                if (aRec.Length > 0)
-                {
-                    result1 |= aRec[0];
-                }
-                if (aRec.Length > 1)
-                {
-                    result2 |= aRec[1];
-                }
-                if (aRec.Length > 2)
-                {
-                    result3 |= aRec[2];
-                }
-                if (aRec.Length > 3)
-                {
-                    result4 |= aRec[3];
-                }
-            }
-            if (!(aDtm is null))
-            {
-                    result1 |= aRec[0];
-                    result2 |= aRec[1];
-                    result3 |= aRec[2];
-                    result4 |= aRec[3];
-            }
+			var result1 = 0;
+			var result2 = 0;
+			var result3 = 0;
+			var result4 = 0;
+			if (!(aOgn is null))
+			{
+				if (aOgn.Length > 0)
+				{
+					result1 |= aOgn[0];
+				}
+				if (aOgn.Length > 1)
+				{
+					result2 |= aOgn[1];
+				}
+				if (aOgn.Length > 2)
+				{
+					result3 |= aOgn[2];
+				}
+			}
+			if (!(aShd is null))
+			{
+				if (aShd.Length > 0)
+				{
+					result1 |= aShd[0];
+				}
+				if (aShd.Length > 1)
+				{
+					result2 |= aShd[1];
+				}
+				if (aShd.Length > 2)
+				{
+					result3 |= aShd[2];
+				}
+				if (aShd.Length > 3)
+				{
+					result4 |= aShd[3];
+				}
+			}
+			if (!(aRec is null))
+			{
+				if (aRec.Length > 0)
+				{
+					result1 |= aRec[0];
+				}
+				if (aRec.Length > 1)
+				{
+					result2 |= aRec[1];
+				}
+				if (aRec.Length > 2)
+				{
+					result3 |= aRec[2];
+				}
+				if (aRec.Length > 3)
+				{
+					result4 |= aRec[3];
+				}
+			}
+			if (!(aDtm is null))
+			{
+				result1 |= aRec[0];
+				result2 |= aRec[1];
+				result3 |= aRec[2];
+				result4 |= aRec[3];
+			}
 
-            return BitConverter.ToInt32(new byte[] { (byte)result1, (byte)result2, (byte)result3, (byte)result4}, 0);
-        }
-         public static bool operator ==(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
-        {
-            return sk1.Equals(sk2);
-        }
-        public static bool operator !=(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
-        {
-            return !sk1.Equals(sk2);
-        }
-        public static ShardKey<TShard, TRecord> Empty
-        {
-            get
-            {
-                return new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord));
-            }
-        }
-    }
-
-
+			return BitConverter.ToInt32(new byte[] { (byte)result1, (byte)result2, (byte)result3, (byte)result4 }, 0);
+		}
+		public static bool operator ==(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
+		{
+			return sk1.Equals(sk2);
+		}
+		public static bool operator !=(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
+		{
+			return !sk1.Equals(sk2);
+		}
+		public static ShardKey<TShard, TRecord> Empty
+		{
+			get
+			{
+				return new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord));
+			}
+		}
+	}
 }
+

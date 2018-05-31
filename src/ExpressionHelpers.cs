@@ -12,7 +12,8 @@ namespace ArgentSea
 {
     public static class ExpressionHelpers
     {
-        public static Expression InParmHelper(string parameterName, ParameterExpression prms, Expression propValue, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, ParameterExpression expIgnoreParameters)
+		#region Database call expressions
+		public static Expression InParmHelper(string parameterName, ParameterExpression expSprocParameters, Expression propValue, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, ParameterExpression expIgnoreParameters)
         {
             List<Type> methodSignatureTypes = new List<Type>(); //to get correct method overload
             List<Expression> methodArgumentExpressions = new List<Expression>(); //parameter, variable, or constant expressions
@@ -24,7 +25,7 @@ namespace ArgentSea
             methodSignatureTypes.Add(typeof(string)); //Arg1: parameterName parameter in this signature
             methodSignatureTypes.Add(propValue.Type); //Arg2: <value> parameter in this signature
 
-            methodArgumentExpressions.Add(prms);
+            methodArgumentExpressions.Add(expSprocParameters);
             methodArgumentExpressions.Add(expParameterName);
             methodArgumentExpressions.Add(propValue);
 
@@ -44,7 +45,7 @@ namespace ArgentSea
                 Expression.Call(mSql, methodArgumentExpressions.ToArray()));
         }
 
-        public static void OutParameterBuilder(string parameterName, ParameterExpression prms, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression secondArg, ConstantExpression thirdArg, HashSet<string> parameterNames, ParameterExpression expIgnoreParameters, ILogger logger)
+        public static void OutParameterBuilder(string parameterName, ParameterExpression expSprocParameters, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression secondArg, ConstantExpression thirdArg, HashSet<string> parameterNames, ParameterExpression expIgnoreParameters, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
@@ -55,7 +56,7 @@ namespace ArgentSea
 
                 methodSignatureTypes.Add(typeof(DbParameterCollection)); //Arg0: prms parameter in this signature
                 methodSignatureTypes.Add(typeof(string)); //Arg1: parameterName parameter in this signature
-                methodArgumentExpressions.Add(prms);
+                methodArgumentExpressions.Add(expSprocParameters);
                 methodArgumentExpressions.Add(expParameterName);
                 if (!(secondArg is null))
                 {
@@ -72,9 +73,9 @@ namespace ArgentSea
                 expressions.Add(Expression.IfThen(expShouldIgnore, expCall));
             }
         }
-
-        #region Expression builders
-        public static void InParameterStringExpressionBuilder(string parameterName, int length, Type staticType, string methodName, ConstantExpression expLocale, IList<Expression> expressions, ParameterExpression prms, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
+		#endregion
+		#region Expression builders by type
+		public static void InParameterStringExpressionBuilder(string parameterName, int length, Type staticType, string methodName, ConstantExpression expLocale, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
@@ -82,31 +83,9 @@ namespace ArgentSea
                 {
                     var miEnumToString = typeof(Enum).GetMethod(nameof(Enum.ToString), new Type[] { });
                     var expEnumToString = Expression.Call(propValue, miEnumToString);
-                    expressions.Add(InParmHelper(parameterName, prms, expEnumToString, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, expEnumToString, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters));
 
                 }
-				//else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType) == typeof(ShardKey<,>)) //Nullable ShardKey
-				//{
-				//    var piNullableHasValue = propertyType.GetProperty(nameof(Nullable<int>.HasValue));
-				//    var piNullableGetValue = propertyType.GetProperty(nameof(Nullable<int>.Value));
-
-				//    var expProp = Expression.Condition(
-				//        Expression.Property(propValue, piNullableHasValue),
-				//       Expression.Convert(Expression.Property(Expression.Property(propValue, piNullableGetValue), ShardPropertyName(shardPosition)), typeof(string)),
-				//        Expression.Constant(null, typeof(string))
-				//        );
-				//    var expInParm = InParmHelper(parameterName, prms, expProp, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters);
-				//    expressions.Add(expInParm);
-				//    logger.SqlExpressionLog(expInParm);
-				//}
-				//else if (propertyType == typeof(ShardKey<,>))
-				//{
-				//    var expProp = Expression.Property(propValue, ShardPropertyName(shardPosition));
-				//    var expInParm = InParmHelper(parameterName, prms, expProp, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters);
-				//    expressions.Add(expInParm);
-				//    logger.SqlExpressionLog(expInParm);
-
-				//}
 				else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType).IsEnum) //Nullable Enum
                 {
                     var miEnumToString = typeof(Enum).GetMethod(nameof(Enum.ToString), new Type[] { });
@@ -118,47 +97,24 @@ namespace ArgentSea
                         Expression.Call(Expression.Property(propValue, piNullableGetValue), miEnumToString),
                         Expression.Constant(null, typeof(string))
                         );
-                    expressions.Add(InParmHelper(parameterName, prms, expIf, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, expIf, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters));
                 }
                 else
                 {
-                    expressions.Add(InParmHelper(parameterName, prms, propValue, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, propValue, staticType, methodName, Expression.Constant(length, typeof(int)), expLocale, expIgnoreParameters));
                 }
             }
         }
 
-        public static void InParameterEnumXIntExpressionBuilder(string parameterName, Type staticType, string addMethodName, Type nullableBaseType, IList<Expression> expressions, ParameterExpression prms, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void InParameterEnumXIntExpressionBuilder(string parameterName, Type staticType, string addMethodName, Type nullableBaseType, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
                 if (propertyType.IsEnum)
                 {
                     var expConvert = Expression.Convert(propValue, Nullable.GetUnderlyingType(nullableBaseType));
-                    expressions.Add(InParmHelper(parameterName, prms, expConvert, staticType, addMethodName, null, null, expIgnoreParameters));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, expConvert, staticType, addMethodName, null, null, expIgnoreParameters));
                 }
-				//else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType) == typeof(ShardKey<,>)) //Nullable ShardKey
-				//{
-				//    var piNullableHasValue = propertyType.GetProperty(nameof(Nullable<int>.HasValue));
-				//    var piNullableGetValue = propertyType.GetProperty(nameof(Nullable<int>.Value));
-				//    var nullableShardBaseType = GetShardPropertyType(shardPosition, Nullable.GetUnderlyingType(propertyType), true);
-
-				//    var expProp = Expression.Condition(
-				//        Expression.Property(propValue, piNullableHasValue),
-				//       Expression.Convert(Expression.Property(Expression.Property(propValue, piNullableGetValue), ShardPropertyName(shardPosition)), nullableShardBaseType),
-				//        Expression.Constant(null, typeof(string))
-				//        );
-				//    var expInParm = InParmHelper(parameterName, prms, expProp, staticType, addMethodName, null, null, expIgnoreParameters);
-				//    expressions.Add(expInParm);
-				//    logger.SqlExpressionLog(expInParm);
-				//}
-				//else if (propertyType == typeof(ShardKey<,>))
-				//{
-				//    var expProp = Expression.Property(propValue, ShardPropertyName(shardPosition));
-				//    var expInParm = InParmHelper(parameterName, prms, expProp, staticType, addMethodName, null, null, expIgnoreParameters);
-				//    expressions.Add(expInParm);
-				//    logger.SqlExpressionLog(expInParm);
-
-				//}
 				else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType).IsEnum) //Nullable Enum
                 {
 
@@ -170,58 +126,25 @@ namespace ArgentSea
                        Expression.Convert(Expression.Property(propValue, piNullableGetValue), nullableBaseType),
                         Expression.Constant(null, nullableBaseType)
                         );
-                    expressions.Add(InParmHelper(parameterName, prms, expIf, staticType, addMethodName, null, null, expIgnoreParameters));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, expIf, staticType, addMethodName, null, null, expIgnoreParameters));
                 }
                 else
                 {
-                    expressions.Add(InParmHelper(parameterName, prms, propValue, staticType, addMethodName, null, null, expIgnoreParameters));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, propValue, staticType, addMethodName, null, null, expIgnoreParameters));
                 }
             }
         }
-        public static void InParameterSimpleBuilder(string parameterName, Type propertyType, ParameterExpression prms, ParameterExpression expIgnoreParameters, MemberExpression expProperty, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, HashSet<string> parameterNames, ParameterExpression expLogger, ILogger logger)
+        public static void InParameterSimpleBuilder(string parameterName, Type propertyType, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, MemberExpression expProperty, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, HashSet<string> parameterNames, ParameterExpression expLogger, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
-
-				//if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType) == typeof(ShardKey<,>)) //Nullable ShardKey
-				//{
-				//    var piNullableHasValue = propertyType.GetProperty(nameof(Nullable<int>.HasValue));
-				//    var piNullableGetValue = propertyType.GetProperty(nameof(Nullable<int>.Value));
-				//    var nullableShardBaseType = GetShardPropertyType(shardPosition, Nullable.GetUnderlyingType(propertyType), true);
-
-				//    var expProp = Expression.Condition(
-				//        Expression.Property(expProperty, piNullableHasValue),
-				//       Expression.Convert(Expression.Property(Expression.Property(expProperty, piNullableGetValue), ShardPropertyName(shardPosition)), nullableShardBaseType),
-				//        Expression.Constant(null, typeof(string))
-				//        );
-				//    var expInParm = InParmHelper(parameterName, prms, expProp, staticType, addMethod, null, null, expIgnoreParameters);
-				//    expressions.Add(expInParm);
-				//    logger.SqlExpressionLog(expInParm);
-				//}
-				//else if (propertyType == typeof(ShardKey<,>))
-				//{
-				//    var expProp = Expression.Property(expProperty, ShardPropertyName(shardPosition));
-				//    var expInParm = InParmHelper(parameterName, prms, expProp, staticType, addMethod, null, null, expIgnoreParameters);
-				//    expressions.Add(expInParm);
-				//    logger.SqlExpressionLog(expInParm);
-
-				//}
-				//else
-				//{
-				expressions.Add(InParmHelper(parameterName, prms, expProperty, staticType, addMethod, thirdArg, forthArg, expIgnoreParameters));
-                //}
+				expressions.Add(InParmHelper(parameterName, expSprocParameters, expProperty, staticType, addMethod, thirdArg, forthArg, expIgnoreParameters));
 
             }
         }
 
-		public static void ReadOutParameterStringExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, PropertyInfo propertyInfo, ParameterExpression expLogger, ILogger logger)
+		public static void ReadOutParameterStringExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
-            //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
-            //var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
-            //expressions.Add(expAssign);
-            //logger.SqlExpressionLog(expAssign);
-
-            var propertyType = propertyInfo.PropertyType;
 
             var miGetString = staticType.GetMethod(getMethodName);
             var expGetString = Expression.Call(miGetString, expPrm);
@@ -231,7 +154,7 @@ namespace ArgentSea
                 var expSet = Expression.Assign(expProperty, Expression.Convert(Expression.Call(miEnumParse, Expression.Constant(propertyType, typeof(Type)), Expression.Call(miGetString, expPrm)), propertyType));
 				expressions.Add(Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     expSet,
-                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })));
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) })));
             }
             else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType).IsEnum) //Nullable Enum
             {
@@ -245,7 +168,7 @@ namespace ArgentSea
                     );
 				expressions.Add(Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     Expression.Assign(expProperty, expIf),
-                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })));
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType.ReflectedType, typeof(Type)) })));
             }
             else
             {
@@ -253,13 +176,12 @@ namespace ArgentSea
             }
         }
 
-        public static void ReadOutParameterEnumXIntExpressions(string parameterName, Type staticType, string getMethodName, string nullableGetMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, PropertyInfo propertyInfo, ParameterExpression expLogger, ILogger logger)
+        public static void ReadOutParameterEnumXIntExpressions(string parameterName, Type staticType, string getMethodName, string nullableGetMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
             //var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
             //expressions.Add(expAssign);
             //logger.SqlExpressionLog(expAssign);
-            var propertyType = propertyInfo.PropertyType;
 
             if (propertyType.IsEnum)
             {
@@ -267,7 +189,7 @@ namespace ArgentSea
                 var expGet = Expression.Call(miGet, expPrm);
                 var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     Expression.Assign(expProperty, Expression.Convert(expGet, propertyType)),
-                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) }));
                 expressions.Add(expIf);
             }
             else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -279,14 +201,14 @@ namespace ArgentSea
                 {
                     var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                         Expression.Assign(expProperty, Expression.Convert(expGetNl, propertyType)),
-                        Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
+                        Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) }));
                     expressions.Add(expIf);
                 }
                 else
                 {
                     var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                         Expression.Assign(expProperty, expGetNl),
-                        Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) }));
+                        Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) }));
                     expressions.Add(expIf);
                 }
             }
@@ -296,19 +218,18 @@ namespace ArgentSea
                 var expGet = Expression.Call(miGet, expPrm);
                 var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                     Expression.Assign(expProperty, expGet),
-                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })
+                    Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) })
                     );
                 expressions.Add(expIf);
             }
         }
 
-        public static void ReadOutParameterSimpleValueExpressions(string parameterName, Type staticType, string getMethodName, string nullableGetMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, PropertyInfo propertyInfo, ParameterExpression expLogger, ILogger logger)
+        public static void ReadOutParameterSimpleValueExpressions(string parameterName, Type staticType, string getMethodName, string nullableGetMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
             //var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
             //expressions.Add(expAssign);
             //logger.SqlExpressionLog(expAssign);
-            var propertyType = propertyInfo.PropertyType;
 
             MethodCallExpression expGet;
             if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -321,11 +242,11 @@ namespace ArgentSea
             }
             var expIf = Expression.IfThenElse(Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                 Expression.Assign(expProperty, expGet),
-                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })
+                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) })
                 );
             expressions.Add(expIf);
         }
-        public static void ReadOutParameterBinaryExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, PropertyInfo propertyInfo, ParameterExpression expLogger, ILogger logger)
+        public static void ReadOutParameterBinaryExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
             //var expAssignPrm = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
@@ -336,12 +257,12 @@ namespace ArgentSea
             var expIf = Expression.IfThenElse(
                 Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
                 expSet,
-                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyInfo.ReflectedType, typeof(Type)) })
+                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) })
                 );
             expressions.Add(expIf);
         }
 
-        public static void ReaderStringExpressions(string parameterName, MemberExpression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void ReaderStringExpressions(string parameterName, Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             var miGetTypedFieldValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetString));
             var expGetField = Expression.Call(prmSqlRdr, miGetTypedFieldValue, new[] { expOrdinal });
@@ -396,7 +317,7 @@ namespace ArgentSea
             }
         }
 
-        public static void ReaderEnumXIntExpressions(string parameterName, MemberExpression expProperty, Type baseType, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void ReaderEnumXIntExpressions(string parameterName, Expression expProperty, Type baseType, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
 			//This approach won't work because the base type in the DB might be different than the base type for the enum.
 			//Type baseType = propertyType;
@@ -491,7 +412,7 @@ namespace ArgentSea
             }
         }
 		//double (NaN), single (NaN), Guid (Guid.Empty)
-		public static void ReaderNullableValueTypeExpressions(string parameterName, MemberExpression expProperty, ConstantExpression expNullResult, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+		public static void ReaderNullableValueTypeExpressions(string parameterName, Expression expProperty, ConstantExpression expNullResult, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
 			Type baseType = propertyType;
 			if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -552,8 +473,8 @@ namespace ArgentSea
         //    string shdPosName;
         //    switch (shardPosition)
         //    {
-        //        case ParameterMapAttribute.ShardUsage.IsShardNumber:
-        //            shdPosName = nameof(ShardKey<int, int>.ShardNumber);
+        //        case ParameterMapAttribute.ShardUsage.IsShardId:
+        //            shdPosName = nameof(ShardKey<int, int>.ShardId);
         //            break;
         //        case ParameterMapAttribute.ShardUsage.IsRecordId:
         //            shdPosName = nameof(ShardKey<int, int>.RecordID);
@@ -579,8 +500,8 @@ namespace ArgentSea
         //    string shdPosName;
         //    switch (shardPosition)
         //    {
-        //        case ParameterMapAttribute.ShardUsage.IsShardNumber:
-        //            shdPosName = nameof(ShardKey<int, int>.ShardNumber);
+        //        case ParameterMapAttribute.ShardUsage.IsShardId:
+        //            shdPosName = nameof(ShardKey<int, int>.ShardId);
         //            break;
         //        case ParameterMapAttribute.ShardUsage.IsRecordId:
         //            shdPosName = nameof(ShardKey<int, int>.RecordID);
@@ -599,7 +520,7 @@ namespace ArgentSea
         //    Type result;
         //    switch (shardPosition)
         //    {
-        //        case ParameterMapAttribute.ShardUsage.IsShardNumber:
+        //        case ParameterMapAttribute.ShardUsage.IsShardId:
         //            result = types[0];
         //            break;
         //        case ParameterMapAttribute.ShardUsage.IsRecordId:
@@ -633,13 +554,13 @@ namespace ArgentSea
         //}
 
 
-		//public static BlockExpression MakeShardKeyExpressions<TShard, TRecord>(string propertyName, MemberExpression expProperty, ParameterExpression expVarShardNumber, ParameterExpression expVarRecordId, ParameterExpression expVarTimeStamp, LabelTarget expExit, List<Expression> blkExpressions, char originSource, Type propertyType, ParameterExpression expLogger, ILogger logger) where TShard : IComparable where TRecord : IComparable
+		//public static BlockExpression MakeShardKeyExpressions<TShard, TRecord>(string propertyName, MemberExpression expProperty, ParameterExpression expVarShardId, ParameterExpression expVarRecordId, ParameterExpression expVarTimeStamp, LabelTarget expExit, List<Expression> blkExpressions, char originSource, Type propertyType, ParameterExpression expLogger, ILogger logger) where TShard : IComparable where TRecord : IComparable
 		//{
 		//    Type[] constructorTypes;
 		//    Expression[] constructorValues;
 		//    ParameterExpression expVarResult;
 		//    var varExpressions = new List<ParameterExpression>();
-		//    varExpressions.Add(expVarShardNumber);
+		//    varExpressions.Add(expVarShardId);
 		//    varExpressions.Add(expVarRecordId);
 		//    var piGetByteValue = typeof(Nullable<byte>).GetProperty(nameof(Nullable<byte>.Value));
 		//    var piGetIntValue = typeof(Nullable<int>).GetProperty(nameof(Nullable<int>.Value));
@@ -650,12 +571,12 @@ namespace ArgentSea
 		//    {
 		//        varExpressions.Add(expVarTimeStamp);
 		//        constructorTypes = new[] { typeof(DataOrigin), typeof(byte), typeof(int), typeof(byte[]) };
-		//        constructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardNumber, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue), expVarTimeStamp };
+		//        constructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardId, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue), expVarTimeStamp };
 		//    }
 		//    else
 		//    {
 		//        constructorTypes = new[] { typeof(DataOrigin), typeof(byte), typeof(int) };
-		//        constructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardNumber, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue) };
+		//        constructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardId, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue) };
 		//    }
 		//    ConstantExpression expNullShardKey;
 		//    NewExpression expNewShardKey;
@@ -676,7 +597,7 @@ namespace ArgentSea
 		//    //var expHasValue = Expression.Condition(
 		//    //    Expression.Property(expVarRecordId, typeof(int?).GetProperty(nameof(Nullable<int>.HasValue))),
 		//    //        Expression.Condition(
-		//    //            Expression.Property(expVarShardNumber, typeof(byte?).GetProperty(nameof(Nullable<byte>.HasValue))),
+		//    //            Expression.Property(expVarShardId, typeof(byte?).GetProperty(nameof(Nullable<byte>.HasValue))),
 		//    //            Expression.Assign(expVarResult, expNewShardKey),
 		//    //            Expression.Assign(expVarResult, expNullShardKey)),
 		//    //        Expression.Assign(expVarResult, expNullShardKey));
@@ -684,19 +605,19 @@ namespace ArgentSea
 
 
 		//    var expHasValue = Expression.Condition(
-		//        Expression.AndAlso(Expression.Property(expVarShardNumber, typeof(byte?).GetProperty(nameof(Nullable<byte>.HasValue))),
+		//        Expression.AndAlso(Expression.Property(expVarShardId, typeof(byte?).GetProperty(nameof(Nullable<byte>.HasValue))),
 		//                       Expression.Property(expVarRecordId, typeof(int?).GetProperty(nameof(Nullable<int>.HasValue)))),
 		//        Expression.Assign(expVarResult, expNewShardKey),
 		//            //Expression.Block(new Expression[] {
 		//            Expression.Assign(expVarResult, expNullShardKey)
-		//        //Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.NullShardKeyArguments)), new Expression[] { expLogger, expVarShardNumber, expVarRecordId })
+		//        //Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.NullShardKeyArguments)), new Expression[] { expLogger, expVarShardId, expVarRecordId })
 		//        //})
 		//        );
 		//    blkExpressions.Add(expHasValue);
 		//    logger.SqlExpressionLog(expHasValue);
 
 
-		//    var expLogNull = Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.NullShardKeyArguments)), new Expression[] { expLogger, Expression.Constant(propertyName, typeof(string)), expVarShardNumber, expVarRecordId });
+		//    var expLogNull = Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.NullShardKeyArguments)), new Expression[] { expLogger, Expression.Constant(propertyName, typeof(string)), expVarShardId, expVarRecordId });
 		//    blkExpressions.Add(expLogNull);
 		//    logger.SqlExpressionLog(expLogNull);
 		//    var expAssignResult = Expression.Assign(expProperty, expVarResult);
@@ -709,12 +630,12 @@ namespace ArgentSea
 		//    logger.SqlExpressionLog(expVarResult);
 		//    return Expression.Block(varExpressions, blkExpressions);
 		//}
-		//public static BlockExpression MakeShardChildExpressions<TShard, TRecord, TChild>(string propertyName, MemberExpression expProperty, ParameterExpression expVarShardNumber, ParameterExpression expVarRecordId, ParameterExpression expVarChildId, ParameterExpression expVarTimeStamp, LabelTarget expExit, List<Expression> blkExpressions, char originSource, Type propertyType, ParameterExpression expLogger, ILogger logger) where TShard: IComparable where TRecord: IComparable where TChild: IComparable
+		//public static BlockExpression MakeShardChildExpressions<TShard, TRecord, TChild>(string propertyName, MemberExpression expProperty, ParameterExpression expVarShardId, ParameterExpression expVarRecordId, ParameterExpression expVarChildId, ParameterExpression expVarTimeStamp, LabelTarget expExit, List<Expression> blkExpressions, char originSource, Type propertyType, ParameterExpression expLogger, ILogger logger) where TShard: IComparable where TRecord: IComparable where TChild: IComparable
 		//{
 		//    Type[] shardConstructorTypes;
 		//    Expression[] shardConstructorValues;
 		//    var varExpressions = new List<ParameterExpression>();
-		//    varExpressions.Add(expVarShardNumber);
+		//    varExpressions.Add(expVarShardId);
 		//    varExpressions.Add(expVarRecordId);
 		//    varExpressions.Add(expVarChildId);
 		//    var piGetByteValue = typeof(Nullable<byte>).GetProperty(nameof(Nullable<byte>.Value));
@@ -726,18 +647,18 @@ namespace ArgentSea
 		//    {
 		//        varExpressions.Add(expVarTimeStamp);
 		//        shardConstructorTypes = new[] { typeof(DataOrigin), typeof(byte), typeof(int), typeof(byte[]) };
-		//        shardConstructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardNumber, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue), expVarTimeStamp };
+		//        shardConstructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardId, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue), expVarTimeStamp };
 		//    }
 		//    else
 		//    {
 		//        shardConstructorTypes = new[] { typeof(DataOrigin), typeof(byte), typeof(int) };
-		//        shardConstructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardNumber, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue) };
+		//        shardConstructorValues = new Expression[] { expDataOrigin, Expression.Property(expVarShardId, piGetByteValue), Expression.Property(expVarRecordId, piGetIntValue) };
 		//    } 
 		//    var expNewShardKey = Expression.New(typeof(ShardKey<TShard, TRecord>).GetConstructor(shardConstructorTypes), shardConstructorValues);
 		//    var expVarResult = Expression.Variable(propertyType, "result");
 		//    varExpressions.Add(expVarResult);
 
-		//    var expIfHasValue = Expression.AndAlso(Expression.Property(expVarShardNumber, typeof(byte?).GetProperty(nameof(Nullable<byte>.HasValue))),
+		//    var expIfHasValue = Expression.AndAlso(Expression.Property(expVarShardId, typeof(byte?).GetProperty(nameof(Nullable<byte>.HasValue))),
 		//                           Expression.AndAlso(
 		//                                Expression.Property(expVarRecordId, typeof(int?).GetProperty(nameof(Nullable<int>.HasValue))),
 		//                                Expression.Property(expVarChildId, typeof(short?).GetProperty(nameof(Nullable<short>.HasValue)))));
@@ -765,7 +686,7 @@ namespace ArgentSea
 		//        blkExpressions.Add(expIf);
 		//        logger.SqlExpressionLog(expIf);
 		//    }
-		//    var expHasValue = Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.NullShardChildArguments)), new Expression[] { expLogger, Expression.Constant(propertyName, typeof(string)), expVarShardNumber, expVarRecordId, expVarChildId });
+		//    var expHasValue = Expression.Call(typeof(SqlLoggerExtensions).GetMethod(nameof(SqlLoggerExtensions.NullShardChildArguments)), new Expression[] { expLogger, Expression.Constant(propertyName, typeof(string)), expVarShardId, expVarRecordId, expVarChildId });
 		//    blkExpressions.Add(expHasValue);
 		//    logger.SqlExpressionLog(expHasValue);
 		//    var expAssignResult = Expression.Assign(expProperty, expVarResult);
@@ -875,5 +796,12 @@ namespace ArgentSea
 			}
 			return false;
 		}
-    }
+		internal static Expression ReturnNullIfDbNull(ParameterExpression expPrm, string parameterName, Type tModel, LabelTarget exitLabel, Expression expLogger)
+		{
+			//Add quick exit if this parameter is dbNull
+			var miGetIsDbNull = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.IsRequiredParameterDbNull), BindingFlags.Static | BindingFlags.NonPublic);
+			var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expPrm, Expression.Constant(tModel.ToString(), typeof(string)), Expression.Constant(parameterName, typeof(string)), expLogger });
+			return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, tModel)));
+		}
+	}
 }

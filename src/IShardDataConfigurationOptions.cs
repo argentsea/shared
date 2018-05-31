@@ -145,7 +145,7 @@ namespace ArgentSea
 
 	public interface IShardConnectionConfiguration<TShard>
 	{
-		TShard ShardNumber { get; set; }
+		TShard ShardId { get; set; }
 		IConnectionConfiguration ReadConnectionInternal { get; }
 		IConnectionConfiguration WriteConnectionInternal { get; }
 	}

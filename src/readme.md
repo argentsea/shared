@@ -2,7 +2,7 @@
 The principal goal is of the Argent Sea framework is to optimize 
 data access performance, while minimizing the overhead of custom coding.
 
-In brief, the framework combines:
+The framework combines:
 * The convenience to the programmer of an ORM tool
 * The performance of direct ADO.NET calls to stored procedures
 * The scalability of application data sharding

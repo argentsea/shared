@@ -9,13 +9,17 @@ namespace ArgentSea
 		[Flags]
 		public enum InputCleaningOptions {
 			/// <summary>
+			/// Remove starting and trailing whitespace, “control” characters including Lf and Cr, and extended characters like Emoji icons.
+			/// </summary>
+			CleanAll = 0,
+			/// <summary>
 			/// Do not remove Unicode surrogate values, like Emoji.
 			/// </summary>
-			AllowEmojis,
+			AllowEmojis = 1,
 			/// <summary>
 			/// All “control” characters are removed by default; setting this flag preserve keep CrLf and/or Cr. It also ensures Windows line endings (Cr+Lf) when encountering Lf only (Unix line endings).
 			/// </summary>
-			AllowMultiline,
+			AllowMultiline = 2,
 		}
 
 		/// <summary>
