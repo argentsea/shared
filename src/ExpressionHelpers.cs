@@ -75,7 +75,7 @@ namespace ArgentSea
         }
 		#endregion
 		#region Expression builders by type
-		public static void InParameterStringExpressionBuilder(string parameterName, int length, Type staticType, string methodName, ConstantExpression expLocale, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
+		public static void InParameterStringExpressionBuilder(string parameterName, int length, Type staticType, string methodName, ConstantExpression expLocale, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, Expression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
@@ -106,7 +106,7 @@ namespace ArgentSea
             }
         }
 
-        public static void InParameterEnumXIntExpressionBuilder(string parameterName, Type staticType, string addMethodName, Type nullableBaseType, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void InParameterEnumXIntExpressionBuilder(string parameterName, Type staticType, string addMethodName, Type nullableBaseType, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, Expression propValue, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
@@ -134,7 +134,7 @@ namespace ArgentSea
                 }
             }
         }
-        public static void InParameterSimpleBuilder(string parameterName, Type propertyType, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, MemberExpression expProperty, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, HashSet<string> parameterNames, ParameterExpression expLogger, ILogger logger)
+        public static void InParameterSimpleBuilder(string parameterName, Type propertyType, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, Expression expProperty, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, HashSet<string> parameterNames, ParameterExpression expLogger, ILogger logger)
         {
             if (parameterNames.Add(parameterName))
             {
