@@ -262,14 +262,15 @@ namespace ArgentSea
             expressions.Add(expIf);
         }
 
-        public static void ReaderStringExpressions(string parameterName, Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void ReaderStringExpressions(string columnName, Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             var miGetTypedFieldValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetString));
             var expGetField = Expression.Call(prmSqlRdr, miGetTypedFieldValue, new[] { expOrdinal });
 
             var miGetFieldOrdinal = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetFieldOrdinal), BindingFlags.NonPublic | BindingFlags.Static);
-            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(parameterName, typeof(string)) }));
+            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(columnName, typeof(string)) }));
             expressions.Add(Expression.Assign(expOrdinal, Expression.ArrayAccess(expOrdinals, new[] { Expression.Constant(propIndex, typeof(int)) })));
+            propIndex++;
 
             if (propertyType.IsEnum)
             {
@@ -317,7 +318,7 @@ namespace ArgentSea
             }
         }
 
-        public static void ReaderEnumXIntExpressions(string parameterName, Expression expProperty, Type baseType, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void ReaderEnumXIntExpressions(string columnName, Expression expProperty, Type baseType, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
 			//This approach won't work because the base type in the DB might be different than the base type for the enum.
 			//Type baseType = propertyType;
@@ -332,9 +333,10 @@ namespace ArgentSea
 			var miGetTypedFieldValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFieldValue)).MakeGenericMethod(baseType);
             var expGetField = Expression.Call(prmSqlRdr, miGetTypedFieldValue, new[] { expOrdinal });
             var miGetFieldOrdinal = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetFieldOrdinal), BindingFlags.NonPublic | BindingFlags.Static);
-            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(parameterName, typeof(string)) }));
+            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(columnName, typeof(string)) }));
 
             expressions.Add(Expression.Assign(expOrdinal, Expression.ArrayAccess(expOrdinals, new[] { Expression.Constant(propIndex, typeof(int)) })));
+            propIndex++;
 
             if (propertyType.IsEnum)
             {
@@ -368,12 +370,13 @@ namespace ArgentSea
         }
 
         //long, bit, array...
-        public static void ReaderSimpleValueExpressions(string parameterName, Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void ReaderSimpleValueExpressions(string columnName, Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
             var miGetFieldOrdinal = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetFieldOrdinal), BindingFlags.NonPublic | BindingFlags.Static);
-            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(parameterName, typeof(string)) }));
+            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(columnName, typeof(string)) }));
 
             expressions.Add(Expression.Assign(expOrdinal, Expression.ArrayAccess(expOrdinals, new[] { Expression.Constant(propIndex, typeof(int)) })));
+            propIndex++;
 
             if ((propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>)) || (propertyType.IsArray))
             {
@@ -412,7 +415,7 @@ namespace ArgentSea
             }
         }
 		//double (NaN), single (NaN), Guid (Guid.Empty)
-		public static void ReaderNullableValueTypeExpressions(string parameterName, Expression expProperty, ConstantExpression expNullResult, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
+		public static void ReaderNullableValueTypeExpressions(string columnName, Expression expProperty, ConstantExpression expNullResult, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
 			Type baseType = propertyType;
 			if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -426,10 +429,10 @@ namespace ArgentSea
 			var miGetTypedFieldValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFieldValue)).MakeGenericMethod(baseType);
 			Expression expGetField = Expression.Call(prmSqlRdr, miGetTypedFieldValue, new[] { expOrdinal });
 			var miGetFieldOrdinal = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetFieldOrdinal), BindingFlags.NonPublic | BindingFlags.Static);
-            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(parameterName, typeof(string)) }));
+            columnLookupExpressions.Add(Expression.Call(miGetFieldOrdinal, new Expression[] { prmSqlRdr, Expression.Constant(columnName, typeof(string)) }));
 
             expressions.Add(Expression.Assign(expOrdinal, Expression.ArrayAccess(expOrdinals, new[] { Expression.Constant(propIndex, typeof(int)) })));
-
+            propIndex++;
             var miIsDbNull = typeof(DbDataReader).GetMethod(nameof(DbDataReader.IsDBNull));
 
             if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -753,10 +756,6 @@ namespace ArgentSea
         //Return -1 if not found (rather than error, as rdr.GetOrdinal does), otherwise essentially identical code.
         internal static int GetFieldOrdinal(DbDataReader rdr, string fieldName)
         {
-            if (fieldName.StartsWith("@") || fieldName.StartsWith(":"))
-            {
-                fieldName = fieldName.Substring(1);
-            }
             for (int i = 0; i < rdr.FieldCount; i++)
             {
                 if (fieldName == rdr.GetName(i))
@@ -787,7 +786,7 @@ namespace ArgentSea
 		{
 			if (prm is null)
 			{
-				throw new Exception($"The parameter {parameterName} is a null object. This indicates a code problem, as it should be DbNull or have a value.");
+				throw new Exception($"The parameter {parameterName}, which was requested for model {modelName}, is a null object. This indicates a code problem, as it should be DbNull or have a value.");
 			}
 			if (DBNull.Value.Equals(prm.Value))
 			{
@@ -796,12 +795,32 @@ namespace ArgentSea
 			}
 			return false;
 		}
-		internal static Expression ReturnNullIfDbNull(ParameterExpression expPrm, string parameterName, Type tModel, LabelTarget exitLabel, Expression expLogger)
+        internal static bool IsRequiredColumnDbNull(DbDataReader rdr, int ordinal, string modelName, ILogger logger)
+        {
+            if (rdr is null)
+            {
+                throw new Exception($"The data reader provide is null.");
+            }
+            if (DBNull.Value.Equals(rdr?.IsDBNull(ordinal)))
+            {
+                logger.RequiredPropertyIsDbNull(modelName, rdr.GetName(ordinal));
+                return true;
+            }
+            return false;
+        }
+        internal static Expression ReturnNullIfPrmNull(ParameterExpression expPrm, string parameterName, Type tModel, LabelTarget exitLabel, Expression expLogger)
 		{
 			//Add quick exit if this parameter is dbNull
 			var miGetIsDbNull = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.IsRequiredParameterDbNull), BindingFlags.Static | BindingFlags.NonPublic);
 			var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expPrm, Expression.Constant(tModel.ToString(), typeof(string)), Expression.Constant(parameterName, typeof(string)), expLogger });
 			return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, tModel)));
 		}
-	}
+        internal static Expression ReturnNullIfColNull(ParameterExpression expRdr, ParameterExpression expOrdinal, Type tModel, LabelTarget exitLabel, Expression expLogger)
+        {
+            //Add quick exit if this parameter is dbNull
+            var miGetIsDbNull = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.IsRequiredColumnDbNull), BindingFlags.Static | BindingFlags.NonPublic);
+            var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expRdr, expOrdinal, Expression.Constant(tModel.ToString(), typeof(string)), expLogger });
+            return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, tModel)));
+        }
+    }
 }

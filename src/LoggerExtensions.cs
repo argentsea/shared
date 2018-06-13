@@ -71,8 +71,9 @@ namespace ArgentSea
 		private static readonly Action<ILogger, string, string, Exception> _sqlGetInExpressionTreeCreation;
 		private static readonly Action<ILogger, string, string, Exception> _sqlSetOutExpressionTreeCreation;
 		private static readonly Action<ILogger, string, string, Exception> _sqlReadOutExpressionTreeCreation;
-		private static readonly Action<ILogger, string, string, Exception> _sqlReaderExpressionTreeCreation;
-		private static readonly Action<ILogger, string, string, string, Exception> _sqlObjectExpressionTreeCreation;
+		private static readonly Action<ILogger, string, string, Exception> _sqlReaderExpressionTreeDataRowCreation;
+        private static readonly Action<ILogger, string, string, Exception> _sqlReaderExpressionTreeOrdinalsCreation;
+        private static readonly Action<ILogger, string, string, string, Exception> _sqlObjectExpressionTreeCreation;
 
 		static LoggingExtensions()
         {
@@ -112,8 +113,9 @@ namespace ArgentSea
 			_sqlGetInExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForSetInParameters)), "Compiled code to map model {model} to input parameters as:\r\n{code}.");
 			_sqlSetOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForSetOutParameters)), "Compiled code to map model {model} to set output parameters as:\r\n{code}.");
 			_sqlReadOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReadOutParameters)), "Compiled code to map model {model} to read output parameters as:\r\n{code}.");
-			_sqlReaderExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReader)), "Compiled code to map model {model} to data reader values as:\r\n{code}.");
-			_sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
+			_sqlReaderExpressionTreeDataRowCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} to data reader row values as:\r\n{code}.");
+            _sqlReaderExpressionTreeOrdinalsCreation = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} ordinals to data reader values as:\r\n{code}.");
+            _sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
 		}
         public static void SqlParameterNotFound(this ILogger logger, string parameterName, Type propertyType)
         {
@@ -277,14 +279,25 @@ namespace ArgentSea
 				}
 			}
 		}
-		public static void CreatedExpressionTreeForReader(this ILogger logger, Type model, Expression codeBlock)
+        public static void CreatedExpressionTreeForReaderOrdinals(this ILogger logger, Type model, Expression codeBlock)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
+                {
+                    DebugViewWriter.WriteTo(codeBlock, writer);
+                    _sqlReaderExpressionTreeDataRowCreation(logger, model.ToString(), writer.ToString(), null);
+                }
+            }
+        }
+        public static void CreatedExpressionTreeForReaderRowData(this ILogger logger, Type model, Expression codeBlock)
 		{
 			if (logger.IsEnabled(LogLevel.Information))
 			{
 				using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
 				{
 					DebugViewWriter.WriteTo(codeBlock, writer);
-					_sqlReaderExpressionTreeCreation(logger, model.ToString(), writer.ToString(), null);
+					_sqlReaderExpressionTreeDataRowCreation(logger, model.ToString(), writer.ToString(), null);
 				}
 			}
 		}

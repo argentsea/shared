@@ -193,7 +193,6 @@ namespace ArgentSea
 		{
 			IList<TResult> result = null;
 			cancellationToken.ThrowIfCancellationRequested();
-			//SqlExceptionsEncountered.Clear();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
 			{
 				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);

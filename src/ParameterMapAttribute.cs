@@ -19,21 +19,30 @@ namespace ArgentSea
         //    IsConcurrencyStamp
         //}
 
-        public ParameterMapAttribute(string parameterName, int sqlType)
+        public ParameterMapAttribute(string name, int sqlType)
         {
-            ParameterName = parameterName;
+            ParameterName = name;
+            ColumnName = name;
+            Name = name;
             SqlType = sqlType;
 			IsRequired = false;
         }
-		public ParameterMapAttribute(string parameterName, int sqlType, bool isRequired)
+		public ParameterMapAttribute(string name, int sqlType, bool isRequired)
 		{
-			ParameterName = parameterName;
-			SqlType = sqlType;
+            ParameterName = name;
+            ColumnName = name;
+            Name = name;
+            SqlType = sqlType;
 			IsRequired = isRequired;
 		}
-		public string ParameterName { get; private set; }
 
-		public int SqlType { get; private set; }
+        public string Name { get; private set; }
+
+        public virtual string ParameterName { get; private set; }
+
+        public virtual string ColumnName { get; private set; }
+
+        public int SqlType { get; private set; }
 
 		public bool IsRequired { get; private set; }
 
@@ -43,11 +52,11 @@ namespace ArgentSea
 
         protected internal abstract void AppendInParameterExpressions(IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, MemberExpression expProperty, Type propertyType, ParameterExpression expLogger, ILogger logger);
 
-        protected internal abstract void AppendSetOutParameterExpressions(IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, Type propertyType, ParameterExpression expLogger, ILogger logger);
+        protected internal abstract void AppendSetOutParameterExpressions(IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, HashSet<string> parameterNames, ParameterExpression expLogger, ILogger logger);
 
         protected internal abstract void AppendReadOutParameterExpressions(Expression expProperty, IList<Expression> expressions, ParameterExpression expSprocParameters, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger);
 
-        protected internal abstract void AppendReaderExpressions(Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, PropertyInfo propertyInfo, ParameterExpression expLogger, ILogger logger);
+        protected internal abstract void AppendReaderExpressions(Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger);
 
         //protected internal abstract void AppendTvpExpressions(ParameterExpression expRecord, MemberExpression expProperty, IList<Expression> setExpressions, IList<NewExpression> sqlMetaDataTypeExpressions, HashSet<string> parameterNames, ref int ordinal, Type propertyType, ParameterExpression expLogger, ILogger logger);
 
