@@ -7,6 +7,10 @@ using System.Reflection;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This exception is raise when a model property has a database mapping attribute that is not of the correct type.
+    /// </summary>
+    /// <example>An attempt to map a string property to an integer parameter would generate this error.</example>
     public sealed class InvalidMapTypeException : Exception
     {
 		/// <summary>

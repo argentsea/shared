@@ -3,6 +3,15 @@ using System.Data.Common;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This class adds extension methods which simplify getting typed .NET values from (output) parameters.
+    /// Because these methods reference the abstract DbParameterCollection, these methods are available in the derived classes:
+    /// <list type="bullet">
+    /// <item><see cref="QueryParameterCollection"/>QueryParameterCollection</item>see></item>
+    /// <item>SqlParameterCollection</item>
+    /// <item>NpgsqlParameterCollection</item>
+    /// </list>
+    /// </summary>
     public static class DbParameterCollectionExtensions
     {
 		#region Casting

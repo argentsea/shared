@@ -148,7 +148,8 @@ namespace ArgentSea
 		}
 
 
-		public async Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+		public async Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
+            where TModel : class, new()
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
@@ -189,9 +190,10 @@ namespace ArgentSea
 		#endregion
 		#region Private Handlers
 
-		private async Task<IList<TResult>> ExecuteQueryToListAsync<TResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TResult : class, new()
+		private async Task<IList<TModel>> ExecuteQueryToListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) 
+            where TModel : class, new()
 		{
-			IList<TResult> result = null;
+			IList<TModel> result = null;
 			cancellationToken.ThrowIfCancellationRequested();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
 			{
@@ -206,19 +208,19 @@ namespace ArgentSea
 					using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken).ConfigureAwait(false))
 					{
 						cancellationToken.ThrowIfCancellationRequested();
-						result = Mapper.FromDataReader<TResult>(dataReader, _logger);
+						result = Mapper.FromDataReader<TModel>(dataReader, _logger);
 					}
 				}
 			}
 			if (result is null)
 			{
-				result = new List<TResult>();
+				result = new List<TModel>();
 			}
 			return result;
 		}
 		private async Task<TResult> ExecuteQueryToValueAsync<TResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
-		{
-			TResult result = default(TResult);
+        {
+            TResult result = default(TResult);
 			cancellationToken.ThrowIfCancellationRequested();
 			//SqlExceptionsEncountered.Clear();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))

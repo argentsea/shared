@@ -10,6 +10,9 @@ using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This class is used by provider specific implementations. It is unlikely that you would reference this in consumer code.
+    /// </summary>
     public static class ExpressionHelpers
     {
 		#region Database call expressions

@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace ArgentSea
 {
-	/// <summary>
-	/// Immutable class representing a sharded record.
-	/// </summary>
-	public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>> where TShard : IComparable where TRecord : IComparable
+    /// <summary>
+    /// Immutable class representing a sharded record with a “compound” key: the (virtual) shardId and the (database) recordId.
+    /// </summary>
+    public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>> where TShard : IComparable where TRecord : IComparable
 	{
 		private TShard _shardId;
 		private TRecord _recordId;
@@ -62,12 +62,6 @@ namespace ArgentSea
 			return $"{{ \"origin\": \"{_origin.SourceIndicator}\", \"shardId\": \"{_shardId.ToString()}\", \"recordId\": \"{_recordId.ToString()}\"}}";
 		}
 
-		/// <summary>
-		/// Serializes ShardKey data into a URL-safe string with a checksum
-		/// </summary>
-		/// <returns></returns>
-		public string ToExternalString()
-			=> ToExternalString(false);
 		#endregion
 
 		internal static byte[] GetValueBytes(IComparable value)
@@ -549,7 +543,13 @@ namespace ArgentSea
 				var baseType = Nullable.GetUnderlyingType(valueType);
 				return ConvertFromBytes(data, ref position, baseType);
 			}
-			else
+            if (valueType == typeof(Guid))
+            {
+                var result = new Guid(new byte[] { data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4], data[position + 5], data[position + 6], data[position + 7], data[position + 8], data[position + 9], data[position + 10], data[position + 11], data[position + 12], data[position + 13], data[position + 14], data[position + 15] });
+                position += 16;
+                return result;
+            }
+            else
 			{
 				throw new Exception($"Could not recognized the type {valueType.ToString()}.");
 			}
@@ -675,9 +675,8 @@ namespace ArgentSea
 		/// <summary>
 		/// Serializes ShardKey data into a URL-safe string with a checksum
 		/// </summary>
-		/// <param name="includeConcurrencyStamp">Indicates whether the string should include concurrency stamp data, if defined.</param>
 		/// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
-		public string ToExternalString(bool includeConcurrencyStamp)
+		public string ToExternalString()
 		{
 			var aResult = ToArray();
 
@@ -745,31 +744,32 @@ namespace ArgentSea
 				throw new ArgumentException(nameof(value));
 			}
 			var aValues = Convert.FromBase64String(value.Substring(1).Replace('_', '+').Replace('~', '/'));
+
 			for (int i = 0; i < aValues.Length; i++)
 			{
 				if (i % 6 == 0)
 				{
-					aValues[0] ^= 119;
+					aValues[i] ^= 119;
 				}
 				else if (i % 6 == 1)
 				{
-					aValues[1] ^= 78;
+					aValues[i] ^= 78;
 				}
 				else if (i % 6 == 2)
 				{
-					aValues[2] ^= 180;
+					aValues[i] ^= 180;
 				}
 				else if (i % 6 == 3)
 				{
-					aValues[3] ^= 92;
+					aValues[i] ^= 92;
 				}
 				else if (i % 6 == 4)
 				{
-					aValues[4] ^= 83;
+					aValues[i] ^= 83;
 				}
 				else if (i % 6 == 5)
 				{
-					aValues[5] ^= 77;
+					aValues[i] ^= 77;
 				}
 			}
 
@@ -810,7 +810,7 @@ namespace ArgentSea
 				throw new Exception("External key string is not valid.");
 			}
 
-			if ((aValues[0] & 12) != (1 << 3))
+			if ((aValues[0] & 12) != (1 << 2))
 			{
 				throw new Exception("The serialization version is invalid. Cannot deserialize this external string.");
 			}
@@ -819,7 +819,7 @@ namespace ArgentSea
 			TRecord recordId = default(TRecord);
 
 			int orgnLen = aValues[0] & 3;
-			var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
+			var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 2, orgnLen)[0]);
 			var pos = orgnLen + 1;
 
 			var typeShard = typeof(TShard);

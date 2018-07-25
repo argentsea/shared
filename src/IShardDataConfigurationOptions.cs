@@ -92,59 +92,72 @@ using System.Collections.Immutable;
 
 namespace ArgentSea
 {
-	//  "DataSources":
-	//      {
-	//      "ShardSets": [
-	//          "ShardSetKey": "0",
-	//          "DataResilienceKey": "remote",
-	//          "Shards": [
-	//              {
-	//                  "ShardConnectionId": 0,
-	//                  "ReadConnection": {
-	//                      "SecurityKey": "0",
-	//                      "Server": "10.10.10.10",
-	//                      "Database": "MyDb1"
-	//                  },
-	//                  {
-	//                  "WriteConnection": {
-	//                      "SecurityKey": "0",
-	//                      "Server": "10.10.10.10",
-	//                      "Database": "MyDb1"
-	//                  }
-	//              },
-	//              {
-	//                  "ShardConnectionKey": 1,
-	//                  "ReadConnection": {
-	//                      "SecurityKey": "1",
-	//                      "Server": "10.10.10.10",
-	//                      "Database": "MyDb2"
-	//                  },
-	//                  {
-	//                  "WriteConnection": {
-	//                      "SecurityKey": "1",
-	//                      "Server": "10.10.10.10",
-	//                      "Database": "MyDb2"
-	//                  }
-	//              }
-	//          ]
-	//      ],
+    //  "DataSources":
+    //      {
+    //      "ShardSets": [
+    //          "ShardSetKey": "0",
+    //          "DataResilienceKey": "remote",
+    //          "Shards": [
+    //              {
+    //                  "ShardConnectionId": 0,
+    //                  "ReadConnection": {
+    //                      "SecurityKey": "0",
+    //                      "Server": "10.10.10.10",
+    //                      "Database": "MyDb1"
+    //                  },
+    //                  {
+    //                  "WriteConnection": {
+    //                      "SecurityKey": "0",
+    //                      "Server": "10.10.10.10",
+    //                      "Database": "MyDb1"
+    //                  }
+    //              },
+    //              {
+    //                  "ShardConnectionKey": 1,
+    //                  "ReadConnection": {
+    //                      "SecurityKey": "1",
+    //                      "Server": "10.10.10.10",
+    //                      "Database": "MyDb2"
+    //                  },
+    //                  {
+    //                  "WriteConnection": {
+    //                      "SecurityKey": "1",
+    //                      "Server": "10.10.10.10",
+    //                      "Database": "MyDb2"
+    //                  }
+    //              }
+    //          ]
+    //      ],
 
 
-	public interface IShardDataConfigurationOptions<TShard>
-	{
+    /// <summary>
+    /// This interface is used by provider specific implementations. It is unlikely that you would implement this in consumer code.
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+    public interface IShardDataConfigurationOptions<TShard> where TShard : IComparable
+    {
 		IShardConnectionsConfiguration<TShard>[] ShardSetsInternal { get; }
 
 	}
-	public interface IShardConnectionsConfiguration<TShard>
-	{
+
+    /// <summary>
+    /// This interface is used by provider specific implementations. It is unlikely that you would implement this in consumer code.
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+	public interface IShardConnectionsConfiguration<TShard> where TShard : IComparable
+    {
 		string ShardSetKey { get; set; }
 		string SecurityKey { get; set; }
 		string DataResilienceKey { get; set; }
 		IShardConnectionConfiguration<TShard>[] ShardsInternal { get; }
 	}
 
-	public interface IShardConnectionConfiguration<TShard>
-	{
+    /// <summary>
+    /// This interface is used by provider specific implementations. It is unlikely that you would implement this in consumer code.
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+	public interface IShardConnectionConfiguration<TShard> where TShard : IComparable
+    {
 		TShard ShardId { get; set; }
 		IConnectionConfiguration ReadConnectionInternal { get; }
 		IConnectionConfiguration WriteConnectionInternal { get; }

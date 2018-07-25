@@ -4,6 +4,11 @@ using System.Text;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This object help descript the “type” of data. For example, you could assign Customer data a data origin value of 'c'.
+    /// When comparing data values, the ShardKey/ShardChild will not match if the data origin is not the same value — even if IDs are the same.
+    /// This helps prevent accidentaly comparisions that are not valid and also prevents collisions if you choose allows values of different types to be stored in the same cache.
+    /// </summary>
     public struct DataOrigin :  IEquatable<object>
     {
         private char _value;

@@ -12,6 +12,9 @@ using ArgentSea;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This static class contains the logic for mapping database parameters to/from properties.
+    /// </summary>
 	public static class Mapper
 	{
 		private static ConcurrentDictionary<Type, Delegate> _cacheInParamSet = new ConcurrentDictionary<Type, Delegate>();
@@ -33,8 +36,9 @@ namespace ArgentSea
 		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, ILogger logger) where TModel : class
-			=> MapToInParameters<TModel>(parameters, model, null, logger);
+		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, ILogger logger)
+            where TModel : class, new()
+            => MapToInParameters<TModel>(parameters, model, null, logger);
 
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
@@ -44,9 +48,10 @@ namespace ArgentSea
 		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
 		/// <param name="ignoreParameters">A lists of parameter names that should not be created. Each entry must exactly match the parameter name, including prefix and casing.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, HashSet<string> ignoreParameters, ILogger logger) where TModel : class
-		{
-			if (ignoreParameters is null)
+		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, HashSet<string> ignoreParameters, ILogger logger)
+            where TModel : class, new()
+        {
+            if (ignoreParameters is null)
 			{
 				ignoreParameters = new HashSet<string>();
 			}
@@ -85,7 +90,7 @@ namespace ArgentSea
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns></returns>
 		public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type TModel, ILogger logger)
-			=> MapToOutParameters(parameters, TModel, null, logger);
+            => MapToOutParameters(parameters, TModel, null, logger);
 
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
@@ -94,8 +99,9 @@ namespace ArgentSea
 		/// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>The DbParameterCollection, enabling a fluent API.</returns>
-		public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger)
-			=> MapToOutParameters(parameters, typeof(TModel), null, logger);
+		public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) 
+            where TModel : class, new()
+            => MapToOutParameters(parameters, typeof(TModel), null, logger);
 
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
@@ -106,7 +112,8 @@ namespace ArgentSea
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>The DbParameterCollection, enabling a fluent API.</returns>
 		public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, HashSet<string> ignoreParameters, ILogger logger)
-			=> MapToOutParameters(parameters, typeof(TModel), null, logger);
+            where TModel : class, new()
+            => MapToOutParameters(parameters, typeof(TModel), null, logger);
 
 		/// <summary>
 		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
@@ -164,7 +171,8 @@ namespace ArgentSea
 		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
-		public static TModel ReadOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) where TModel : class, new()
+		public static TModel ReadOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) 
+            where TModel : class, new()
 			=> ReadOutParameters<BadShardType, TModel>(parameters, null, logger);
 
 		/// <summary>
@@ -174,7 +182,9 @@ namespace ArgentSea
 		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
-		public static TModel ReadOutParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, ILogger logger) where TModel : class, new() where TShard : IComparable
+		public static TModel ReadOutParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, ILogger logger) 
+            where TModel : class, new() 
+            where TShard : IComparable
 		{
 			var T = typeof(TModel);
 			if (!_getOutParamReadCache.TryGetValue(T, out var SqlOutDelegate))
@@ -200,7 +210,8 @@ namespace ArgentSea
 		/// <param name="rdr">The data reader, set to the current result set.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>A list of objects of the specified type, one for each result.</returns>
-		public static IList<TModel> FromDataReader<TModel>(DbDataReader rdr, ILogger logger) where TModel : class, new()
+		public static IList<TModel> FromDataReader<TModel>(DbDataReader rdr, ILogger logger) 
+            where TModel : class, new()
 			=> FromDataReader<BadShardType, TModel>(null, rdr, logger);
 
 		/// <summary>
@@ -210,7 +221,9 @@ namespace ArgentSea
 		/// <param name="rdr">The data reader, set to the current result set.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
 		/// <returns>A list of objects of the specified type, one for each result.</returns>
-		public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardId, DbDataReader rdr, ILogger logger) where TModel : class, new() where TShard : IComparable
+		public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardId, DbDataReader rdr, ILogger logger) 
+            where TModel : class, new() 
+            where TShard : IComparable
 		{
             var result = new List<TModel>();
             if (rdr is null)
@@ -252,7 +265,8 @@ namespace ArgentSea
 		#endregion
 		#region delegate builders
 		private static Action<DbParameterCollection, HashSet<string>, ILogger, TModel> BuildInMapDelegate<TModel>(ILogger logger)
-		{
+            where TModel : class, new()
+        {
             var tModel = typeof(TModel);
 			var expressions = new List<Expression>();
 			//Create the two delegate parameters: in: sqlParametersCollection and model instance; out: sqlParametersCollection
@@ -620,7 +634,8 @@ namespace ArgentSea
             }
         }
 
-        private static Func<TShard, DbParameterCollection, ILogger, object> BuildOutGetDelegate<TShard>(DbParameterCollection parameters, Type tModel, ILogger logger) where TShard : IComparable
+        private static Func<TShard, DbParameterCollection, ILogger, object> BuildOutGetDelegate<TShard>(DbParameterCollection parameters, Type tModel, ILogger logger) 
+            where TShard : IComparable
 		{
 			var tShard = typeof(TShard);
 			ParameterExpression expShardArgument = Expression.Variable(tShard, "shardId");
@@ -1053,9 +1068,11 @@ namespace ArgentSea
 		}
 
 
-		private static (Func<TShard, DbDataReader, int[], ILogger, TModel> DataRow, Func<DbDataReader, int[]> Ordinals) BuildReaderMapDelegate<TShard, TModel>(ILogger logger) where TShard : IComparable
-		{
-			var tModel = typeof(TModel);
+		private static (Func<TShard, DbDataReader, int[], ILogger, TModel> DataRow, Func<DbDataReader, int[]> Ordinals) BuildReaderMapDelegate<TShard, TModel>(ILogger logger) 
+            where TShard : IComparable
+            where TModel : class, new()
+        {
+            var tModel = typeof(TModel);
 			var tShard = typeof(TShard);
 			ParameterExpression expShardArgument = Expression.Variable(tShard, "shardId");
 			ParameterExpression prmSqlRdr = Expression.Parameter(typeof(DbDataReader), "rdr"); //input param
@@ -1610,8 +1627,8 @@ namespace ArgentSea
 		{
 			// Build return object
 			var expressions = new List<Expression>();
-
-			var expProcName = Expression.Parameter(typeof(string), "sprocName");
+            var expShardId = Expression.Parameter(typeof(TShard), "shardId");
+            var expProcName = Expression.Parameter(typeof(string), "sprocName");
 			var expResultSet0 = Expression.Parameter(typeof(IList<TReaderResult0>), "rstResult0");
 			var expResultSet1 = Expression.Parameter(typeof(IList<TReaderResult1>), "rstResult1");
 			var expResultSet2 = Expression.Parameter(typeof(IList<TReaderResult2>), "rstResult2");
@@ -1864,8 +1881,34 @@ namespace ArgentSea
 			expressions.Add(expModel); //return model
 			var expBlock = Expression.Block(resultType, new ParameterExpression[] { expModel, expCount }, expressions); //+variables
 
-			var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>>
-				(expBlock, new ParameterExpression[] { expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expResultOut, expLogger }); //+parameters
+			var lambda = Expression.Lambda<Func<
+                TShard, 
+                string, 
+                IList<TReaderResult0>, 
+                IList<TReaderResult1>, 
+                IList<TReaderResult2>, 
+                IList<TReaderResult3>, 
+                IList<TReaderResult4>, 
+                IList<TReaderResult5>, 
+                IList<TReaderResult6>, 
+                IList<TReaderResult7>, 
+                TOutResult, 
+                ILogger, 
+                TModel>>
+				(expBlock, new ParameterExpression[] {
+                    expShardId,
+                    expProcName,
+                    expResultSet0,
+                    expResultSet1,
+                    expResultSet2,
+                    expResultSet3,
+                    expResultSet4,
+                    expResultSet5,
+                    expResultSet6,
+                    expResultSet7,
+                    expResultOut,
+                    expLogger
+                }); //+parameters
 			return lambda.Compile();
 		}
 

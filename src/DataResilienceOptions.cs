@@ -4,26 +4,33 @@ using System.Text;
 
 namespace ArgentSea
 {
-	//EXAMPLE:
-	//"ResilienceStrategies": [
-	//	{
-	//	    "DataResilienceKey": "remote",
-	//	    "RetryCount": "6",
-	//	    "RetryInterval": "250",
-	//	    "RetryLengthening": "Finonacci",
-	//	    "CircuitBreakerFailureCount": "20",
-	//	    "CircuitBreakerTestInterval": "5000"
-	//	},
-	//	{
-	//	    "DataResilienceKey": "local",
-	//	    "RetryCount": "6",
-	//	    "RetryInterval": "150",
-	//	    "RetryLengthening": "Finonacci",
-	//	    "CircuitBreakerFailureCount": "10",
-	//	    "CircuitBreakerTestInterval": "5000"
-	//	}
-	//]
-	public class DataResilienceOptions
+    /// <summary>
+    /// This options class contains an array of resilience strategies (retry and circuit breaking settings). To specify as particular resilience strategy, a connection can specify a DataResilienceKey.
+    /// </summary>
+    /// <example>
+    /// For example, you might configure your appsettings.json like this:
+    /// <code>
+    ///"ResilienceStrategies": [
+    ///	{
+    ///	    "DataResilienceKey": "remote",
+    ///	    "RetryCount": "6",
+    ///	    "RetryInterval": "250",
+    ///	    "RetryLengthening": "Finonacci",
+    ///	    "CircuitBreakerFailureCount": "20",
+    ///	    "CircuitBreakerTestInterval": "5000"
+    ///	},
+    ///	{
+    ///	    "DataResilienceKey": "local",
+    ///	    "RetryCount": "6",
+    ///	    "RetryInterval": "150",
+    ///	    "RetryLengthening": "Linear",
+    ///	    "CircuitBreakerFailureCount": "10",
+    ///	    "CircuitBreakerTestInterval": "5000"
+    ///	}
+    ///]
+    ///</code>
+    ///</example>
+    public class DataResilienceOptions
     {
 		public DataResilienceConfiguration[] DataResilienceStrategies { get; set; }
 	}

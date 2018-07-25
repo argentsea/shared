@@ -7,6 +7,10 @@ using System.Reflection;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This exception is invoked if a model property has multiple mapping attributes. A single value cannot be mapped to/from multiple parameters or columns.
+    /// This exception is not raised in the case of <see cref="ShardKey"> ShardKey</see>> or <see cref="ShardChild">ShardChild</see> properties.
+    /// </summary>
 	public sealed class MultipleMapAttributesException : Exception
 	{
 		/// <summary>

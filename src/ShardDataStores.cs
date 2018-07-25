@@ -13,6 +13,12 @@ using Polly;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This class is used by provider specific implementations. It is unlikely that you would call this in consumer code.
+    /// This is the generic class that defines connections for sharded data sets.
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+    /// <typeparam name="TConfiguration"></typeparam>
     public class ShardDataStores<TShard, TConfiguration> where TShard : IComparable where TConfiguration : class, IShardDataConfigurationOptions<TShard>, new()
 
 	{
@@ -73,6 +79,10 @@ namespace ArgentSea
                 var bdr = ImmutableDictionary.CreateBuilder<string, ShardDataSet>();
                 foreach (var set in config)
                 {
+                    if (set is null)
+                    {
+                        throw new Exception($"A shard set configuration is not valid; the configuration provider returned null.");
+                    }
                     bdr.Add(set.ShardSetKey, new ShardDataSet(parent, set));
                 }
                 this.dtn = bdr.ToImmutable();
@@ -109,7 +119,11 @@ namespace ArgentSea
                 var bdr = ImmutableDictionary.CreateBuilder<TShard, ShardInstance>();
                 foreach (var shd in config.ShardsInternal)
                 {
-					shd.ReadConnectionInternal.SetSecurity(parent._credentials[config.SecurityKey]);
+                    if (shd is null)
+                    {
+                        throw new Exception($"A shard set’s connection configuration was not valid; the configuration provider returned null.");
+                    }
+                    shd.ReadConnectionInternal.SetSecurity(parent._credentials[config.SecurityKey]);
 					shd.WriteConnectionInternal.SetSecurity(parent._credentials[config.SecurityKey]);
 					bdr.Add(shd.ShardId, new ShardInstance(parent, shd.ShardId, config.DataResilienceKey, shd.ReadConnectionInternal, shd.WriteConnectionInternal));
                 }

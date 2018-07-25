@@ -4,6 +4,10 @@ using System.Text;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This class contains the definition for a data resiliance strategy. Specifically: when to retry and when to circuit break.
+    /// This class is created as a configuration entry in an array in the DataResilienceStrategies property of the <see cref="DataConfigurationOptions">DataConfigurationOptions</see> class.
+    /// </summary>
 	public class DataResilienceConfiguration
 	{
 		public string DataResilienceKey { get; set; }
@@ -20,8 +24,7 @@ namespace ArgentSea
 		{
 			Linear,
 			Fibonacci,
-			Cumulative,
-			Doubling,
+			HalfSquare,
 			Squaring
 		}
 
@@ -47,12 +50,9 @@ namespace ArgentSea
 			long result;
 			switch (this.RetryLengthening)
 			{
-				case SequenceLengthening.Cumulative:
-					result = attempt * (attempt + 1) / 2;
-					break;
-				case SequenceLengthening.Doubling:
-					result = ((attempt - 1) * 2) * this.RetryInterval;
-					break;
+				case SequenceLengthening.HalfSquare:
+					result = ((attempt * attempt) / 2) * this.RetryInterval;
+                    break;
 				case SequenceLengthening.Linear:
 					result = attempt * this.RetryInterval;
 					break;

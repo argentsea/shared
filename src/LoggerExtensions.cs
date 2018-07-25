@@ -7,7 +7,9 @@ using System.Globalization;
 
 namespace ArgentSea
 {
-
+    /// <summary>
+    /// The are extension methods for high-performance logging.
+    /// </summary>
     public static class LoggingExtensions
     {
         public enum EventIdentifier
@@ -195,7 +197,7 @@ namespace ArgentSea
         {
             _sqlDbCmdExecutedTrace(logger, commandName, connectionName, milliseconds, null);
         }
-        public static void TraceShardCmdExecuted<TShard>(this ILogger logger, string commandName, string shardSetKey, TShard shardId, long milliseconds)
+        public static void TraceShardCmdExecuted<TShard>(this ILogger logger, string commandName, string shardSetKey, TShard shardId, long milliseconds) where TShard : IComparable
         {
             if (logger.IsEnabled(LogLevel.Trace))
             {

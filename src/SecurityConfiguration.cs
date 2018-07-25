@@ -5,7 +5,7 @@ using System.Text;
 namespace ArgentSea
 {
     /// <summary>
-    /// Data security information separated into separate configuration class so that it can be secured separately, as in Azure Key Value for example.
+    /// This class represents data security information, with a key that can be reference by any connection(s) that share the security information.
     /// </summary>
     public class SecurityConfiguration
     {

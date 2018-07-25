@@ -4,13 +4,19 @@ using System.Text;
 
 namespace ArgentSea
 {
+    /// <summary>
+	/// Immutable class representing a sharded record with a database compound key. The ShardChild consist of the (virtual) shardId, the recordId, and the childId.
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+    /// <typeparam name="TRecord"></typeparam>
+    /// <typeparam name="TChild"></typeparam>
     public struct ShardChild<TShard, TRecord, TChild> : IEquatable<ShardChild<TShard, TRecord, TChild>> 
         where TShard : IComparable
         where TRecord : IComparable
         where TChild : IComparable
     {
         private readonly ShardKey<TShard, TRecord> _key;
-        private TChild _childId;
+        private readonly TChild _childId;
 
         public ShardKey<TShard, TRecord> Key {
             get { return _key;  }
@@ -112,8 +118,7 @@ namespace ArgentSea
             var shardData = ShardKey<TShard, TRecord>.GetValueBytes(this._key.ShardId);
             var recordData = ShardKey<TShard, TRecord>.GetValueBytes(this._key.RecordId);
             var childData = ShardKey<TShard, TRecord>.GetValueBytes(this._childId);
-            byte[] aStamp = null;
-            var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + aStamp.Length + 1];
+            var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + childData.Length + 1];
             aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
             var resultIndex = 1;
             aOrigin.CopyTo(aResult, resultIndex);
@@ -124,31 +129,20 @@ namespace ArgentSea
             resultIndex += recordData.Length;
             childData.CopyTo(aResult, resultIndex);
             resultIndex = +childData.Length;
-            if (!(aStamp is null))
-            {
-                aStamp.CopyTo(recordData, resultIndex);
-            }
             return aResult;
         }
-
-        /// <summary>
-        /// Serializes ShardChild data into a URL-safe string with a checksum, but no concurrency stamp (if defined).
-        /// </summary>
-        /// <returns>A 12-character string.</returns>
-        public string ToExternalString()
-            => ToExternalString(false);
 
         /// <summary>
         /// Serializes ShardChild data into a URL-safe string with a checksum, optionally including a concurrency stamp.
         /// </summary>
         /// <param name="includeConcurrencyStamp">Indicates whether the string should include concurrancy stamp data, if defined.</param>
         /// <returns>A URL-safe string that can be re-serialized into a shard child.</returns>
-        public string ToExternalString(bool includeConcurrencyStamp)
+        public string ToExternalString()
         {
             var aValues = ToArray();
 
             int checkSum = 0;
-            for (var i = 1; i < aValues.Length; i++)
+            for (var i = 0; i < aValues.Length; i++)
             {
                 checkSum += aValues[i];
                 checkSum &= 0xff;
@@ -191,8 +185,12 @@ namespace ArgentSea
         }
         public static ShardChild<TShard, TRecord, TChild> FromExternalString(string value)
         {
+            if (value is null)
+            {
+                throw new ArgumentException(nameof(value));
+            }
             var aValues = Convert.FromBase64String(value.Replace('_', '+').Replace('~', '/'));
-            for (int i = 1; i < aValues.Length; i++)
+            for (int i = 0; i < aValues.Length; i++)
             {
                 if (i % 6 == 0)
                 {
@@ -219,6 +217,11 @@ namespace ArgentSea
                     aValues[i] ^= 114;
                 }
             }
+
+
+
+
+
             var sourceCheckSum = aValues[0];
             int checkSum = 0;
             for (var i = 1; i < aValues.Length; i++)
@@ -231,16 +234,15 @@ namespace ArgentSea
                 throw new Exception("Provided ShardChild string is corrupted.");
             }
 
-            TShard shardId = default(TShard);
-            TRecord recordId = default(TRecord);
-            TChild childId = default(TChild);
-
             if (aValues[0] >> 2 == 1)
             {
                 throw new Exception("This verion of serializer specified was not found.");
             }
-            int orgnLen = aValues[1] & 3;
-            
+            TShard shardId = default(TShard);
+            TRecord recordId = default(TRecord);
+            TChild childId = default(TChild);
+
+            int orgnLen = aValues[0] & 3;
             var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 2, orgnLen)[0]);
             var pos = orgnLen + 1;
 

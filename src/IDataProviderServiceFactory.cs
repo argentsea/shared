@@ -5,6 +5,10 @@ using System.Data.Common;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This interface is used by provider specific implementations. It is unlikely that you would reference this in consumer code.
+    /// The interface defines the capabilities of a database providers service.
+    /// </summary>
     public interface IDataProviderServiceFactory
     {
         bool GetIsErrorTransient(Exception exception);
@@ -15,9 +19,6 @@ namespace ArgentSea
 
         void SetParameters(DbCommand cmd, DbParameterCollection parameters);
 
-        //string NormalizeParameterName(string parameterName);
-
-        //string NormalizeFieldName(string fieldName);
     }
 
 }

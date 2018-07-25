@@ -4,6 +4,9 @@ using System.Text;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// The exception is thrown when an output parameter is expected, but not found, when ExecuteQueryToValueAsync is invoked.
+    /// </summary>
     public sealed class UnexpectedSqlResultException : Exception
     {
         /// <summary>

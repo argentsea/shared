@@ -13,6 +13,11 @@ using Polly;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This class is used by provider specific implementations. It is unlikely that you would reference this in consumer code.
+    /// This generic class manages non-sharded database connections.
+    /// </summary>
+    /// <typeparam name="TConfiguration">The provider-specific connection implementation.</typeparam>
     public class DbDataStores<TConfiguration> where TConfiguration : class, IDbDataConfigurationOptions, new()
 	{
         private readonly ImmutableDictionary<string, SecurityConfiguration> _credentials;
@@ -59,7 +64,11 @@ namespace ArgentSea
 
 				foreach (var db in config)
 				{
-					if (!parent._credentials.TryGetValue(db.SecurityKey, out var secCfg))
+                    if (db is null)
+                    {
+                        throw new Exception($"A database connection configuration was not valid; the configuration provider returned null.");
+                    }
+                    if (!parent._credentials.TryGetValue(db.SecurityKey, out var secCfg))
 					{
 						throw new Exception($"Connection {db.DataConnectionInternal.ConnectionDescription} specifies a security key that could not be found in the “Credentials” list.");
 					}

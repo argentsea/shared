@@ -7,6 +7,19 @@ using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This property attribute is used to map multiple paramters to a ShardChild object.
+    /// This recordIdName attribute and childIdName attributes must exactly match the names of the corresponding MapTo attributes which are also on the same property.
+    /// </summary>
+    /// <example>
+    /// For example, you could implement the mapping for a ShardChild property like this:
+    /// <code>
+    /// [MapShardChild('C', "ParentRecordId", "ChildRecordId")]
+    /// [MapToSqlSmallInt("ParentRecordId")]
+    /// [MapToSqlNVarChar("ChildRecordId", 255)]
+    /// public ShardChild<byte, short, string>? ChildShard2 { get; set; } = null;
+    /// </code>
+    /// </example>
 	public class MapShardChildAttribute : Attribute
 	{
 		public MapShardChildAttribute(DataOrigin origin, string shardIdName, string recordIdName, string childIdName)

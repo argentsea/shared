@@ -6,6 +6,9 @@ using System.Collections.Specialized;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This is an implementation of the abstract DbParameterCollecion class. Unlike most provider-specific parameter collections, it can be created without a prior DbCommand object instance.
+    /// </summary>
     public class QueryParameterCollection : DbParameterCollection
     {
         //private readonly Dictionary<string, DbParameter> _dtn = new Dictionary<string, DbParameter>();

@@ -4,6 +4,10 @@ using System.Text;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This static class contains extension methods for cleaning input strings of invalid characters.
+    /// It does NOT sanitize input strings for protection against injection attacks (your parmemeterized queries should protect against that).
+    /// </summary>
     public static class StringExtensions
     {
 		[Flags]
