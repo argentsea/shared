@@ -130,8 +130,7 @@ namespace ArgentSea
                 this.dtn = bdr.ToImmutable();
             }
 
-            public TShard ShardId { get; set; }
-
+            public string Key { get; set; }
 
             public ShardInstance this[TShard shardId]
             {
@@ -180,9 +179,8 @@ namespace ArgentSea
                     {
                         if (shardIdParameterIndex >= 0 && shardIdParameterIndex < parameters.Count) // && cmd.Parameters[shardIdParameterIndex].DbType == System.Data.DbType.Byte)
                         {
-                            parameters[shardIdParameterIndex].Value = this.ShardId;
+                            parameters[shardIdParameterIndex].Value = shardId;
                         }
-
                         tsks.Add(this.dtn[shardId].ReadConnection.QueryAsync<TArg, TResult>(sprocName, parameters, shardIdParameterIndex, resultHandler, true, dataObject, queryCancelationToken.Token));
                     }
                     while (tsks.Count > 0)
@@ -234,7 +232,7 @@ namespace ArgentSea
                 {
                     if (shardIdParameterIndex >= 0 && shardIdParameterIndex < parameters.Count) // && cmd.Parameters[shardIdParameterIndex].DbType == System.Data.DbType.Byte)
                     {
-                        parameters[shardIdParameterIndex].Value = this.ShardId;
+                        parameters[shardIdParameterIndex].Value = shardId;
                     }
                     tsks.Add(this.dtn[shardId].ReadConnection.QueryAsync<TArg, TModel>(sprocName, parameters, shardIdParameterIndex, resultHandler, false, dataObject, cancellationToken));
                 }
