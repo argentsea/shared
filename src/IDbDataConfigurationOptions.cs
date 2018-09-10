@@ -20,8 +20,7 @@ namespace ArgentSea
     public interface IDbConnectionConfiguration
 	{
 		string DatabaseKey { get; set; }
-		string SecurityKey { get; set; }
-		string DataResilienceKey { get; set; }
-		IConnectionConfiguration DataConnectionInternal { get; }
+
+        IConnectionConfiguration DataConnectionInternal { get; }
 	}
 }

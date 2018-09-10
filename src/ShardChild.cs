@@ -139,45 +139,7 @@ namespace ArgentSea
         /// <returns>A URL-safe string that can be re-serialized into a shard child.</returns>
         public string ToExternalString()
         {
-            var aValues = ToArray();
-
-            int checkSum = 0;
-            for (var i = 0; i < aValues.Length; i++)
-            {
-                checkSum += aValues[i];
-                checkSum &= 0xff;
-            }
-            aValues[0] = (byte)checkSum;
-
-            for (int i = 0; i < aValues.Length; i++)
-            {
-                if (i % 6 == 0)
-                {
-                    aValues[i] ^= 180;
-                }
-                else if (i % 6 == 1)
-                {
-                    aValues[i] ^= 78;
-                }
-                else if (i % 6 == 2)
-                {
-                    aValues[i] ^= 92;
-                }
-                else if (i % 6 == 3)
-                {
-                    aValues[i] ^= 119;
-                }
-                else if (i % 6 == 4)
-                {
-                    aValues[i] ^= 209;
-                }
-                else if (i % 6 == 5)
-                {
-                    aValues[i] ^= 114;
-                }
-            }
-
-             return Convert.ToBase64String(aValues).Replace('+', '_').Replace('/', '~');
+            return StringExtensions.SerializeToExternalString(ToArray());
         }
         public override string ToString()
         {
@@ -185,65 +147,13 @@ namespace ArgentSea
         }
         public static ShardChild<TShard, TRecord, TChild> FromExternalString(string value)
         {
-            if (value is null)
-            {
-                throw new ArgumentException(nameof(value));
-            }
-            var aValues = Convert.FromBase64String(value.Replace('_', '+').Replace('~', '/'));
-            for (int i = 0; i < aValues.Length; i++)
-            {
-                if (i % 6 == 0)
-                {
-                    aValues[i] ^= 180;
-                }
-                else if (i % 6 == 1)
-                {
-                    aValues[i] ^= 78;
-                }
-                else if (i % 6 == 2)
-                {
-                    aValues[i] ^= 92;
-                }
-                else if (i % 6 == 3)
-                {
-                    aValues[i] ^= 119;
-                }
-                else if (i % 6 == 4)
-                {
-                    aValues[i] ^= 209;
-                }
-                else if (i % 6 == 5)
-                {
-                    aValues[i] ^= 114;
-                }
-            }
-
-
-
-
-
-            var sourceCheckSum = aValues[0];
-            int checkSum = 0;
-            for (var i = 1; i < aValues.Length; i++)
-            {
-                checkSum += aValues[i];
-                checkSum &= 0xff;
-            }
-            if (checkSum != (int)sourceCheckSum)
-            {
-                throw new Exception("Provided ShardChild string is corrupted.");
-            }
-
-            if (aValues[0] >> 2 == 1)
-            {
-                throw new Exception("This verion of serializer specified was not found.");
-            }
+            var aValues = StringExtensions.SerializeFromExternalString(value);
             TShard shardId = default(TShard);
             TRecord recordId = default(TRecord);
             TChild childId = default(TChild);
 
             int orgnLen = aValues[0] & 3;
-            var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 2, orgnLen)[0]);
+            var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
             var pos = orgnLen + 1;
 
             var typeShard = typeof(TShard);

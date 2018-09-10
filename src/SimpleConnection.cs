@@ -15,7 +15,7 @@ namespace ArgentSea
             return ConnectionString;
         }
 
-        public void SetSecurity(SecurityConfiguration security)
+        public void SetConfigurationOptions(DataSecurityOptions securityOptions, DataResilienceOptions resilienceStrategiesOptions)
         {
             //
         }

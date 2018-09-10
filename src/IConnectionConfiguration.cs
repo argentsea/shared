@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Polly;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 
 namespace ArgentSea
 {
@@ -22,6 +23,6 @@ namespace ArgentSea
             get;
         }
 
-        void SetSecurity(SecurityConfiguration security);
+        void SetConfigurationOptions(DataSecurityOptions securityOptions, DataResilienceOptions resilienceStrategiesOptions);
     }
 }

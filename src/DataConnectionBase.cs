@@ -18,25 +18,24 @@ namespace ArgentSea
 		#region Private variables and constructors
 		private readonly ILogger _logger;
 		private readonly Dictionary<string, Policy> _commandPolicy = new Dictionary<string, Policy>();
-		private readonly DataResilienceConfiguration _resilienceStrategy;
+		private DataResilienceConfiguration _resilienceStrategy;
 		private readonly IDataProviderServiceFactory _dataProviderServices;
 		private readonly string _connectionString;
 		private readonly string _connectionName;
-		private readonly TShard _shardId;
+        private readonly TShard _shardId;
+        private string _resilienceStrategyKey;
 
-		private Policy ConnectionPolicy { get; set; }
+        private Policy ConnectionPolicy { get; set; }
 		private Dictionary<string, Policy> CommandPolicies { get; set; } = new Dictionary<string, Policy>();
 
-		protected DataConnectionManager() { } //hide ctor
-
-		internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, string resilienceStrategyKey, string connectionString, string connectionName, ImmutableDictionary<string, DataResilienceConfiguration> resilienceStrategies, ILogger logger)
+        internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, string connectionString, string connectionName, ILogger logger)
 		{
 			this._logger = logger;
 			this._dataProviderServices = dataProviderServices;
 			this._connectionString = connectionString;
 			this._connectionName = connectionName;
-			this._resilienceStrategy = DataStoreHelper.GetResilienceStrategy(resilienceStrategies, resilienceStrategyKey, connectionName, _logger);
-		}
+            _shardId = shardId;
+        }
 		#endregion
 		#region Private helper methods
 		private Policy GetCommandResiliencePolicy(string sprocName)
@@ -91,18 +90,19 @@ namespace ArgentSea
 		#region Public properties
 
 		public string ConnectionString { get => this._connectionString; }
-		#endregion
 
-		#region Public data fetch methods
-		/// <summary>
-		/// Connect to the database and return a single value.
-		/// </summary>
-		/// <typeparam name="TValue">The expected type of the return value.</typeparam>
-		/// <param name="sprocName">The stored procedure to call to fetch the value.</param>
-		/// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; will return the value of the first output (or input/output) parameter. If TValue is an int, will also return the sproc return value.</param>
-		/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-		/// <returns>The retrieved value.</returns>
-		public async Task<TValue> LookupAsync<TValue>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, CancellationToken cancellationToken)
+        #endregion
+
+        #region Public data fetch methods
+        /// <summary>
+        /// Connect to the database and return a single value.
+        /// </summary>
+        /// <typeparam name="TValue">The expected type of the return value.</typeparam>
+        /// <param name="sprocName">The stored procedure to call to fetch the value.</param>
+        /// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; will return the value of the first output (or input/output) parameter. If TValue is an int, will also return the sproc return value.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>The retrieved value.</returns>
+        public async Task<TValue> LookupAsync<TValue>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, CancellationToken cancellationToken)
 		{
 			//return await DataStoreHelper.AdoExecute<TValue>(sprocName, parameters, this._commandPolicy, this._dataProviderServices, this._resilienceStrategy, this._connectionName, this.HandleCommandRetry, this._logger, cancellationToken);
 			cancellationToken.ThrowIfCancellationRequested();

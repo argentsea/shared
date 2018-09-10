@@ -678,148 +678,17 @@ namespace ArgentSea
 		/// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
 		public string ToExternalString()
 		{
-			var aResult = ToArray();
-
-			int checkSum = 0;
-			foreach (var chr in aResult)
-			{
-				checkSum += chr;
-				checkSum &= 0x3f;
-			}
-			char checkSumChr;
-			if (checkSum < 26)
-			{
-				checkSumChr = (char)(0x41 + checkSum);
-			}
-			else if (checkSum < 52)
-			{
-				checkSumChr = (char)(0x61 + (checkSum - 26));
-			}
-			else if (checkSum < 62)
-			{
-				checkSumChr = (char)(0x30 + (checkSum - 52));
-			}
-			else if (checkSum == 62)
-			{
-				checkSumChr = '+';
-			}
-			else
-			{
-				checkSumChr = '/';
-			}
-			for (int i = 0; i < aResult.Length; i++)
-			{
-				if (i % 6 == 0)
-				{
-					aResult[i] ^= 119;
-				}
-				else if (i % 6 == 1)
-				{
-					aResult[i] ^= 78;
-				}
-				else if (i % 6 == 2)
-				{
-					aResult[i] ^= 180;
-				}
-				else if (i % 6 == 3)
-				{
-					aResult[i] ^= 92;
-				}
-				else if (i % 6 == 4)
-				{
-					aResult[i] ^= 83;
-				}
-				else if (i % 6 == 5)
-				{
-					aResult[i] ^= 77;
-				}
-			}
-			return checkSumChr + Convert.ToBase64String(aResult).Replace('+', '_').Replace('/', '~');
+            return StringExtensions.SerializeToExternalString(ToArray());
 		}
 		public static ShardKey<TShard, TRecord> FromExternalString(string value)
 		{
 
-			if (value is null)
-			{
-				throw new ArgumentException(nameof(value));
-			}
-			var aValues = Convert.FromBase64String(value.Substring(1).Replace('_', '+').Replace('~', '/'));
-
-			for (int i = 0; i < aValues.Length; i++)
-			{
-				if (i % 6 == 0)
-				{
-					aValues[i] ^= 119;
-				}
-				else if (i % 6 == 1)
-				{
-					aValues[i] ^= 78;
-				}
-				else if (i % 6 == 2)
-				{
-					aValues[i] ^= 180;
-				}
-				else if (i % 6 == 3)
-				{
-					aValues[i] ^= 92;
-				}
-				else if (i % 6 == 4)
-				{
-					aValues[i] ^= 83;
-				}
-				else if (i % 6 == 5)
-				{
-					aValues[i] ^= 77;
-				}
-			}
-
-			var charCheckSum = value.ToCharArray()[0];
-			int origCheckSum;
-			if ('A' <= charCheckSum && charCheckSum <= 'Z')
-			{
-				origCheckSum = (int)charCheckSum - 0x41;
-			}
-			else if ('a' <= charCheckSum && charCheckSum <= 'z')
-			{
-				origCheckSum = ((int)charCheckSum - 0x61) + 26;
-			}
-			else if ('0' <= charCheckSum && charCheckSum <= '9')
-			{
-				origCheckSum = ((int)charCheckSum - 0x30) + 52;
-			}
-			else if ('+' == charCheckSum)
-			{
-				origCheckSum = 62;
-			}
-			else if ('/' == charCheckSum)
-			{
-				origCheckSum = 63;
-			}
-			else
-			{
-				throw new Exception("External key string has been corrupted.");
-			}
-			int checkSum = 0;
-			foreach (var chr in aValues)
-			{
-				checkSum += chr;
-				checkSum &= 0x3f;
-			}
-			if (origCheckSum != checkSum)
-			{
-				throw new Exception("External key string is not valid.");
-			}
-
-			if ((aValues[0] & 12) != (1 << 2))
-			{
-				throw new Exception("The serialization version is invalid. Cannot deserialize this external string.");
-			}
-
+            var aValues = StringExtensions.SerializeFromExternalString(value);
 			TShard shardId = default(TShard);
 			TRecord recordId = default(TRecord);
 
 			int orgnLen = aValues[0] & 3;
-			var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 2, orgnLen)[0]);
+			var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
 			var pos = orgnLen + 1;
 
 			var typeShard = typeof(TShard);
@@ -932,6 +801,6 @@ namespace ArgentSea
 				return new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord));
 			}
 		}
-	}
+    }
 }
 

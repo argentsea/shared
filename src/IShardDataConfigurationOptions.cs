@@ -147,8 +147,8 @@ namespace ArgentSea
 	public interface IShardConnectionsConfiguration<TShard> where TShard : IComparable
     {
 		string ShardSetKey { get; set; }
-		string SecurityKey { get; set; }
-		string DataResilienceKey { get; set; }
+//		string SecurityKey { get; set; }
+//		string DataResilienceKey { get; set; }
 		IShardConnectionConfiguration<TShard>[] ShardsInternal { get; }
 	}
 

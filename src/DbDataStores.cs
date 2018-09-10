@@ -20,17 +20,17 @@ namespace ArgentSea
     /// <typeparam name="TConfiguration">The provider-specific connection implementation.</typeparam>
     public class DbDataStores<TConfiguration> where TConfiguration : class, IDbDataConfigurationOptions, new()
 	{
-        private readonly ImmutableDictionary<string, SecurityConfiguration> _credentials;
-        private readonly ImmutableDictionary<string, DataResilienceConfiguration> _resilienceStrategies;
+        private readonly DataSecurityOptions _securityOptions;
+        private readonly DataResilienceOptions _resilienceStrategiesOptions;
         private readonly IDataProviderServiceFactory _dataProviderServices;
         private readonly ILogger _logger;
 
 		#region DbDataStores Constructor
 		public DbDataStores(
 			IOptions<TConfiguration> configOptions,
-			IOptions<DataSecurityOptions> securityOptions,
-			IOptions<DataResilienceOptions> resilienceStrategiesOptions,
-			IDataProviderServiceFactory dataProviderServices,
+            IOptions<DataSecurityOptions> securityOptions,
+            IOptions<DataResilienceOptions> resilienceStrategiesOptions,
+            IDataProviderServiceFactory dataProviderServices,
 			ILogger<DbDataStores<TConfiguration>> logger)
 		{
 			this._logger = logger;
@@ -40,9 +40,9 @@ namespace ArgentSea
 				throw new Exception("The DbDataStore object is missing required data connection information. Your application configuration may be missing a data configuration section.");
 			}
 
-			this._credentials = DataStoreHelper.BuildCredentialDictionary(securityOptions);
-			this._resilienceStrategies = DataStoreHelper.BuildResilienceStrategies(resilienceStrategiesOptions);
-			this._dataProviderServices = dataProviderServices;
+            this._securityOptions = securityOptions?.Value;
+            this._resilienceStrategiesOptions = resilienceStrategiesOptions?.Value;
+            this._dataProviderServices = dataProviderServices;
 			this.DbConnections = new DbDataSets(this, configOptions.Value.DbConnectionsInternal);
         }
 		#endregion
@@ -54,10 +54,6 @@ namespace ArgentSea
 			private readonly object syncRoot = new Lazy<object>();
 			private readonly ImmutableDictionary<string, DataConnection> dtn;
 
-			public DbDataSets()
-			{
-				//hide ctor
-			}
 			public DbDataSets(DbDataStores<TConfiguration> parent, IDbConnectionConfiguration[] config)
 			{
 				var bdr = ImmutableDictionary.CreateBuilder<string, DataConnection>();
@@ -68,12 +64,12 @@ namespace ArgentSea
                     {
                         throw new Exception($"A database connection configuration was not valid; the configuration provider returned null.");
                     }
-                    if (!parent._credentials.TryGetValue(db.SecurityKey, out var secCfg))
-					{
-						throw new Exception($"Connection {db.DataConnectionInternal.ConnectionDescription} specifies a security key that could not be found in the “Credentials” list.");
-					}
-					db.DataConnectionInternal.SetSecurity(secCfg);
-					bdr.Add(db.DatabaseKey, new DataConnection(parent, db.DataResilienceKey, db.DataConnectionInternal));
+                    //if (!parent._credentials.TryGetValue(db.SecurityKey, out var secCfg))
+                    //{
+                    //    throw new Exception($"Connection {db.DataConnectionInternal.ConnectionDescription} specifies a security key that could not be found in the “Credentials” list.");
+                    //}
+                    //db.DataConnectionInternal.SetSecurity(secCfg);
+                    bdr.Add(db.DatabaseKey, new DataConnection(parent, db.DataConnectionInternal));
 				}
 				this.dtn = bdr.ToImmutable();
 			}
@@ -101,12 +97,11 @@ namespace ArgentSea
 		{
 			private readonly DataConnectionManager<int> _manager;
 
-			private DataConnection() { } //hide ctor
-
-			internal DataConnection(DbDataStores<TConfiguration> parent, string resilienceStrategyKey, IConnectionConfiguration config)
+			internal DataConnection(DbDataStores<TConfiguration> parent, IConnectionConfiguration config)
 			{
 				_manager = new DataConnectionManager<int>(0, parent._dataProviderServices,
-					resilienceStrategyKey, config.GetConnectionString(), config.ConnectionDescription, parent._resilienceStrategies, parent._logger);
+					config.GetConnectionString(), config.ConnectionDescription, parent._logger);
+                config.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
 			}
 			public string ConnectionString { get => _manager.ConnectionString; }
 
@@ -345,8 +340,6 @@ namespace ArgentSea
 
   //          private Policy ConnectionPolicy { get; set; }
   //          private Dictionary<string, Policy> CommandPolicies { get; set; } = new Dictionary<string, Policy>();
-
-  //          private DataConnectionOld() {  } //hide ctor
 
 		//	////internal DataConnection(DbDataStores<TConfiguration> parent, string resilienceStrategyKey, IConnectionConfiguration config)
 		//	////    : this(parent, resilienceStrategyKey, config.ConnectionDescription, config)
