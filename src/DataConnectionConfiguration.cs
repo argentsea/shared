@@ -14,7 +14,7 @@ namespace ArgentSea
     {
         private ImmutableDictionary<string, SecurityConfiguration> _credentials = null;
         private ImmutableDictionary<string, DataResilienceConfiguration> _resilienceStrategies = null;
-        private string _dataResilienceKey = null;
+        private string _resilienceKey = null;
         private string _securityKey = null;
         protected bool hasConnectionPropertyChanged = true;
 
@@ -40,7 +40,7 @@ namespace ArgentSea
             {
                 foreach (var rs in resilienceStrategiesOptions.DataResilienceStrategies)
                 {
-                    rbdr.Add(rs.DataResilienceKey, rs);
+                    rbdr.Add(rs.ResilienceKey, rs);
                 }
             }
             _resilienceStrategies = rbdr.ToImmutable();
@@ -52,11 +52,11 @@ namespace ArgentSea
 
         protected DataResilienceConfiguration GetResilienceStrategy(ILogger logger)
         {
-            if (_resilienceStrategies != null && _resilienceStrategies.Count > 0 && !string.IsNullOrEmpty(_dataResilienceKey))
+            if (_resilienceStrategies != null && _resilienceStrategies.Count > 0 && !string.IsNullOrEmpty(_resilienceKey))
             {
-                if (!_resilienceStrategies.TryGetValue(_dataResilienceKey, out var rstrategy))
+                if (!_resilienceStrategies.TryGetValue(_resilienceKey, out var rstrategy))
                 {
-                    logger.LogWarning($"Connection {this.ConnectionDescription} specifies a resiliance strategy of “{_dataResilienceKey}”, but that could not be found in the list of configured strategies. Using a default strategy instead.");
+                    logger.LogWarning($"Connection {this.ConnectionDescription} specifies a resiliance strategy of “{_resilienceKey}”, but that could not be found in the list of configured strategies. Using a default strategy instead.");
                     rstrategy = new DataResilienceConfiguration();
                 }
                 return rstrategy;
@@ -90,15 +90,15 @@ namespace ArgentSea
             }
         }
 
-        public string DataResilienceKey
+        public string ResilienceKey
         {
             get
             {
-                return _dataResilienceKey;
+                return _resilienceKey;
             }
             set
             {
-                _dataResilienceKey = value;
+                _resilienceKey = value;
             }
         }
 

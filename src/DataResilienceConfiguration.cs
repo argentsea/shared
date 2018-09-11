@@ -10,7 +10,7 @@ namespace ArgentSea
     /// </summary>
 	public class DataResilienceConfiguration
 	{
-		public string DataResilienceKey { get; set; }
+		public string ResilienceKey { get; set; }
 
 		public int RetryCount { get; set; } = 6;
 

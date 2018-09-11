@@ -23,6 +23,11 @@ namespace ArgentSea
             get;
         }
 
+        string ResilienceKey
+        {
+            get;
+        }
+
         void SetConfigurationOptions(DataSecurityOptions securityOptions, DataResilienceOptions resilienceStrategiesOptions);
     }
 }

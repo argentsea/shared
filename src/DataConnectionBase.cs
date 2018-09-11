@@ -23,16 +23,16 @@ namespace ArgentSea
 		private readonly string _connectionString;
 		private readonly string _connectionName;
         private readonly TShard _shardId;
-        private string _resilienceStrategyKey;
 
-        private Policy ConnectionPolicy { get; set; }
-		private Dictionary<string, Policy> CommandPolicies { get; set; } = new Dictionary<string, Policy>();
+        //private Policy ConnectionPolicy { get; set; }
+		//private Dictionary<string, Policy> CommandPolicies { get; set; } = new Dictionary<string, Policy>();
 
-        internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, string connectionString, string connectionName, ILogger logger)
+        internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, DataResilienceConfiguration resilienceStrategy, string connectionString, string connectionName, ILogger logger)
 		{
 			this._logger = logger;
-			this._dataProviderServices = dataProviderServices;
-			this._connectionString = connectionString;
+            this._dataProviderServices = dataProviderServices;
+            this._resilienceStrategy = resilienceStrategy;
+            this._connectionString = connectionString;
 			this._connectionName = connectionName;
             _shardId = shardId;
         }

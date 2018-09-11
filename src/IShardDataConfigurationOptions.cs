@@ -25,7 +25,7 @@ using System.Collections.Immutable;
 //  "DataSources":
 //      "ResilienceStrategies": [
 //          {
-//              "DataResilienceKey": "remote",
+//              "ResilienceKey": "remote",
 //              "RetryCount": "6",
 //              "RetryInterval": "250",
 //              "RetryLengthening": "Finonacci",
@@ -35,8 +35,8 @@ using System.Collections.Immutable;
 //      ]
 //      {
 //      "ShardSets": [
-//          "ShardSetKey": "0",
-//          "DataResilienceKey": "remote",
+//          "ShardSetName": "0",
+//          "ResilienceKey": "remote",
 //          "Shards": [
 //              {
 //                  "ShardConnectionId": 0,
@@ -73,7 +73,7 @@ using System.Collections.Immutable;
 //              "DbConnectionId": 0,
 //              "DbConnection": {
 //                  "SecurityKey": "0",
-//                  "DataResilienceKey": "remote",
+//                  "ResilienceKey": "remote",
 //                  "Server": "10.10.10.10",
 //                  "Database": "MyDb3"
 //              }
@@ -82,7 +82,7 @@ using System.Collections.Immutable;
 //              "DbConnectionId": 1,
 //              "DbConnection": {
 //                  "SecurityKey": "1",
-//                  "DataResilienceKey": "remote",
+//                  "ResilienceKey": "remote",
 //                  "Server": "10.10.10.10",
 //                  "Database": "MyDb4"
 //              }
@@ -95,8 +95,8 @@ namespace ArgentSea
     //  "DataSources":
     //      {
     //      "ShardSets": [
-    //          "ShardSetKey": "0",
-    //          "DataResilienceKey": "remote",
+    //          "ShardSetName": "0",
+    //          "ResilienceKey": "remote",
     //          "Shards": [
     //              {
     //                  "ShardConnectionId": 0,
@@ -146,9 +146,7 @@ namespace ArgentSea
     /// <typeparam name="TShard"></typeparam>
 	public interface IShardConnectionsConfiguration<TShard> where TShard : IComparable
     {
-		string ShardSetKey { get; set; }
-//		string SecurityKey { get; set; }
-//		string DataResilienceKey { get; set; }
+		string ShardSetName { get; set; }
 		IShardConnectionConfiguration<TShard>[] ShardsInternal { get; }
 	}
 

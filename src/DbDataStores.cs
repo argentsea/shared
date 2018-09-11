@@ -99,7 +99,25 @@ namespace ArgentSea
 
 			internal DataConnection(DbDataStores<TConfiguration> parent, IConnectionConfiguration config)
 			{
-				_manager = new DataConnectionManager<int>(0, parent._dataProviderServices,
+                var resilienceStrategies = parent?._resilienceStrategiesOptions?.DataResilienceStrategies;
+                DataResilienceConfiguration drc = null;
+                if (!(resilienceStrategies is null))
+                {
+                    foreach (var rs in resilienceStrategies)
+                    {
+                        if (rs.ResilienceKey == config.ResilienceKey)
+                        {
+                            drc = rs;
+                            break;
+                        }
+                    }
+                }
+                if (drc is null)
+                {
+                    drc = new DataResilienceConfiguration();
+                }
+
+                _manager = new DataConnectionManager<int>(0, parent._dataProviderServices, drc,
 					config.GetConnectionString(), config.ConnectionDescription, parent._logger);
                 config.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
 			}

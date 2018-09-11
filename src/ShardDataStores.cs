@@ -65,7 +65,7 @@ namespace ArgentSea
                     {
                         throw new Exception($"A shard set configuration is not valid; the configuration provider returned null.");
                     }
-                    bdr.Add(set.ShardSetKey, new ShardDataSet(parent, set));
+                    bdr.Add(set.ShardSetName, new ShardDataSet(parent, set));
                 }
                 this.dtn = bdr.ToImmutable();
             }
@@ -266,8 +266,27 @@ namespace ArgentSea
 
             internal DataConnection(ShardDataStores<TShard, TConfiguration> parent, TShard shardId, IConnectionConfiguration config)
             {
+                var resilienceStrategies = parent?._resilienceStrategiesOptions?.DataResilienceStrategies;
+                DataResilienceConfiguration drc = null;
+                if (!(resilienceStrategies is null))
+                {
+                    foreach (var rs in resilienceStrategies)
+                    {
+                        if (rs.ResilienceKey == config.ResilienceKey)
+                        {
+                            drc = rs;
+                            break;
+                        }
+                    }
+                }
+                if (drc is null)
+                {
+                    drc = new DataResilienceConfiguration();
+                }
+
                 _manager = new DataConnectionManager<TShard>(shardId, 
 					parent._dataProviderServices, 
+                    drc,
 					config.GetConnectionString(), 
 					$"shard number { shardId.ToString() } on connection { config.ConnectionDescription }", 
 					parent._logger);

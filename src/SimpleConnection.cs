@@ -10,6 +10,8 @@ namespace ArgentSea
 
         public string ConnectionString { get; set; }
 
+        public string ResilienceKey { get { return null; } }
+
         public string GetConnectionString()
         {
             return ConnectionString;
