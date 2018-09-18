@@ -6,6 +6,11 @@
 	  <DebugType>Full</DebugType>
 	  <AssemblyVersion>1.0.0.0</AssemblyVersion>
 	  <FileVersion>1.0.0.0</FileVersion>
+	  <ApplicationIcon />
+	  <OutputType>Library</OutputType>
+	  <StartupObject />
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <PackageProjectUrl>http://www.argentsea.com</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
