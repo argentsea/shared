@@ -36,19 +36,21 @@ namespace ArgentSea
 		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
 		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
 		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
 		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, ILogger logger)
             where TModel : class, new()
             => MapToInParameters<TModel>(parameters, model, null, logger);
 
-		/// <summary>
-		/// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
-		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
-		/// <param name="model">An object model instance. The property values are use as parameter values.</param>
-		/// <param name="ignoreParameters">A lists of parameter names that should not be created. Each entry must exactly match the parameter name, including prefix and casing.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, HashSet<string> ignoreParameters, ILogger logger)
+        /// <summary>
+        /// Accepts a Sql Parameter collection and appends Sql input parameters whose values correspond to the provided object properties and MapTo attributes.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql metadata and columns.</typeparam>
+        /// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+        /// <param name="model">An object model instance. The property values are use as parameter values.</param>
+        /// <param name="ignoreParameters">A lists of parameter names that should not be created. Each entry must exactly match the parameter name, including prefix and casing.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static DbParameterCollection MapToInParameters<TModel>(this DbParameterCollection parameters, TModel model, HashSet<string> ignoreParameters, ILogger logger)
             where TModel : class, new()
         {
             if (ignoreParameters is null)
@@ -79,51 +81,55 @@ namespace ArgentSea
 			((Action<DbParameterCollection, HashSet<string>, ILogger, TModel>)sqlParameterDelegates)(parameters, ignoreParameters, logger, model);
 			return parameters;
 		}
-		#endregion
+        #endregion
 
-		#region Set Mapped Output Parameters
-		/// <summary>
-		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
-		/// </summary>
-		/// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
-		/// <param name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns></returns>
-		public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type TModel, ILogger logger)
+        #region Set Mapped Output Parameters
+        /// <summary>
+        /// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
+        /// </summary>
+        /// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
+        /// <param name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type TModel, ILogger logger)
             => MapToOutParameters(parameters, TModel, null, logger);
 
-		/// <summary>
-		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
-		/// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns>The DbParameterCollection, enabling a fluent API.</returns>
-		public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) 
+        /// <summary>
+        /// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
+        /// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns>The DbParameterCollection, enabling a fluent API.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) 
             where TModel : class, new()
             => MapToOutParameters(parameters, typeof(TModel), null, logger);
 
-		/// <summary>
-		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
-		/// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
-		/// <param name="ignoreParameters">A lists of parameter names that should not be created.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns>The DbParameterCollection, enabling a fluent API.</returns>
-		public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, HashSet<string> ignoreParameters, ILogger logger)
+        /// <summary>
+        /// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
+        /// <param name="parameters">A parameter collection, possibly belonging to a ADO.Net Command object or a QueryParmaters object.</param>
+        /// <param name="ignoreParameters">A lists of parameter names that should not be created.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns>The DbParameterCollection, enabling a fluent API.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static DbParameterCollection MapToOutParameters<TModel>(this DbParameterCollection parameters, HashSet<string> ignoreParameters, ILogger logger)
             where TModel : class, new()
             => MapToOutParameters(parameters, typeof(TModel), null, logger);
 
-		/// <summary>
-		/// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
-		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
-		/// <param name="model">The type of the model.</param>
-		/// <param name="ignoreParameters">A lists of parameter names that should not be created.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type TModel, HashSet<string> ignoreParameters, ILogger logger)
+        /// <summary>
+        /// Accepts a Sql Parameter collection and appends Sql output parameters corresponding to the MapTo attributes.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to create the Sql parameter types.</typeparam>
+        /// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object.</param>
+        /// <param name="model">The type of the model.</param>
+        /// <param name="ignoreParameters">A lists of parameter names that should not be created.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type TModel, HashSet<string> ignoreParameters, ILogger logger)
 		{
 			//For each paramater, Expression Tree does the following:
 			//ArgentSea.LoggingExtensions.TraceSetOutMapperProperty(logger, "ParameterName");
@@ -161,28 +167,30 @@ namespace ArgentSea
 			SqlParameterDelegates(parameters, ignoreParameters, logger);
 			return parameters;
 		}
-		#endregion
+        #endregion
 
-		#region Get Map Output Parameters
-		/// <summary>
-		/// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
-		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
-		public static TModel ReadOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) 
+        #region Get Map Output Parameters
+        /// <summary>
+        /// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
+        /// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns>An object of the specified type, with properties set to parameter values.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static TModel ReadOutParameters<TModel>(this DbParameterCollection parameters, ILogger logger) 
             where TModel : class, new()
 			=> ReadOutParameters<BadShardType, TModel>(parameters, null, logger);
 
-		/// <summary>
-		/// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
-		/// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns>An object of the specified type, with properties set to parameter values.</returns>
-		public static TModel ReadOutParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, ILogger logger) 
+        /// <summary>
+        /// Creates a new object with property values based upon the provided output parameters which correspond to the MapTo attributes.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the object. The "MapTo" attributes are used to read the Sql parameter collection values.</typeparam>
+        /// <param name="parameters">A parameter collection, generally belonging to a ADO.Net Command object after a database query.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns>An object of the specified type, with properties set to parameter values.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static TModel ReadOutParameters<TShard, TModel>(this DbParameterCollection parameters, TShard shardId, ILogger logger) 
             where TModel : class, new() 
             where TShard : IComparable
 		{
@@ -203,25 +211,27 @@ namespace ArgentSea
 			return (TModel)((Func<TShard, DbParameterCollection, ILogger, object>)SqlOutDelegate)(shardId, parameters, logger);
 		}
 
-		/// <summary>
-		/// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the list result</typeparam>
-		/// <param name="rdr">The data reader, set to the current result set.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns>A list of objects of the specified type, one for each result.</returns>
-		public static IList<TModel> FromDataReader<TModel>(DbDataReader rdr, ILogger logger) 
+        /// <summary>
+        /// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the list result</typeparam>
+        /// <param name="rdr">The data reader, set to the current result set.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns>A list of objects of the specified type, one for each result.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static IList<TModel> FromDataReader<TModel>(DbDataReader rdr, ILogger logger) 
             where TModel : class, new()
 			=> FromDataReader<BadShardType, TModel>(null, rdr, logger);
 
-		/// <summary>
-		/// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
-		/// </summary>
-		/// <typeparam name="TModel">The type of the list result</typeparam>
-		/// <param name="rdr">The data reader, set to the current result set.</param>
-		/// <param name="logger">The logger instance to write any processing or debug information to.</param>
-		/// <returns>A list of objects of the specified type, one for each result.</returns>
-		public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardId, DbDataReader rdr, ILogger logger) 
+        /// <summary>
+        /// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the list result</typeparam>
+        /// <param name="rdr">The data reader, set to the current result set.</param>
+        /// <param name="logger">The logger instance to write any processing or debug information to.</param>
+        /// <returns>A list of objects of the specified type, one for each result.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardId, DbDataReader rdr, ILogger logger) 
             where TModel : class, new() 
             where TShard : IComparable
 		{
@@ -294,7 +304,7 @@ namespace ArgentSea
                 MemberExpression expOriginalProperty = expProperty;
                 var isShardKey = prop.IsDefined(typeof(MapShardKeyAttribute), true);
                 var isShardChild = prop.IsDefined(typeof(MapShardChildAttribute), true);
-                if ((isShardKey || isShardChild) && prop.IsDefined(typeof(ParameterMapAttribute), true))
+                if ((isShardKey || isShardChild) && prop.IsDefined(typeof(ParameterMapAttributeBase), true))
                 {
                     Type propType = prop.PropertyType;
                     var foundShardId = false;
@@ -332,7 +342,7 @@ namespace ArgentSea
                         childIdPrm = shdData.ChildIdName;
                     }
 
-                    var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+                    var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
                     foreach (var attrPM in attrPMs)
                     {
                         if (!string.IsNullOrEmpty(shardIdPrm) && attrPM.Name == shardIdPrm)
@@ -427,10 +437,10 @@ namespace ArgentSea
                         throw new Exception($"The ShardChild attribute specified a childId attribute named {childIdPrm}, but the attribute was not found.");
                     }
                 }
-                else if (prop.IsDefined(typeof(ParameterMapAttribute), true))
+                else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
 					bool alreadyFound = false;
-					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+					var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
 					foreach (var attrPM in attrPMs)
 					{
 						if (alreadyFound)
@@ -484,7 +494,7 @@ namespace ArgentSea
                 var isShardChild = prop.IsDefined(typeof(MapShardChildAttribute), true);
                 Type propType = null;
 
-                if ((isShardKey || isShardChild) && prop.IsDefined(typeof(ParameterMapAttribute), true))
+                if ((isShardKey || isShardChild) && prop.IsDefined(typeof(ParameterMapAttributeBase), true))
                 {
                     var foundShardId = false;
                     var foundRecordId = false;
@@ -508,7 +518,7 @@ namespace ArgentSea
                         recordIdPrm = shdData.RecordIdName;
                         childIdPrm = shdData.ChildIdName;
                     }
-                    var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+                    var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
                     foreach (var attrPM in attrPMs)
                     {
                         if (!string.IsNullOrEmpty(shardIdPrm) && attrPM.Name == shardIdPrm)
@@ -576,10 +586,10 @@ namespace ArgentSea
                         throw new Exception($"The ShardChild attribute specified a childId attribute named {childIdPrm}, but the attribute was not found.");
                     }
                 }
-                else if (prop.IsDefined(typeof(ParameterMapAttribute), true))
+                else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
 					bool alreadyFound = false;
-					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+					var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
 					foreach (var attrPM in attrPMs)
 					{
 						if (alreadyFound)
@@ -617,7 +627,7 @@ namespace ArgentSea
         {
             var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceSetOutMapperProperty));
             bool alreadyFound = false;
-            var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+            var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
             foreach (var attrPM in attrPMs)
             {
                 if (alreadyFound)
@@ -672,15 +682,15 @@ namespace ArgentSea
 
 			foreach (var prop in tModel.GetProperties())
 			{
-				if ((prop.IsDefined(typeof(MapShardKeyAttribute), true) || prop.IsDefined(typeof(MapShardChildAttribute), true)) && prop.IsDefined(typeof(ParameterMapAttribute), true))
+				if ((prop.IsDefined(typeof(MapShardKeyAttribute), true) || prop.IsDefined(typeof(MapShardChildAttribute), true)) && prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
                     int notUsed = 0;
                     HandleShardKeyChild(true, prop, tShard, tModel, expShardArgument, expSprocParameters, expPrm, null, null, null, null, ref notUsed, variableExpressions, requiredExpressions, nonrequiredExpressions, expModel, expLogger, exitLabel, logger);
 				}
-				else if (prop.IsDefined(typeof(ParameterMapAttribute), true))
+				else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
 					bool alreadyFound = false;
-					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+					var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
 
 					foreach (var attrPM in attrPMs)
 					{
@@ -700,7 +710,7 @@ namespace ArgentSea
 			}
 		}
 
-		private static void HandleOutProperty(ParameterMapAttribute attrPM, PropertyInfo prop, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+		private static void HandleOutProperty(ParameterMapAttributeBase attrPM, PropertyInfo prop, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
 		{
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
 			var expCallLog = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
@@ -731,7 +741,7 @@ namespace ArgentSea
 			}
 
 		}
-		private static void HandleOutVariable(ParameterMapAttribute attrPM, ParameterExpression var, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+		private static void HandleOutVariable(ParameterMapAttributeBase attrPM, ParameterExpression var, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
 		{
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
 			if (!attrPM.IsValidType(var.Type))
@@ -848,7 +858,7 @@ namespace ArgentSea
 				}
 
 				//ShardId
-				var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+				var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
 				bool shardIdFound = false;
 				if (!string.IsNullOrEmpty(shardParameterName))
 				{
@@ -1124,14 +1134,14 @@ namespace ArgentSea
 		{
 			foreach (var prop in tModel.GetProperties())
 			{
-                if ((prop.IsDefined(typeof(MapShardKeyAttribute), true) || prop.IsDefined(typeof(MapShardChildAttribute), true)) && prop.IsDefined(typeof(ParameterMapAttribute), true))
+                if ((prop.IsDefined(typeof(MapShardKeyAttribute), true) || prop.IsDefined(typeof(MapShardChildAttribute), true)) && prop.IsDefined(typeof(ParameterMapAttributeBase), true))
                 {
                     HandleShardKeyChild(false, prop, tShard, tModel, expShardArgument, null, null, expRdr, expOrdinalsArg, expOrdinal, columnLookupExpressions, ref propIndex, variableExpressions, requiredExpressions, nonrequiredExpressions, expModel, expLogger, exitLabel, logger);
                 }
-                else if (prop.IsDefined(typeof(ParameterMapAttribute), true))
+                else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
                     var alreadyFound = false;
-					var attrPMs = prop.GetCustomAttributes<ParameterMapAttribute>(true);
+					var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
 
                     foreach (var attrPM in attrPMs)
 					{
@@ -1152,7 +1162,7 @@ namespace ArgentSea
 			}
 
 		}
-        private static void HandleRdrColumn(ParameterMapAttribute attrPM, PropertyInfo prop, Type tModel, ParameterExpression expRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, List<MethodCallExpression> columnLookupExpressions, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, ref int propIndex, LabelTarget exitLabel, ILogger logger)
+        private static void HandleRdrColumn(ParameterMapAttributeBase attrPM, PropertyInfo prop, Type tModel, ParameterExpression expRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, List<MethodCallExpression> columnLookupExpressions, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, ref int propIndex, LabelTarget exitLabel, ILogger logger)
         {
             var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceRdrMapperProperty));
             var expCallLog = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
@@ -1177,7 +1187,7 @@ namespace ArgentSea
                 attrPM.AppendReaderExpressions(expProperty, columnLookupExpressions, nonrequiredExpressions, expRdr, expOrdinals, expOrdinal, ref propIndex, prop.PropertyType, expLogger, logger);
             }
         }
-        private static void HandleRdrVariable(ParameterMapAttribute attrPM, ParameterExpression var, Type tModel, ParameterExpression expRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, List<MethodCallExpression> columnLookupExpressions, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, ref int propIndex, LabelTarget exitLabel, ILogger logger)
+        private static void HandleRdrVariable(ParameterMapAttributeBase attrPM, ParameterExpression var, Type tModel, ParameterExpression expRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, List<MethodCallExpression> columnLookupExpressions, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, ref int propIndex, LabelTarget exitLabel, ILogger logger)
         {
             var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceRdrMapperProperty));
             if (!attrPM.IsValidType(var.Type))
