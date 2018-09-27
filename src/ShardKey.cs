@@ -16,8 +16,15 @@ namespace ArgentSea
 		private const char cSeperator = ':';
 
 
-		#region Constructors
-		public ShardKey(DataOrigin origin, TShard shardId, TRecord recordId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="shardId"></param>
+        /// <param name="recordId"></param>
+        /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
+        #region Constructors
+        public ShardKey(DataOrigin origin, TShard shardId, TRecord recordId)
 		{
 			if (origin.SourceIndicator == '0' && (shardId.CompareTo(default(TShard)) != 0 || recordId.CompareTo(default(TRecord)) != 0))
 			{
@@ -27,6 +34,13 @@ namespace ArgentSea
 			_shardId = shardId;
 			_recordId = recordId;
 		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dataOrigin"></param>
+        /// <param name="shardId"></param>
+        /// <param name="recordId"></param>
+        /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
 		public ShardKey(char dataOrigin, TShard shardId, TRecord recordId) : this(new DataOrigin(dataOrigin), shardId, recordId)
 		{
 
