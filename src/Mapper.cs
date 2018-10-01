@@ -9,6 +9,7 @@ using System.Globalization;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using ArgentSea;
+using System.Threading;
 
 namespace ArgentSea
 {
@@ -17,12 +18,11 @@ namespace ArgentSea
     /// </summary>
 	public static class Mapper
 	{
-		private static ConcurrentDictionary<Type, Delegate> _cacheInParamSet = new ConcurrentDictionary<Type, Delegate>();
-		private static ConcurrentDictionary<Type, Action<DbParameterCollection, HashSet<string>, ILogger>> _cacheOutParamSet = new ConcurrentDictionary<Type, Action<DbParameterCollection, HashSet<string>, ILogger>>();
-        //private static ConcurrentDictionary<Type, Tuple<Delegate, Delegate>> _getRdrMapCache = new ConcurrentDictionary<Type, Tuple<Delegate, Delegate>>();
-        private static ConcurrentDictionary<Type, (Delegate RowData, Delegate Ordinals)> _getRdrMapCache = new ConcurrentDictionary<Type, (Delegate, Delegate)>();
-        private static ConcurrentDictionary<Type, Delegate> _getOutParamReadCache = new ConcurrentDictionary<Type, Delegate>();
-		private static ConcurrentDictionary<string, Delegate> _getObjectCache = new ConcurrentDictionary<string, Delegate>();
+		private static ConcurrentDictionary<Type, Lazy<Delegate>> _cacheInParamSet = new ConcurrentDictionary<Type, Lazy<Delegate>>();
+		private static ConcurrentDictionary<Type, Lazy<Action<DbParameterCollection, HashSet<string>, ILogger>>> _cacheOutParamSet = new ConcurrentDictionary<Type, Lazy<Action<DbParameterCollection, HashSet<string>, ILogger>>>();
+        private static ConcurrentDictionary<Type, Lazy<(Delegate RowData, Delegate Ordinals)>> _getRdrMapCache = new ConcurrentDictionary<Type, Lazy<(Delegate, Delegate)>>();
+        private static ConcurrentDictionary<Type, Lazy<Delegate>> _getOutParamReadCache = new ConcurrentDictionary<Type, Lazy<Delegate>>();
+		private static ConcurrentDictionary<string, Lazy<Delegate>> _getObjectCache = new ConcurrentDictionary<string, Lazy<Delegate>>();
 
 		#region Public methods
 
@@ -57,28 +57,25 @@ namespace ArgentSea
 			{
 				ignoreParameters = new HashSet<string>();
 			}
-			var typeModel = typeof(TModel);
-			if (!_cacheInParamSet.TryGetValue(typeModel, out var sqlParameterDelegates))
-			{
-				LoggingExtensions.SqlInParametersCacheMiss(logger, typeModel);
-				sqlParameterDelegates = BuildInMapDelegate<TModel>(logger);
-				if (!_cacheInParamSet.TryAdd(typeModel, sqlParameterDelegates))
-				{
-					sqlParameterDelegates = _cacheInParamSet[typeModel];
-				}
-			}
-			else
-			{
-				LoggingExtensions.SqlInParametersCacheHit(logger, typeModel);
-			}
-			foreach (DbParameter prm in parameters)
+			var tModel = typeof(TModel);
+            var lazySqlParameterDelegate = _cacheInParamSet.GetOrAdd(tModel, new Lazy<Delegate>(() => BuildInMapDelegate<TModel>(tModel, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            if (lazySqlParameterDelegate.IsValueCreated)
+            {
+                LoggingExtensions.SqlInParametersCacheHit(logger, tModel);
+            }
+            else
+            {
+                LoggingExtensions.SqlInParametersCacheMiss(logger, tModel);
+            }
+
+            foreach (DbParameter prm in parameters)
 			{
 				if (!ignoreParameters.Contains(prm.ParameterName))
 				{
 					ignoreParameters.Add(prm.ParameterName);
 				}
 			}
-			((Action<DbParameterCollection, HashSet<string>, ILogger, TModel>)sqlParameterDelegates)(parameters, ignoreParameters, logger, model);
+            ((Action<DbParameterCollection, HashSet<string>, ILogger, TModel>)lazySqlParameterDelegate.Value)(parameters, ignoreParameters, logger, model);
 			return parameters;
 		}
         #endregion
@@ -129,9 +126,9 @@ namespace ArgentSea
         /// <param name="ignoreParameters">A lists of parameter names that should not be created.</param>
         /// <param name="logger">The logger instance to write any processing or debug information to.</param>
         /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
-        public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type TModel, HashSet<string> ignoreParameters, ILogger logger)
+        public static DbParameterCollection MapToOutParameters(this DbParameterCollection parameters, Type tModel, HashSet<string> ignoreParameters, ILogger logger)
 		{
-			//For each paramater, Expression Tree does the following:
+			//For each parameter, Expression Tree does the following:
 			//ArgentSea.LoggingExtensions.TraceSetOutMapperProperty(logger, "ParameterName");
 			//if (ArgentSea.ExpressionHelpers.DontIgnoreThisParameter("@ParameterName", ignoreParameters))
 			//{
@@ -142,20 +139,17 @@ namespace ArgentSea
 			{
 				ignoreParameters = new HashSet<string>();
 			}
-			if (!_cacheOutParamSet.TryGetValue(TModel, out var SqlParameterDelegates))
-			{
-				LoggingExtensions.SqlSetOutParametersCacheMiss(logger, TModel);
-				SqlParameterDelegates = BuildOutSetDelegate(TModel, logger);
-				if (!_cacheOutParamSet.TryAdd(TModel, SqlParameterDelegates))
-				{
-					SqlParameterDelegates = _cacheOutParamSet[TModel];
-					LoggingExtensions.SqlSetOutParametersCacheMiss(logger, TModel);
-				}
-			}
-			else
-			{
-				LoggingExtensions.SqlSetOutParametersCacheHit(logger, TModel);
-			}
+
+            var lazySqlParameterDelegate = _cacheOutParamSet.GetOrAdd(tModel, new Lazy<Action<DbParameterCollection, HashSet<string>, ILogger>>(() => BuildOutSetDelegate(tModel, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            if (lazySqlParameterDelegate.IsValueCreated)
+            {
+                LoggingExtensions.SqlSetOutParametersCacheHit(logger, tModel);
+            }
+            else
+            {
+                LoggingExtensions.SqlSetOutParametersCacheMiss(logger, tModel);
+            }
+
 			foreach (DbParameter prm in parameters)
 			{
 
@@ -164,7 +158,7 @@ namespace ArgentSea
 					ignoreParameters.Add(prm.ParameterName);
 				}
 			}
-			SqlParameterDelegates(parameters, ignoreParameters, logger);
+            lazySqlParameterDelegate.Value(parameters, ignoreParameters, logger);
 			return parameters;
 		}
         #endregion
@@ -194,21 +188,18 @@ namespace ArgentSea
             where TModel : class, new() 
             where TShard : IComparable
 		{
-			var T = typeof(TModel);
-			if (!_getOutParamReadCache.TryGetValue(T, out var SqlOutDelegate))
-			{
-				LoggingExtensions.SqlReadOutParametersCacheMiss(logger, T);
-				SqlOutDelegate = BuildOutGetDelegate<TShard>(parameters, typeof(TModel), logger);
-				if (!_getOutParamReadCache.TryAdd(typeof(TModel), SqlOutDelegate))
-				{
-					SqlOutDelegate = _getOutParamReadCache[typeof(TModel)];
-				}
-			}
-			else
-			{
-				LoggingExtensions.SqlReadOutParametersCacheHit(logger, T);
-			}
-			return (TModel)((Func<TShard, DbParameterCollection, ILogger, object>)SqlOutDelegate)(shardId, parameters, logger);
+			var tModel = typeof(TModel);
+
+            var lazySqlOutDelegate = _getOutParamReadCache.GetOrAdd(tModel, new Lazy<Delegate>(() => BuildOutGetDelegate<TShard>(parameters, tModel, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            if (lazySqlOutDelegate.IsValueCreated)
+            {
+                LoggingExtensions.SqlReadOutParametersCacheHit(logger, tModel);
+            }
+            else
+            {
+                LoggingExtensions.SqlReadOutParametersCacheMiss(logger, tModel);
+            }
+			return (TModel)((Func<TShard, DbParameterCollection, ILogger, object>)lazySqlOutDelegate.Value)(shardId, parameters, logger);
 		}
 
         /// <summary>
@@ -249,24 +240,21 @@ namespace ArgentSea
 				return result;
 			}
 			var tModel = typeof(TModel);
-			if (!_getRdrMapCache.TryGetValue(typeof(TModel), out var sqlRdrDelegates))
-			{
-				LoggingExtensions.SqlReaderCacheMiss(logger, tModel);
-				sqlRdrDelegates = BuildReaderMapDelegate<TShard, TModel>(logger);
-				if (!_getRdrMapCache.TryAdd(typeof(TModel), sqlRdrDelegates))
-				{
-					sqlRdrDelegates = _getRdrMapCache[typeof(TModel)];
-				}
-			}
+
+            var lazySqlRdrDelegate = _getRdrMapCache.GetOrAdd(tModel, new Lazy<(Delegate RowData, Delegate Ordinals)>(() => BuildReaderMapDelegate<TShard, TModel>(logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            if (lazySqlRdrDelegate.IsValueCreated)
+            {
+                LoggingExtensions.SqlReaderCacheHit(logger, tModel);
+            }
             else
             {
-				LoggingExtensions.SqlReaderCacheHit(logger, tModel);
-			}
+                LoggingExtensions.SqlReadOutParametersCacheMiss(logger, tModel);
+            }
 
-            int[] ordinals = ((Func<DbDataReader, int[]>)sqlRdrDelegates.Ordinals)(rdr);
+            int[] ordinals = ((Func<DbDataReader, int[]>)lazySqlRdrDelegate.Value.Ordinals)(rdr);
             while (rdr.Read())
             {
-                result.Add(((Func<TShard, DbDataReader, int[] , ILogger, TModel>)sqlRdrDelegates.RowData)(shardId, rdr, ordinals, logger));
+                result.Add(((Func<TShard, DbDataReader, int[] , ILogger, TModel>)lazySqlRdrDelegate.Value.RowData)(shardId, rdr, ordinals, logger));
             }
 			return result;
 		}
@@ -274,10 +262,9 @@ namespace ArgentSea
 
 		#endregion
 		#region delegate builders
-		private static Action<DbParameterCollection, HashSet<string>, ILogger, TModel> BuildInMapDelegate<TModel>(ILogger logger)
+		private static Action<DbParameterCollection, HashSet<string>, ILogger, TModel> BuildInMapDelegate<TModel>(Type tModel, ILogger logger)
             where TModel : class, new()
         {
-            var tModel = typeof(TModel);
 			var expressions = new List<Expression>();
 			//Create the two delegate parameters: in: sqlParametersCollection and model instance; out: sqlParametersCollection
 			ParameterExpression prmSqlPrms = Expression.Variable(typeof(DbParameterCollection), "parameters");
@@ -1089,7 +1076,7 @@ namespace ArgentSea
             //ParameterExpression expOrdinalsVar = Expression.Variable(typeof(int[]), "ordinals");
             ParameterExpression expLogger = Expression.Parameter(typeof(ILogger), "logger");
 			var variableExpressions = new List<ParameterExpression>();
-			var expModel = Expression.Variable(typeof(TModel), "model"); //model variable
+			var expModel = Expression.Variable(tModel, "model"); //model variable
 			variableExpressions.Add(expModel);
 			var expOrdinal = Expression.Variable(typeof(int), "ordinal");
 			variableExpressions.Add(expOrdinal);
@@ -1104,7 +1091,7 @@ namespace ArgentSea
 
             var propIndex = 0;
 
-			var expAssign = Expression.Assign(expModel, Expression.New(typeof(TModel)));
+			var expAssign = Expression.Assign(expModel, Expression.New(tModel));
 			initialExpressions.Add(expAssign);
             var subsequentExpressions = new List<Expression>();
 
@@ -1119,7 +1106,7 @@ namespace ArgentSea
             resultExpressions.AddRange(subsequentExpressions);
             resultExpressions.Add(Expression.Label(expExitLabel, Expression.Constant(null, tModel)));
 
-            var expDataBlock = Expression.Block(typeof(TModel), variableExpressions, resultExpressions);
+            var expDataBlock = Expression.Block(tModel, variableExpressions, resultExpressions);
             var lambdaDataRow = Expression.Lambda<Func<TShard, DbDataReader, int[], ILogger, TModel>>(expDataBlock, expressionPrms);
 
             var expOrdinalArray = Expression.NewArrayInit(typeof(int), columnLookupExpressions.ToArray());
@@ -1208,8 +1195,20 @@ namespace ArgentSea
         #endregion
         #region Convert Sql result to object(s)
 
-        //Make model out of out parameters only
-        public static TModel QueryResultsHandler<TShard, TModel>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TShard"></typeparam>
+        /// <typeparam name="TModel"></typeparam>
+        /// <param name="shardId"></param>
+        /// <param name="sprocName"></param>
+        /// <param name="notUsed"></param>
+        /// <param name="rdr"></param>
+        /// <param name="parameters"></param>
+        /// <param name="connectionDescription"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public static TModel OutputParameterResultsHandler<TShard, TModel>
 			(
 			TShard shardId,
 			string sprocName,
@@ -1220,10 +1219,48 @@ namespace ArgentSea
 			ILogger logger)
 			where TShard : IComparable
 			where TModel : class, new()
-			=> QueryResultsHandler<TShard, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TModel>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
+			=> Mapper.ReadOutParameters<TShard, TModel>(parameters, shardId, logger);
 
-		//To Make model out of reader result, set TOutParamaters type to DummyType or something like it.
-		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult, TOutParameters>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TShard"></typeparam>
+        /// <typeparam name="TModel"></typeparam>
+        /// <param name="shardId"></param>
+        /// <param name="sprocName"></param>
+        /// <param name="notUsed"></param>
+        /// <param name="rdr"></param>
+        /// <param name="parameters"></param>
+        /// <param name="connectionDescription"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public static IList<TModel> ReaderResultsHandler<TShard, TModel>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TModel : class, new()
+            => Mapper.FromDataReader<TShard, TModel>(shardId, rdr, logger);
+
+        public static TModel QueryResultsHandler<TShard, TModel>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TModel : class, new()
+            => QueryResultsHandler<TShard, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TModel>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
+
+        public static TModel QueryResultsHandler<TShard, TModel, TReaderResult, TOutParameters>
 			(
 			TShard shardId,
 			string sprocName,
@@ -1583,19 +1620,11 @@ namespace ArgentSea
 
 
 			var queryKey = typeof(TModel).ToString() + sprocName;
-			if (!_getObjectCache.TryGetValue(queryKey, out var sqlObjectDelegate))
-			{
-				sqlObjectDelegate = BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, logger);
-				if (!_getObjectCache.TryAdd(queryKey, sqlObjectDelegate))
-				{
-					sqlObjectDelegate = _getObjectCache[queryKey];
-				}
-			}
-			var sqlObjectDelegate2 = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>)sqlObjectDelegate;
-			//return (TModel)sqlObjectDelegate(sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
-			return (TModel)sqlObjectDelegate2(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
-
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+			var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>)lazySqlObjectDelegate.Value;
+			return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
 		}
+
 		private static TResult AssignRootToResult<TEval, TResult>(string procedureName, IList<TEval> resultList, ILogger logger) where TResult : class, new() where TEval : class, new()
 		{
 			if (resultList is null)
