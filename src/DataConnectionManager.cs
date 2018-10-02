@@ -209,7 +209,7 @@ namespace ArgentSea
 					using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken).ConfigureAwait(false))
 					{
 						cancellationToken.ThrowIfCancellationRequested();
-						result = Mapper.FromDataReader<TModel>(dataReader, _logger);
+						result = Mapper.MapToList<TModel>(dataReader, _logger);
 					}
 				}
 			}

@@ -210,19 +210,20 @@ namespace ArgentSea
         /// <param name="logger">The logger instance to write any processing or debug information to.</param>
         /// <returns>A list of objects of the specified type, one for each result.</returns>
         /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
-        public static IList<TModel> FromDataReader<TModel>(DbDataReader rdr, ILogger logger) 
+        public static IList<TModel> MapToList<TModel>(this DbDataReader rdr, ILogger logger) 
             where TModel : class, new()
-			=> FromDataReader<BadShardType, TModel>(null, rdr, logger);
+			=> MapToList<BadShardType, TModel>(rdr, null, logger);
 
         /// <summary>
         /// Accepts a data reader object and returns a list of objects of the specified type, one for each record.
         /// </summary>
         /// <typeparam name="TModel">The type of the list result</typeparam>
+        /// <param name="shardId">The identifier for the current shard. Required for ShardKey and ShardChild types.</param>
         /// <param name="rdr">The data reader, set to the current result set.</param>
         /// <param name="logger">The logger instance to write any processing or debug information to.</param>
         /// <returns>A list of objects of the specified type, one for each result.</returns>
         /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
-        public static IList<TModel> FromDataReader<TShard, TModel>(TShard shardId, DbDataReader rdr, ILogger logger) 
+        public static IList<TModel> MapToList<TShard, TModel>(this DbDataReader rdr, TShard shardId, ILogger logger) 
             where TModel : class, new() 
             where TShard : IComparable
 		{
@@ -1195,45 +1196,22 @@ namespace ArgentSea
         #endregion
         #region Convert Sql result to object(s)
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TShard"></typeparam>
-        /// <typeparam name="TModel"></typeparam>
-        /// <param name="shardId"></param>
-        /// <param name="sprocName"></param>
-        /// <param name="notUsed"></param>
-        /// <param name="rdr"></param>
-        /// <param name="parameters"></param>
-        /// <param name="connectionDescription"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        public static TModel OutputParameterResultsHandler<TShard, TModel>
-			(
-			TShard shardId,
-			string sprocName,
-			object notUsed,
-			DbDataReader rdr,
-			DbParameterCollection parameters,
-			string connectionDescription,
-			ILogger logger)
-			where TShard : IComparable
-			where TModel : class, new()
-			=> Mapper.ReadOutParameters<TShard, TModel>(parameters, shardId, logger);
 
         /// <summary>
-        /// 
+        /// Uses Mapping attributes to return a list of TModel records, populated from DataReader rows.
         /// </summary>
-        /// <typeparam name="TShard"></typeparam>
-        /// <typeparam name="TModel"></typeparam>
-        /// <param name="shardId"></param>
-        /// <param name="sprocName"></param>
-        /// <param name="notUsed"></param>
-        /// <param name="rdr"></param>
-        /// <param name="parameters"></param>
-        /// <param name="connectionDescription"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
+        /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
+        /// <typeparam name="TModel">The type of the return value.</typeparam>
+        /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
+        /// <typeparam name="TModel">The type of the return value.</typeparam>
+        /// <param name="shardId">The shard identifier.</param>
+        /// <param name="sprocName">The name of the stored procedure or function, which is used for logging, if any.</param>
+        /// <param name="notUsed">The optional data parameter is not used but is required by the delegate’s method signature.</param>
+        /// <param name="rdr">The DbDataReader containing tables and rows.</param>
+        /// <param name="parameters">The output parameter set.</param>
+        /// <param name="connectionDescription">The connection description is used in logging.</param>
+        /// <param name="logger">A logging instance.</param>
+        /// <returns>A list of TModel objects, one for each record returned by the DataReader.</returns>
         public static IList<TModel> ReaderResultsHandler<TShard, TModel>
             (
             TShard shardId,
@@ -1245,9 +1223,71 @@ namespace ArgentSea
             ILogger logger)
             where TShard : IComparable
             where TModel : class, new()
-            => Mapper.FromDataReader<TShard, TModel>(shardId, rdr, logger);
+            => Mapper.MapToList<TShard, TModel>(rdr, shardId, logger);
 
-        public static TModel QueryResultsHandler<TShard, TModel>
+
+   //     public static TModel OutputParameterResultsHandler<TShard, TModel, TReaderResult0>
+   //         (
+   //         TShard shardId,
+   //         string sprocName,
+   //         object notUsed,
+   //         DbDataReader rdr,
+   //         DbParameterCollection parameters,
+   //         string connectionDescription,
+   //         ILogger logger)
+   //         where TShard : IComparable
+   //         where TModel : class, new()
+   //         where TReaderResult0 : class, new()
+   //     {
+   //         if (rdr is null)
+   //         {
+   //             logger.DataReaderIsNull(sprocName, connectionDescription);
+   //             return null;
+   //         }
+   //         if (rdr.IsClosed)
+   //         {
+   //             logger.DataReaderIsClosed(sprocName, connectionDescription);
+   //             return null;
+   //         }
+   //         IList<TReaderResult0> resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+   //         var hasNextResult = rdr.NextResult();
+   //         var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+
+   //         var queryKey = typeof(TModel).ToString() + sprocName;
+   //         var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+			//var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>)lazySqlObjectDelegate.Value;
+			//return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
+   //     }
+
+        private static void ValidateDataReader(string sprocName, DbDataReader rdr, string connectionDescription, ILogger logger)
+        {
+            if (rdr is null)
+            {
+                logger.DataReaderIsNull(sprocName, connectionDescription);
+                throw new Exception($"The procedure {sprocName} on connection {connectionDescription} did not return a data reader object.");
+            }
+            if (rdr.IsClosed)
+            {
+                logger.DataReaderIsClosed(sprocName, connectionDescription);
+                throw new Exception($"The procedure {sprocName} on connection {connectionDescription} returned a data reader that is not open.");
+            }
+        }
+
+        #region Handle Complex Models with both DataReader and Output Paramters
+        /// <summary>
+        /// Uses Mapping attributes to return a instance of TModel with corresponding properties populated from output parameters.
+        /// </summary>
+        /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
+        /// <typeparam name="TModel">The type of the return value.</typeparam>
+        /// <param name="shardId">The shard identifier.</param>
+        /// <param name="sprocName">The name of the stored procedure or function, which is used for logging, if any.</param>
+        /// <param name="notUsed">The optional data parameter is not used but is required by the delegate’s method signature.</param>
+        /// <param name="rdr">Not used.</param>
+        /// <param name="parameters">The output parameter set.</param>
+        /// <param name="connectionDescription">The connection description is used in logging.</param>
+        /// <param name="logger">A logging instance.</param>
+        /// <returns>A instance of TModel or null.</returns>
+        public static TModel ModelFromOutResultsHandler<TShard, TModel>
             (
             TShard shardId,
             string sprocName,
@@ -1258,8 +1298,466 @@ namespace ArgentSea
             ILogger logger)
             where TShard : IComparable
             where TModel : class, new()
-            => QueryResultsHandler<TShard, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, TModel>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
+            => Mapper.ReadOutParameters<TShard, TModel>(parameters, shardId, logger);
 
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList = Mapper.MapToList<TShard, TReaderResult>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 3, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 7, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 15, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 31, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 63, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 127, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TReaderResult6 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
+            var resultList6 = Mapper.MapToList<TShard, TReaderResult6>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, Mapper.DummyType, TModel>(shardId, sprocName, 255, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultOutPrms, logger);
+        }
+
+        public static TModel ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TReaderResult6 : class, new()
+            where TReaderResult7 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
+            var resultList6 = Mapper.MapToList<TShard, TReaderResult6>(rdr, shardId, logger);
+            var resultList7 = Mapper.MapToList<TShard, TReaderResult7>(rdr, shardId, logger);
+            var resultOutPrms = Mapper.ReadOutParameters<TModel>(parameters, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(shardId, sprocName, 511, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
+        }
+        #endregion
+
+        #region Handle Complex Models with DataReader results
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList = Mapper.MapToList<TShard, TModel>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TModel, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType>(shardId, sprocName, 2, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TModel>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList, logger);
+        }
+
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 6, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, logger);
+        }
+
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 14, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, logger);
+        }
+
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 30, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, logger);
+        }
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 62, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, logger);
+        }
+
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 126, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5> , ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, logger);
+        }
+
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TReaderResult6 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
+            var resultList6 = Mapper.MapToList<TShard, TReaderResult6>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, Mapper.DummyType, TModel>(shardId, sprocName, 254, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, logger);
+        }
+
+        public static TModel ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+    (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TReaderResult6 : class, new()
+            where TReaderResult7 : class, new()
+            where TModel : class, new()
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
+            var resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
+            var resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
+            var resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
+            var resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
+            var resultList6 = Mapper.MapToList<TShard, TReaderResult6>(rdr, shardId, logger);
+            var resultList7 = Mapper.MapToList<TShard, TReaderResult7>(rdr, shardId, logger);
+            var queryKey = typeof(TModel).ToString() + sprocName;
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(shardId, sprocName, 510, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, logger);
+        }
+        #endregion
+
+        /*
         public static TModel QueryResultsHandler<TShard, TModel, TReaderResult, TOutParameters>
 			(
 			TShard shardId,
@@ -1364,162 +1862,185 @@ namespace ArgentSea
 			where TModel : class, new()
 			=> QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, TOutParameters>(shardId, sprocName, null, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TModel, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TReaderResult2 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TReaderResult2 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, DummyType, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TReaderResult2 : class, new()
-		//	where TReaderResult3 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TReaderResult2 : class, new()
+        //	where TReaderResult3 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, DummyType, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TReaderResult2 : class, new()
-		//	where TReaderResult3 : class, new()
-		//	where TReaderResult4 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TReaderResult2 : class, new()
+        //	where TReaderResult3 : class, new()
+        //	where TReaderResult4 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, DummyType, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TReaderResult2 : class, new()
-		//	where TReaderResult3 : class, new()
-		//	where TReaderResult4 : class, new()
-		//	where TReaderResult5 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TReaderResult2 : class, new()
+        //	where TReaderResult3 : class, new()
+        //	where TReaderResult4 : class, new()
+        //	where TReaderResult5 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, DummyType, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TReaderResult2 : class, new()
-		//	where TReaderResult3 : class, new()
-		//	where TReaderResult4 : class, new()
-		//	where TReaderResult5 : class, new()
-		//	where TReaderResult6 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TReaderResult2 : class, new()
+        //	where TReaderResult3 : class, new()
+        //	where TReaderResult4 : class, new()
+        //	where TReaderResult5 : class, new()
+        //	where TReaderResult6 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, DummyType, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
-		//	(
-		//	TShard shardId,
-		//	string sprocName,
-		//	TArg optionalArgument,
-		//	DbDataReader rdr,
-		//	DbParameterCollection parameters,
-		//	string connectionDescription,
-		//	ILogger logger)
-		//	where TReaderResult0 : class, new()
-		//	where TReaderResult1 : class, new()
-		//	where TReaderResult2 : class, new()
-		//	where TReaderResult3 : class, new()
-		//	where TReaderResult4 : class, new()
-		//	where TReaderResult5 : class, new()
-		//	where TReaderResult6 : class, new()
-		//	where TReaderResult7 : class, new()
-		//	where TModel : class, new()
-		//	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
+        //public static TModel SqlRdrResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+        //	(
+        //	TShard shardId,
+        //	string sprocName,
+        //	TArg optionalArgument,
+        //	DbDataReader rdr,
+        //	DbParameterCollection parameters,
+        //	string connectionDescription,
+        //	ILogger logger)
+        //	where TReaderResult0 : class, new()
+        //	where TReaderResult1 : class, new()
+        //	where TReaderResult2 : class, new()
+        //	where TReaderResult3 : class, new()
+        //	where TReaderResult4 : class, new()
+        //	where TReaderResult5 : class, new()
+        //	where TReaderResult6 : class, new()
+        //	where TReaderResult7 : class, new()
+        //	where TModel : class, new()
+        //	=> QueryResultsHandler<TShard, TArg, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, DummyType>(shardId, sprocName, optionalArgument, rdr, parameters, connectionDescription, logger);
 
-		//Full implementation for up to 8 results (plus output) 
+        //Full implementation for up to 8 results (plus output) 
 
-		/// <summary>
-		/// A function whose signature cooresponds to delegate QueryResultModelHandler and is used to map the provided model type(s) to query results.
-		/// </summary>
-		/// <typeparam name="TShard">The type of the shardId value. Can be any value type if not used.</typeparam>
-		/// <typeparam name="TModel">This is the expected return type of the handler.</typeparam>
-		/// <typeparam name="TReaderResult0">The first result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult1">The second result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult2">The third result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult3">The forth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult4">The fifth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult5">The sixth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult6">The seventh result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TReaderResult7">The eighth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
-		/// <typeparam name="TOutResult">This must be either type TModel or Mapper.DummyType. If set to TModel the TModel properties will be mapped to cooresponding output parameters; if set to DummyType, the output parameters are ignored.</typeparam>
-		/// <param name="shardId">This value will be provided to ShardKey or ShardChild objects. If not using sharded data, any provided value will be ignored.</param>
-		/// <param name="sprocName">The name of the stored procedure is used to cache the mapping metadata and also for provide richer logging information.</param>
-		/// <param name="notUsed">This parameter is required to conform to the QueryResultModelHandler delegate signature. This argument should be null.</param>
-		/// <param name="rdr">The data reader returned by the query.</param>
-		/// <param name="parameters">The output parameters returned by the query.</param>
-		/// <param name="connectionDescription">The connection description is used to enrich logging information.</param>
-		/// <param name="logger">The logging instance to use for any logging requirements.</param>
-		/// <returns>An instance of TResult, with properties matching the provided data.</returns>
+        /// <summary>
+        /// A function whose signature cooresponds to delegate QueryResultModelHandler and is used to map the provided model type(s) to query results.
+        /// </summary>
+        /// <typeparam name="TShard">The type of the shardId value. Can be any value type if not used.</typeparam>
+        /// <typeparam name="TModel">This is the expected return type of the handler.</typeparam>
+        /// <typeparam name="TReaderResult0">The first result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult1">The second result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult2">The third result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult3">The forth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult4">The fifth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult5">The sixth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult6">The seventh result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TReaderResult7">The eighth result set from data reader will be mapped an object or property of this type. Set to Mapper.DummyType if not used.</typeparam>
+        /// <typeparam name="TOutResult">This must be either type TModel or Mapper.DummyType. If set to TModel the TModel properties will be mapped to cooresponding output parameters; if set to DummyType, the output parameters are ignored.</typeparam>
+        /// <param name="shardId">This value will be provided to ShardKey or ShardChild objects. If not using sharded data, any provided value will be ignored.</param>
+        /// <param name="sprocName">The name of the stored procedure is used to cache the mapping metadata and also for provide richer logging information.</param>
+        /// <param name="notUsed">This parameter is required to conform to the QueryResultModelHandler delegate signature. This argument should be null.</param>
+        /// <param name="rdr">The data reader returned by the query.</param>
+        /// <param name="parameters">The output parameters returned by the query.</param>
+        /// <param name="connectionDescription">The connection description is used to enrich logging information.</param>
+        /// <param name="logger">The logging instance to use for any logging requirements.</param>
+        /// <returns>An instance of TResult, with properties matching the provided data.</returns>
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
+            (
+            TShard shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+            where TShard : IComparable
+            where TReaderResult0 : class, new()
+            where TReaderResult1 : class, new()
+            where TReaderResult2 : class, new()
+            where TReaderResult3 : class, new()
+            where TReaderResult4 : class, new()
+            where TReaderResult5 : class, new()
+            where TReaderResult6 : class, new()
+            where TReaderResult7 : class, new()
+            where TOutResult : class, new()
+            where TModel : class, new()
+            => QueryResultsHandler2<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, notUsed, rdr, parameters, connectionDescription, logger);
+
+
+        private static TModel QueryResultsHandler2<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
 			(
 			TShard shardId,
 			string sprocName,
@@ -1527,6 +2048,7 @@ namespace ArgentSea
 			DbDataReader rdr,
 			DbParameterCollection parameters,
 			string connectionDescription,
+            int recordSetFlags,
 			ILogger logger)
 			where TShard : IComparable
 			where TReaderResult0 : class, new()
@@ -1540,7 +2062,8 @@ namespace ArgentSea
 			where TOutResult : class, new()
 			where TModel : class, new()
 		{
-			if (typeof(TOutResult) == typeof(DummyType))
+			//if (typeof(TOutResult) == typeof(DummyType))
+            if ((recordSetFlags & 1) == 0)
 			{
 				if (rdr is null)
 				{
@@ -1553,13 +2076,14 @@ namespace ArgentSea
 					return null;
 				}
 			}
-			else
-			{
-				if (typeof(TModel) != typeof(TOutResult))
-				{
-					throw new Exception("If a TOutParameters type is provided, it must be the result type.");
-				}
-			}
+			//else
+			//{
+			//	if (typeof(TModel) != typeof(TOutResult))
+			//	{
+			//		throw new Exception("If a TOutParameters type is provided, it must be the result type.");
+			//	}
+			//}
+
 			// Get results from query
 			IList<TReaderResult0> resultList0 = null;
 			IList<TReaderResult1> resultList1 = null;
@@ -1571,87 +2095,94 @@ namespace ArgentSea
 			IList<TReaderResult7> resultList7 = null;
 			TOutResult resultOutPrms = null;
 
-			var dummy = typeof(DummyType);
+			//var dummy = typeof(DummyType);
 			var hasNextResult = true;
-			if (typeof(TReaderResult0) != dummy)
+            //if (typeof(TReaderResult0) != dummy)
+            if ((recordSetFlags & 2) == 2)
 			{
-				resultList0 = Mapper.FromDataReader<TShard, TReaderResult0>(shardId, rdr, logger);
+				resultList0 = Mapper.MapToList<TShard, TReaderResult0>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult1) != dummy)
-			{
-				resultList1 = Mapper.FromDataReader<TShard, TReaderResult1>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult1) != dummy)
+            if ((recordSetFlags & 4) == 4)
+            {
+                resultList1 = Mapper.MapToList<TShard, TReaderResult1>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult2) != dummy)
-			{
-				resultList2 = Mapper.FromDataReader<TShard, TReaderResult2>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult2) != dummy)
+            if ((recordSetFlags & 8) == 8)
+            {
+                resultList2 = Mapper.MapToList<TShard, TReaderResult2>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult3) != dummy)
-			{
-				resultList3 = Mapper.FromDataReader<TShard, TReaderResult3>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult3) != dummy)
+            if ((recordSetFlags & 16) == 16)
+            {
+                resultList3 = Mapper.MapToList<TShard, TReaderResult3>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult4) != dummy)
-			{
-				resultList4 = Mapper.FromDataReader<TShard, TReaderResult4>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult4) != dummy)
+            if ((recordSetFlags & 32) == 32)
+            {
+                resultList4 = Mapper.MapToList<TShard, TReaderResult4>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult5) != dummy)
-			{
-				resultList5 = Mapper.FromDataReader<TShard, TReaderResult5>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult5) != dummy)
+            if ((recordSetFlags & 64) == 64)
+            {
+                resultList5 = Mapper.MapToList<TShard, TReaderResult5>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult6) != dummy)
-			{
-				resultList6 = Mapper.FromDataReader<TShard, TReaderResult6>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult6) != dummy)
+            if ((recordSetFlags & 128) == 128)
+            {
+                resultList6 = Mapper.MapToList<TShard, TReaderResult6>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (hasNextResult && typeof(TReaderResult7) != dummy)
-			{
-				resultList7 = Mapper.FromDataReader<TShard, TReaderResult7>(shardId, rdr, logger);
+            //if (hasNextResult && typeof(TReaderResult7) != dummy)
+            if ((recordSetFlags & 256) == 256)
+            {
+                resultList7 = Mapper.MapToList<TShard, TReaderResult7>(rdr, shardId, logger);
 				hasNextResult = rdr.NextResult();
 			}
-			if (typeof(TOutResult) != dummy)
-			{
-				resultOutPrms = Mapper.ReadOutParameters<TOutResult>(parameters, logger);
+            //if (typeof(TOutResult) != dummy)
+            if ((recordSetFlags & 1) == 1)
+            {
+                resultOutPrms = Mapper.ReadOutParameters<TOutResult>(parameters, logger);
 			}
 
 
 			var queryKey = typeof(TModel).ToString() + sprocName;
-            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, logger), LazyThreadSafetyMode.ExecutionAndPublication));
+            var lazySqlObjectDelegate = _getObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>(shardId, sprocName, recordSetFlags, logger), LazyThreadSafetyMode.ExecutionAndPublication));
 			var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>)lazySqlObjectDelegate.Value;
 			return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
 		}
-
-		private static TResult AssignRootToResult<TEval, TResult>(string procedureName, IList<TEval> resultList, ILogger logger) where TResult : class, new() where TEval : class, new()
+        */
+		private static TResult AssignRootToResult<TEval, TResult>(string procedureName, string connectionDescription, IList<TEval> resultList, ILogger logger) where TResult : class, new() where TEval : class, new()
 		{
 			if (resultList is null)
 			{
-				logger.LogError($"Procedure {procedureName} failed to return an expected base recordset result.");
-				return null;
+				throw new Exception($"Procedure {procedureName} on connection {connectionDescription} failed to return an expected base recordset result.");
 			}
 			else if (resultList.Count == 0)
 			{
-				logger.LogDebug($"Procedure {procedureName} returned an empty base result.");
+				logger.LogDebug($"Procedure {procedureName} on connection {connectionDescription} returned an empty base result.");
 				return null;
 			}
 			else if (resultList.Count > 1)
 			{
-				logger.LogError($"Procedure {procedureName} returned multiple base recordset results.");
-				return null;
-			}
-			else
+                throw new Exception($"Procedure {procedureName} on connection {connectionDescription} returned multiple records when only one was expected.");
+            }
+            else
 			{
 				var result = resultList[0] as TResult;
 				return result;
 			}
 		}
 
-		private static Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel> BuildModelFromResultsExpressions<
-			TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
-			(TShard shardId, string procedureName, ILogger logger)
+        //private static Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>
+        private static Delegate BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
+			(TShard shardId, string procedureName, int recordSetFlags, ILogger logger)
 			where TShard : IComparable
 			where TReaderResult0 : class, new()
 			where TReaderResult1 : class, new()
@@ -1703,16 +2234,12 @@ namespace ArgentSea
 			using (logger.BuildSqlResultsHandlerScope(procedureName, resultType))
 			{
 				//Set base type to some result value, if we can.
-				if (resultType == typeof(TOutResult))
+				if ((recordSetFlags & 1) == 1 && resultType == typeof(TOutResult))
 				{
-					//var miReadOut = typeof(Mapper).GetMethod(nameof(Mapper.ReadOutParameters)).MakeGenericMethod(resultType);
-
-					//var result = Mapper.ReadOutParameters<TModel>(prms, logger);
-					//var expAssign = Expression.Assign(expResult, Expression.Call(miReadOut, expOutParams, expLogger));
 					expressions.Add(Expression.Assign(expModel, expResultOut));
 					isPrmOutUsed = true;
 				}
-				else if (resultType == typeof(TReaderResult0))
+				else if ((recordSetFlags & 2) == 2 && resultType == typeof(TReaderResult0))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult0), resultType }), expProcName, expResultSet0, expLogger)));
 					expressions.Add(Expression.IfThen(
@@ -1721,43 +2248,43 @@ namespace ArgentSea
 						));
 					isRdrResult0Used = true;
 				}
-				else if (resultType == typeof(TReaderResult1))
+				else if ((recordSetFlags & 4) == 4 && resultType == typeof(TReaderResult1))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult1), resultType }), expProcName, expResultSet1, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
 					isRdrResult1Used = true;
 				}
-				else if (resultType == typeof(TReaderResult2))
+				else if ((recordSetFlags & 8) == 8 && resultType == typeof(TReaderResult2))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult2), resultType }), expProcName, expResultSet2, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
 					isRdrResult2Used = true;
 				}
-				else if (resultType == typeof(TReaderResult3))
+				else if ((recordSetFlags & 16) == 16 && resultType == typeof(TReaderResult3))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult3), resultType }), expProcName, expResultSet3, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
 					isRdrResult3Used = true;
 				}
-				else if (resultType == typeof(TReaderResult4))
+				else if ((recordSetFlags & 32) == 32 && resultType == typeof(TReaderResult4))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult4), resultType }), expProcName, expResultSet4, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
 					isRdrResult4Used = true;
 				}
-				else if (resultType == typeof(TReaderResult5))
+				else if ((recordSetFlags & 64) == 64 && resultType == typeof(TReaderResult5))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult5), resultType }), expProcName, expResultSet5, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
 					isRdrResult5Used = true;
 				}
-				else if (resultType == typeof(TReaderResult6))
+				else if ((recordSetFlags & 128) == 128 && resultType == typeof(TReaderResult6))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult6), resultType }), expProcName, expResultSet6, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
 					isRdrResult6Used = true;
 				}
-				else if (resultType == typeof(TReaderResult7))
+				else if ((recordSetFlags & 256) == 256 && resultType == typeof(TReaderResult7))
 				{
 					expressions.Add(Expression.Assign(expModel, Expression.Call(miSetResultSetGeneric.MakeGenericMethod().MakeGenericMethod(new Type[] { typeof(TReaderResult7), resultType }), expProcName, expResultSet7, expLogger)));
 					expressions.Add(Expression.IfThen(Expression.Equal(expModel, expNull), Expression.Return(expExitTarget, expNull, typeof(TModel))));
@@ -1774,42 +2301,42 @@ namespace ArgentSea
 				//Iterate over any List<> properties and set any List<resultSet> that match.
 				foreach (var prop in props)
 				{
-					if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult0>)) && !isRdrResult0Used)
+					if ((recordSetFlags & 2) == 2 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult0>)) && !isRdrResult0Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet0));
 						isRdrResult0Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult1>)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 4) == 4 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult1>)) && !isRdrResult1Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet1));
 						isRdrResult1Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult2>)) && !isRdrResult2Used)
+					else if ((recordSetFlags & 8) == 8 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult2>)) && !isRdrResult2Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet2));
 						isRdrResult2Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult3>)) && !isRdrResult3Used)
+					else if ((recordSetFlags & 16) == 16 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult3>)) && !isRdrResult3Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet3));
 						isRdrResult3Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult4>)) && !isRdrResult4Used)
+					else if ((recordSetFlags & 32) == 32 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult4>)) && !isRdrResult4Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet4));
 						isRdrResult4Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult5>)) && !isRdrResult5Used)
+					else if ((recordSetFlags & 64) == 64 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult5>)) && !isRdrResult5Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet5));
 						isRdrResult5Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult6>)) && !isRdrResult6Used)
+					else if ((recordSetFlags & 128) == 128 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult6>)) && !isRdrResult6Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet6));
 						isRdrResult6Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult7>)) && !isRdrResult7Used)
+					else if ((recordSetFlags & 256) == 256 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult7>)) && !isRdrResult7Used)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet7));
 						isRdrResult7Used = true;
@@ -1818,17 +2345,17 @@ namespace ArgentSea
 				//Iterate over any object (non-list) properties and set any resultSet that match.
 				foreach (var prop in props)
 				{
-					if (prop.PropertyType.IsAssignableFrom(typeof(TOutResult)) && !isPrmOutUsed)
+					if ((recordSetFlags & 1) == 1 && prop.PropertyType.IsAssignableFrom(typeof(TOutResult)) && !isPrmOutUsed)
 					{
 						expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultOut));
 						isPrmOutUsed = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult0)) && !isRdrResult0Used)
+					else if ((recordSetFlags & 2) == 2 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult0)) && !isRdrResult0Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));   //var count = 0;
 						expressions.Add(Expression.IfThen(                                      //if (resultSet0 != null)
 							Expression.NotEqual(expResultSet0, expNull),                        //{ 
-							Expression.Assign(expCount, Expression.Property(expResultSet0, miCount))    //count = resultSet0.Count;
+							Expression.Assign(expCount, Expression.Property(expResultSet0, miCount)) //count = resultSet0.Count;
 							));                                                                 //}
 						expressions.Add(Expression.IfThenElse(                                  //if (count == 1)
 							Expression.Equal(expCount, expOne),                                 //{ result.prop = resultSet0[0]; }
@@ -1839,25 +2366,16 @@ namespace ArgentSea
 								));                                                               //}
 						isRdrResult0Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult0)) && !isRdrResult1Used)
-					{
-						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
-						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet0, expNull), Expression.Assign(expCount, Expression.Property(expResultSet0, miCount))));
-						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expModel, prop), Expression.Property(expResultSet0, "Item", Expression.Constant(0))),
-							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on unexpectedly returned {{0}} results instead of one."), expCount)))));
-						isRdrResult0Used = true;
-					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult1)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 4) == 4 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult1)) && !isRdrResult1Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet1, expNull), Expression.Assign(expCount, Expression.Property(expResultSet1, miCount))));
 						expressions.Add(Expression.IfThenElse(Expression.Equal(expCount, expOne), Expression.Assign(Expression.Property(expModel, prop), Expression.Property(expResultSet1, "Item", Expression.Constant(0))),
 							Expression.IfThen(Expression.GreaterThan(expCount, expOne), Expression.Call(miLogError,
-								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
+								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} on unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult1Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult2)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 8) == 8 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult2)) && !isRdrResult2Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet2, expNull), Expression.Assign(expCount, Expression.Property(expResultSet2, miCount))));
@@ -1866,7 +2384,7 @@ namespace ArgentSea
 								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult2Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult3)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 16) == 16 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult3)) && !isRdrResult3Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet3, expNull), Expression.Assign(expCount, Expression.Property(expResultSet3, miCount))));
@@ -1875,7 +2393,7 @@ namespace ArgentSea
 								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult3Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult4)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 32) == 32 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult4)) && !isRdrResult4Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet4, expNull), Expression.Assign(expCount, Expression.Property(expResultSet4, miCount))));
@@ -1884,7 +2402,7 @@ namespace ArgentSea
 								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult4Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult5)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 64) == 64 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult5)) && !isRdrResult5Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet5, expNull), Expression.Assign(expCount, Expression.Property(expResultSet5, miCount))));
@@ -1893,7 +2411,7 @@ namespace ArgentSea
 								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult5Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult6)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 128) == 128 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult6)) && !isRdrResult6Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet6, expNull), Expression.Assign(expCount, Expression.Property(expResultSet6, miCount))));
@@ -1902,7 +2420,7 @@ namespace ArgentSea
 								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult6Used = true;
 					}
-					else if (prop.PropertyType.IsAssignableFrom(typeof(TReaderResult7)) && !isRdrResult1Used)
+					else if ((recordSetFlags & 256) == 256 && prop.PropertyType.IsAssignableFrom(typeof(TReaderResult7)) && !isRdrResult7Used)
 					{
 						expressions.Add(Expression.Assign(expCount, Expression.Constant(0)));
 						expressions.Add(Expression.IfThen(Expression.NotEqual(expResultSet7, expNull), Expression.Assign(expCount, Expression.Property(expResultSet7, miCount))));
@@ -1911,7 +2429,6 @@ namespace ArgentSea
 								Expression.Call(miFormat, Expression.Constant($"Could not set property {prop.Name} because procedure {procedureName} unexpectedly returned {{0}} results instead of one."), expCount)))));
 						isRdrResult7Used = true;
 					}
-
 				}
 				var expExit = Expression.Label(expExitTarget);
 				expressions.Add(expExit); //Exit procedure
@@ -1920,39 +2437,107 @@ namespace ArgentSea
 			expressions.Add(expModel); //return model
 			var expBlock = Expression.Block(resultType, new ParameterExpression[] { expModel, expCount }, expressions); //+variables
 
-			var lambda = Expression.Lambda<Func<
-                TShard, 
-                string, 
-                IList<TReaderResult0>, 
-                IList<TReaderResult1>, 
-                IList<TReaderResult2>, 
-                IList<TReaderResult3>, 
-                IList<TReaderResult4>, 
-                IList<TReaderResult5>, 
-                IList<TReaderResult6>, 
-                IList<TReaderResult7>, 
-                TOutResult, 
-                ILogger, 
-                TModel>>
-				(expBlock, new ParameterExpression[] {
-                    expShardId,
-                    expProcName,
-                    expResultSet0,
-                    expResultSet1,
-                    expResultSet2,
-                    expResultSet3,
-                    expResultSet4,
-                    expResultSet5,
-                    expResultSet6,
-                    expResultSet7,
-                    expResultOut,
-                    expLogger
-                }); //+parameters
-			return lambda.Compile();
-		}
+            if (recordSetFlags == 2)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TModel>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 3)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 6)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 7)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 14)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 15)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 30)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 31)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 62)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 63)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 126)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 127)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 254)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 255)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 510)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            if (recordSetFlags == 511)
+            {
+                var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expResultOut, expLogger };
+                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TModel, ILogger, TModel>>(expBlock, prms);
+                return lambda.Compile();
+            }
+            throw new Exception("Invalid recordSetFlags value");
+        }
 
-		#endregion
-		private class BadShardType : IComparable
+        #endregion
+        private class BadShardType : IComparable
 		{
 			public int CompareTo(object obj)
 			{
