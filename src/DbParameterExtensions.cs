@@ -12,7 +12,7 @@ namespace ArgentSea
     /// <item>NpgsqlParameterCollection</item>
     /// </list>
     /// </summary>
-    public static class DbParameterCollectionExtensions
+    public static class DbParameterExtensions
     {
         #region Casting
         /// <summary>
@@ -249,5 +249,28 @@ namespace ArgentSea
         /// <returns>The parameter value as a Nullable&ltTimeSpan&gt.</returns>
         public static TimeSpan? GetNullableTimeSpan(this DbParameter prm) => prm.Value as TimeSpan?;
 		#endregion
-	}
+
+        internal static int GetParameterOrdinal(this DbParameterCollection parameters, string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return -1;
+            }
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                if (parameters[i].ParameterName == name)
+                {
+                    return i;
+                }
+            }
+            throw new Exception($"Could not find data parameter {name} in the parameters collection.");
+        }
+        internal static void SetShardId<TShard>(this DbParameterCollection parameters, int shardParameterOrdinal, TShard shardId) where TShard : IComparable
+        {
+            if (shardParameterOrdinal >= 0 && shardParameterOrdinal < parameters.Count)
+            {
+                parameters[shardParameterOrdinal].Value = shardId;
+            }
+        }
+    }
 }
