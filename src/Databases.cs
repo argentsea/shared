@@ -137,7 +137,7 @@ namespace ArgentSea
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
 			/// <returns>A list containing an object for each data row.</returns>
 			public Task<IList<TResult>> ListAsync<TResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TResult : class, new()
-				=> _manager.ListAsync<TResult>(sprocName, parameters, -1, cancellationToken);
+				=> _manager.ListAsync<TResult>(sprocName, parameters, -1, null, cancellationToken);
 
             #region GetOut overloads
             /// <summary>
@@ -150,7 +150,7 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> GetOutAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -165,7 +165,7 @@ namespace ArgentSea
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -182,7 +182,7 @@ namespace ArgentSea
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
                 where TReaderResult1 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -201,7 +201,7 @@ namespace ArgentSea
                 where TReaderResult0 : class, new()
                 where TReaderResult1 : class, new()
                 where TReaderResult2 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -222,7 +222,7 @@ namespace ArgentSea
                 where TReaderResult1 : class, new()
                 where TReaderResult2 : class, new()
                 where TReaderResult3 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -245,7 +245,7 @@ namespace ArgentSea
                 where TReaderResult2 : class, new()
                 where TReaderResult3 : class, new()
                 where TReaderResult4 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -270,7 +270,7 @@ namespace ArgentSea
                 where TReaderResult3 : class, new()
                 where TReaderResult4 : class, new()
                 where TReaderResult5 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -297,7 +297,7 @@ namespace ArgentSea
                 where TReaderResult4 : class, new()
                 where TReaderResult5 : class, new()
                 where TReaderResult6 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, null, cancellationToken);
             
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -326,7 +326,7 @@ namespace ArgentSea
                 where TReaderResult5 : class, new()
                 where TReaderResult6 : class, new()
                 where TReaderResult7 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, null, cancellationToken);
 
             #endregion
 
@@ -341,7 +341,7 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> ReadAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -358,7 +358,7 @@ namespace ArgentSea
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
                 where TReaderResult1 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -377,7 +377,7 @@ namespace ArgentSea
                 where TReaderResult0 : class, new()
                 where TReaderResult1 : class, new()
                 where TReaderResult2 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -398,7 +398,7 @@ namespace ArgentSea
                 where TReaderResult1 : class, new()
                 where TReaderResult2 : class, new()
                 where TReaderResult3 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -421,7 +421,7 @@ namespace ArgentSea
                 where TReaderResult2 : class, new()
                 where TReaderResult3 : class, new()
                 where TReaderResult4 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -446,7 +446,7 @@ namespace ArgentSea
                 where TReaderResult3 : class, new()
                 where TReaderResult4 : class, new()
                 where TReaderResult5 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -473,7 +473,7 @@ namespace ArgentSea
                 where TReaderResult4 : class, new()
                 where TReaderResult5 : class, new()
                 where TReaderResult6 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -502,7 +502,7 @@ namespace ArgentSea
                 where TReaderResult5 : class, new()
                 where TReaderResult6 : class, new()
                 where TReaderResult7 : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, null, cancellationToken);
 
             #endregion
 
@@ -517,7 +517,7 @@ namespace ArgentSea
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
             public Task<TModel> QueryAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<int, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) where TModel : class, new()
-				=> _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, resultHandler, isTopOne, null, cancellationToken);
+				=> _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, resultHandler, isTopOne, null, cancellationToken);
 
             /// <summary>
 			/// Connect to the database and return the TModel object returned by the delegate.
@@ -532,7 +532,7 @@ namespace ArgentSea
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
 			public Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<int, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
-				=> _manager.QueryAsync<TArg, TModel>(sprocName, parameters, -1, resultHandler, isTopOne, optionalArgument, cancellationToken);
+				=> _manager.QueryAsync<TArg, TModel>(sprocName, parameters, -1, null, resultHandler, isTopOne, optionalArgument, cancellationToken);
 
 
             /// <summary>
@@ -543,7 +543,7 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>Throws an error if not successful.</returns>
             public Task RunAsync(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
-				=> _manager.RunAsync(sprocName, parameters, -1, cancellationToken);
+				=> _manager.RunAsync(sprocName, parameters, -1, null, cancellationToken);
 
 			#endregion
 		}

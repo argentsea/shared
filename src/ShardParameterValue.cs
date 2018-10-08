@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace ArgentSea
 {
-    public class ShardParameterValues<TShard> where TShard : IComparable
+    public class ShardParameterValue<TShard> where TShard : IComparable
     {
         public TShard ShardId { get; set; }
 
