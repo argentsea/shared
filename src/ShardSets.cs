@@ -164,7 +164,7 @@ namespace ArgentSea
                 => QueryAllAsync<object, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, generating results using a handler delegate.
+            /// Query across the specified shards, generating results using a handler delegate.
             /// </summary>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
@@ -189,7 +189,7 @@ namespace ArgentSea
                 => QueryAllAsync<object, TModel>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, generating results using a handler delegate.
+            /// Query across the specified shards, generating results using a handler delegate.
             /// </summary>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
@@ -219,7 +219,7 @@ namespace ArgentSea
                 => QueryAllAsync<TArg, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, generating results using a handler delegate.
+            /// Query across the specified shards, generating results using a handler delegate.
             /// </summary>
             /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
@@ -247,8 +247,9 @@ namespace ArgentSea
             public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
                 => QueryAllAsync<TArg, TModel>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
 
+
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, generating results using a handler delegate.
+            /// Query across the specified shards, generating results using a handler delegate.
             /// </summary>
             /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
@@ -321,11 +322,11 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TArg, TResult>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TResult> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<TArg, TResult>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<TArg, TModel>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
-            /// Query across all shards in the shard set, except for those exlicitly excluded, returning the first non-null result created by a handler delegate .
+            /// Query across all shards in the shard set, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
             /// <typeparam name="TModel">The data object return type.</typeparam>
@@ -336,11 +337,11 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TArg, TResult>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TResult> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<TArg, TResult>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<TArg, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, returning the first non-null result created by a handler delegate .
+            /// Query across the specified shards, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
             /// <typeparam name="TModel">The data object return type.</typeparam>
@@ -351,11 +352,11 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TArg, TResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TResult> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<TArg, TResult>(sprocName, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<TArg, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
-            /// Query across all shards in the shard set, except for those exlicitly excluded, returning the first non-null result created by a handler delegate .
+            /// Query across the specified shards, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TModel">The data object return type.</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
@@ -363,11 +364,11 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TResult>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TResult> resultHandler, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<object, TResult>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<object, TModel>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
 
             /// <summary>
-            /// Query across all shards in the shard set, except for those exlicitly excluded, returning the first non-null result created by a handler delegate .
+            /// Query across all shards in the shard set, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TModel">The data object return type.</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
@@ -377,11 +378,11 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TResult>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TResult> resultHandler, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<object, TResult>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<object, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, returning the first non-null result created by a handler delegate .
+            /// Query across the specified shards, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TModel">The data object return type.</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
@@ -391,12 +392,12 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TResult> resultHandler, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<object, TResult>(sprocName, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<object, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
 
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, returning the first non-null result created by a handler delegate .
+            /// Query across the specified shards, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TModel">The data object return type.</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
@@ -406,11 +407,11 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TResult> QueryFirstAsync<TArg, TResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TResult> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TResult : class, new()
-                => QueryFirstAsync<object, TResult>(sprocName, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => QueryFirstAsync<object, TModel>(sprocName, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, returning the first non-null result created by a handler delegate .
+            /// Query across the specified shards, returning the first non-null result created by a handler delegate .
             /// </summary>
             /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
             /// <typeparam name="TModel">The data object return type.</typeparam>
@@ -489,18 +490,114 @@ namespace ArgentSea
             #endregion
             #region List
             /// <summary>
-            /// 
+            /// Returns a list of objects created by the specified delegate.
             /// </summary>
-            /// <typeparam name="TArg"></typeparam>
-            /// <typeparam name="TModel"></typeparam>
-            /// <param name="sprocName"></param>
-            /// <param name="parameters"></param>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<object, TModel>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<object, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
-            /// <param name="shardParameterName"></param>
-            /// <param name="resultHandler"></param>
-            /// <param name="dataObject"></param>
-            /// <param name="cancellationToken"></param>
-            /// <returns></returns>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<object, TModel>(sprocName, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<object, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<TArg, TModel>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<TArg, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+                => ListAsync<TArg, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
+            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
             public async Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
             {
                 var result = new List<TModel>();
@@ -549,7 +646,7 @@ namespace ArgentSea
                 return result;
             }
             #endregion
-            #region Read All
+            #region MapReaderAllAsync
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
             /// </summary>
@@ -558,8 +655,8 @@ namespace ArgentSea
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> ReadAllAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
-                => ReadAllAsync<TModel>(sprocName, parameters, null, null, cancellationToken);
+            public Task<IList<TModel>> MapReaderAllAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
             /// </summary>
@@ -569,8 +666,8 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> ReadAllAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-                => ReadAllAsync<TModel>(sprocName, parameters, null, shardParameterName, cancellationToken);
+            public Task<IList<TModel>> MapReaderAllAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
@@ -581,8 +678,8 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> ReadAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
-                => ReadAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, cancellationToken);
+            public Task<IList<TModel>> MapReaderAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
 
 
             /// <summary>
@@ -595,168 +692,1345 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public async Task<IList<TModel>> ReadAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-            {
-                var result = new List<TModel>();
-                if (string.IsNullOrEmpty(sprocName))
-                {
-                    throw new ArgumentNullException(nameof(sprocName));
-                }
-                if (parameters == null)
-                {
-                    throw new ArgumentNullException(nameof(parameters));
-                }
+            public Task<IList<TModel>> MapReaderAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
 
-                cancellationToken.ThrowIfCancellationRequested();
-                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
 
-                var tsks = new List<Task<TModel>>();
-                var cancelTokenSource = new CancellationTokenSource();
-                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
-                {
-                    if (shardParameterValues is null)
-                    {
-                        foreach (var shardId in dtn.Keys)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    else
-                    {
-                        var shardParameters = ParseShardParameterValues(shardParameterValues);
-                        foreach (var shardTuple in shardParameters)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    await Task.WhenAll(tsks).ConfigureAwait(false);
-                    foreach (var tsk in tsks)
-                    {
-                        var tskResult = tsk.Result;
-                        if (tskResult != null)
-                        {
-                            result.Add(tskResult);
-                        }
-                    }
-                }
-                return result;
-            }
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapReaderAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
             #endregion
-            #region Read First
+            #region MapReaderFirst
             /// <summary>
-            /// Query across all shards in the shard set, using mapping attributes to build results using the DataReader.
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
             /// </summary>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<TModel> ReadFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
-                => ReadFirstAsync<TModel>(sprocName, parameters, null, null, cancellationToken);
-
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
             /// <summary>
-            /// Query across all shards in the shard set, using mapping attributes to build results using the DataReader.
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
             /// </summary>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<TModel> ReadFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-                => ReadFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, cancellationToken);
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
-            /// </summary>
-            /// <typeparam name="TModel">The data object return type for the list</typeparam>
-            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<TModel> ReadFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
-                => ReadFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, cancellationToken);
-
-            /// <summary>
-            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and the DataReader.
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
             /// </summary>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public async Task<TModel> ReadFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-            {
-                TModel result = null;
-                if (string.IsNullOrEmpty(sprocName))
-                {
-                    throw new ArgumentNullException(nameof(sprocName));
-                }
-                if (parameters == null)
-                {
-                    throw new ArgumentNullException(nameof(parameters));
-                }
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, cancellationToken);
 
-                cancellationToken.ThrowIfCancellationRequested();
-                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
 
-                var tsks = new List<Task<TModel>>();
-                var cancelTokenSource = new CancellationTokenSource();
-                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
-                {
-                    if (shardParameterValues is null)
-                    {
-                        foreach (var shardId in dtn.Keys)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    else
-                    {
-                        var shardParameters = ParseShardParameterValues(shardParameterValues);
-                        foreach (var shardTuple in shardParameters)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    while (tsks.Count > 0)
-                    {
-                        var tsk = await Task.WhenAny(tsks).ConfigureAwait(false);
-                        tsks.Remove(tsk);
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            cancelTokenSource.Cancel();
-                            break;
-                        }
-                        try
-                        {
-                            var tskResult = await tsk.ConfigureAwait(false);
-                            if (tskResult != null)
-                            {
-                                result = tskResult;
-                                cancelTokenSource.Cancel();
-                                break;
-                            }
-                        }
-                        catch (OperationCanceledException) { }
-                        catch (AggregateException) { }
-                        catch (Exception err)
-                        {
-                            throw err;
-                        }
-                    }
-                    return result;
-                }
-            }
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
             #endregion
-            #region GetOut All
+            #region MapOutputAllAsync
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
             /// </summary>
@@ -765,8 +2039,8 @@ namespace ArgentSea
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> GetOutAllAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
-                => GetOutAllAsync<TModel>(sprocName, parameters, null, null, cancellationToken);
+            public Task<IList<TModel>> MapOutputAllAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
@@ -777,8 +2051,8 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> GetOutAllAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-                => GetOutAllAsync<TModel>(sprocName, parameters, null, shardParameterName, cancellationToken);
+            public Task<IList<TModel>> MapOutputAllAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
@@ -789,8 +2063,8 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> GetOutAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
-                => GetOutAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, cancellationToken);
+            public Task<IList<TModel>> MapOutputAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
@@ -802,56 +2076,719 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public async Task<IList<TModel>> GetOutAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-            {
-                var result = new List<TModel>();
-                if (string.IsNullOrEmpty(sprocName))
-                {
-                    throw new ArgumentNullException(nameof(sprocName));
-                }
-                if (parameters == null)
-                {
-                    throw new ArgumentNullException(nameof(parameters));
-                }
+            public Task<IList<TModel>> MapOutputAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
-                cancellationToken.ThrowIfCancellationRequested();
-                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
 
-                var tsks = new List<Task<TModel>>();
-                var cancelTokenSource = new CancellationTokenSource();
-                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
-                {
-                    if (shardParameterValues is null)
-                    {
-                        foreach (var shardId in dtn.Keys)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    else
-                    {
-                        var shardParameters = ParseShardParameterValues(shardParameterValues);
-                        foreach (var shardTuple in shardParameters)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, Mapper.ModelFromOutResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    await Task.WhenAll(tsks).ConfigureAwait(false);
-                    foreach (var tsk in tsks)
-                    {
-                        var tskResult = tsk.Result;
-                        if (tskResult != null)
-                        {
-                            result.Add(tskResult);
-                        }
-                    }
-                }
-                return result;
-            }
+
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns non-null result using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<IList<TModel>> MapOutputAllAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryAllAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
             #endregion
-            #region GetOut First
+            #region MapOutputFirstAsync
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
             /// </summary>
@@ -860,8 +2797,9 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<TModel> GetOutFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
-                => GetOutFirstAsync<TModel>(sprocName, parameters, null, null, cancellationToken);
+            public Task<TModel> MapOutputFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
@@ -872,8 +2810,9 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<TModel> GetOutFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-                => GetOutFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, cancellationToken);
+            public Task<TModel> MapOutputFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
@@ -884,8 +2823,9 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<TModel> GetOutFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
-                => GetOutFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, cancellationToken);
+            public Task<TModel> MapOutputFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
             /// <summary>
             /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
@@ -897,72 +2837,714 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public async Task<TModel> GetOutFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
-            {
-                TModel result = null;
-                if (string.IsNullOrEmpty(sprocName))
-                {
-                    throw new ArgumentNullException(nameof(sprocName));
-                }
-                if (parameters == null)
-                {
-                    throw new ArgumentNullException(nameof(parameters));
-                }
+            public Task<TModel> MapOutputFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel>, cancellationToken);
 
-                cancellationToken.ThrowIfCancellationRequested();
-                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
 
-                var tsks = new List<Task<TModel>>();
-                var cancelTokenSource = new CancellationTokenSource();
-                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
-                {
-                    if (shardParameterValues is null)
-                    {
-                        foreach (var shardId in dtn.Keys)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
-                    else
-                    {
-                        var shardParameters = ParseShardParameterValues(shardParameterValues);
-                        foreach (var shardTuple in shardParameters)
-                        {
-                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, Mapper.ModelFromOutResultsHandler<TShard, TModel>, false, null, cancellationToken));
-                        }
-                    }
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
 
-                    while (tsks.Count > 0)
-                    {
-                        var tsk = await Task.WhenAny(tsks).ConfigureAwait(false);
-                        tsks.Remove(tsk);
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            cancelTokenSource.Cancel();
-                            break;
-                        }
-                        try
-                        {
-                            var tskResult = await tsk.ConfigureAwait(false);
-                            if (tskResult != null)
-                            {
-                                result = tskResult;
-                                cancelTokenSource.Cancel();
-                                break;
-                            }
-                        }
-                        catch (OperationCanceledException) { }
-                        catch (AggregateException) { }
-                        catch (Exception err)
-                        {
-                            throw err;
-                        }
-                    }
-                    return result;
-                }
-            }
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes and output parameters to build results.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns the first non-null result created using Mapping attributes and output parameters .
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of the non-null object results returned from any shard.</returns>
+            public Task<TModel> MapOutputFirstAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : class, new()
+                where TReaderResult0 : class, new()
+                where TReaderResult1 : class, new()
+                where TReaderResult2 : class, new()
+                where TReaderResult3 : class, new()
+                where TReaderResult4 : class, new()
+                where TReaderResult5 : class, new()
+                where TReaderResult6 : class, new()
+                where TReaderResult7 : class, new()
+                => this.QueryFirstAsync<TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, cancellationToken);
+
             #endregion
         }
 
@@ -1050,25 +3632,25 @@ namespace ArgentSea
             /// <summary>
             /// Connect to the database and return the values as a list of objects.
             /// </summary>
-            /// <typeparam name="TResult">The type of object to be listed.</typeparam>
+            /// <typeparam name="TModel">The type of object to be listed.</typeparam>
             /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
-            public Task<IList<TResult>> ListAsync<TResult>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TResult : class, new()
-                => _manager.ListAsync<TResult>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => _manager.ListAsync<TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return the values as a list of objects.
             /// </summary>
-            /// <typeparam name="TResult">The type of object to be listed.</typeparam>
+            /// <typeparam name="TModel">The type of object to be listed.</typeparam>
             /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
-            public Task<IList<TResult>> ListAsync<TResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TResult : class, new()
-                => _manager.ListAsync<TResult>(sprocName, parameters, -1, null, cancellationToken);
+            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+                => _manager.ListAsync<TModel>(sprocName, parameters, -1, null, cancellationToken);
 
 
             ///// <summary>

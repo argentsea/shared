@@ -131,13 +131,13 @@ namespace ArgentSea
 			/// <summary>
 			/// Connect to the database and return the values as a list of objects.
 			/// </summary>
-			/// <typeparam name="TResult">The type of object to be listed.</typeparam>
+			/// <typeparam name="TModel">The type of object to be listed.</typeparam>
 			/// <param name="sprocName">The stored procedure to call to fetch the data.</param>
 			/// <param name="parameters">The query parameters.</param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
 			/// <returns>A list containing an object for each data row.</returns>
-			public Task<IList<TResult>> ListAsync<TResult>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TResult : class, new()
-				=> _manager.ListAsync<TResult>(sprocName, parameters, -1, null, cancellationToken);
+			public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+				=> _manager.ListAsync<TModel>(sprocName, parameters, -1, null, cancellationToken);
 
             #region GetOut overloads
             /// <summary>
@@ -148,7 +148,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<TModel> MapOutputAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<int, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
 
@@ -161,7 +161,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult : class, new()
@@ -177,7 +177,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -195,7 +195,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -215,7 +215,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -237,7 +237,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -261,7 +261,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -287,7 +287,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -315,7 +315,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -339,7 +339,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<TModel> MapReaderAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<int, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
 
@@ -353,7 +353,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -371,7 +371,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -391,7 +391,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -413,7 +413,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -437,7 +437,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -463,7 +463,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -491,7 +491,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()

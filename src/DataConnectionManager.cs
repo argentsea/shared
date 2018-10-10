@@ -118,12 +118,12 @@ namespace ArgentSea
         /// <summary>
         /// Connect to the database and return the values as a list of objects.
         /// </summary>
-        /// <typeparam name="TResult">The type of object to be listed.</typeparam>
+        /// <typeparam name="TModel">The type of object to be listed.</typeparam>
         /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        internal async Task<IList<TResult>> ListAsync<TResult>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, Dictionary<string, object> parameterValues, CancellationToken cancellationToken) where TResult : class, new()
+        internal async Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, Dictionary<string, object> parameterValues, CancellationToken cancellationToken) where TModel : class, new()
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
@@ -134,7 +134,7 @@ namespace ArgentSea
 			}
             parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
             var result = await this._commandPolicy[sprocName].ExecuteAsync(newToken =>
-				ExecuteQueryToListAsync<TResult>(sprocName, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
+				ExecuteQueryToListAsync<TModel>(sprocName, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
 			var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
 			_logger.TraceDbCmdExecuted(sprocName, this._connectionName, elapsedMS);
@@ -212,9 +212,9 @@ namespace ArgentSea
 			}
 			return result;
 		}
-		private async Task<TResult> ExecuteQueryToValueAsync<TResult>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, CancellationToken cancellationToken)
+		private async Task<TValue> ExecuteQueryToValueAsync<TValue>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, CancellationToken cancellationToken)
         {
-            TResult result = default(TResult);
+            TValue result = default(TValue);
 			cancellationToken.ThrowIfCancellationRequested();
 			//SqlExceptionsEncountered.Clear();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
@@ -250,12 +250,12 @@ namespace ArgentSea
 					}
 				}
 			}
-			throw new UnexpectedSqlResultException($"Database query {sprocName} expected to output a type of {typeof(TResult).ToString()}, but no output values were found.");
+			throw new UnexpectedSqlResultException($"Database query {sprocName} expected to output a type of {typeof(TValue).ToString()}, but no output values were found.");
 		}
 
-		private async Task<TResult> ExecuteQueryWithDelegateAsync<TResult, TArg>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, TShard shardId, QueryResultModelHandler<TShard, TArg, TResult> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TResult : class, new()
+		private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, TShard shardId, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
 		{
-			var result = default(TResult);
+			var result = default(TModel);
 			cancellationToken.ThrowIfCancellationRequested();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
 			{

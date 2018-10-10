@@ -8,7 +8,7 @@ namespace ArgentSea
 	/// This delegate will be invoked for each shard (probably on different threads) to convert the cmd.Execute result to model types.
 	/// </summary>
 	/// <typeparam name="TShard">The Type of the ShardId.</typeparam>
-	/// <typeparam name="TResult">The Type of the expected result</typeparam>
+	/// <typeparam name="TModel">The Type of the expected result</typeparam>
 	/// <typeparam name="TArg">The Type of an optional parameter that can be passed to the parsing function. If not used, simply use Type "object" and pass null if required.</typeparam>
 	/// <param name="shardId">The value of the Shard Number.</param>
 	/// <param name="sprocName">Used to uniquely identify any cached Expression Trees (along with TModel type) and also included in any logging information.</param>
@@ -21,7 +21,5 @@ namespace ArgentSea
 	public delegate TModel QueryResultModelHandler<TShard, TArg, TModel>(TShard shardId, string sprocName, TArg optionalArgument, DbDataReader rdr, DbParameterCollection parameters, string connectionDescription, ILogger logger) 
 		where TModel : class, new() 
 		where TShard: IComparable;
-	//public delegate TResult ShardObjectHandler<TShard, TResult, TArg>(TShard shardId, TArg parameter, DbDataReader rdr, DbParameterCollection parameters, string connectionDescription, string sprocName, ILogger logger) where TResult : class, new();
-	//public delegate TResult SqlShardObjectConverter<TShard, TResult, TArg>(TShard shardId, TArg parameter, DbDataReader rdr, DbParameterCollection parameters, ILogger logger);
 
 }

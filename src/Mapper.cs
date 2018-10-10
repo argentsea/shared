@@ -2016,7 +2016,7 @@ namespace ArgentSea
         /// <param name="parameters">The output parameters returned by the query.</param>
         /// <param name="connectionDescription">The connection description is used to enrich logging information.</param>
         /// <param name="logger">The logging instance to use for any logging requirements.</param>
-        /// <returns>An instance of TResult, with properties matching the provided data.</returns>
+        /// <returns>An instance of TModel, with properties matching the provided data.</returns>
 		public static TModel QueryResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
             (
             TShard shardId,
@@ -2158,7 +2158,7 @@ namespace ArgentSea
 			return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
 		}
         */
-		private static TResult AssignRootToResult<TEval, TResult>(string procedureName, string connectionDescription, IList<TEval> resultList, ILogger logger) where TResult : class, new() where TEval : class, new()
+		private static TModel AssignRootToResult<TEval, TModel>(string procedureName, string connectionDescription, IList<TEval> resultList, ILogger logger) where TModel : class, new() where TEval : class, new()
 		{
 			if (resultList is null)
 			{
@@ -2175,7 +2175,7 @@ namespace ArgentSea
             }
             else
 			{
-				var result = resultList[0] as TResult;
+				var result = resultList[0] as TModel;
 				return result;
 			}
 		}
