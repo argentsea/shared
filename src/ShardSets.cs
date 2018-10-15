@@ -160,7 +160,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryAllAsync<object, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -173,7 +173,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryAllAsync<object, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -185,7 +185,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, object dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, object dataObject, CancellationToken cancellationToken)
                 => QueryAllAsync<object, TModel>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -199,7 +199,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryAllAsync<object, TModel>(sprocName, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
 
 
@@ -215,7 +215,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
                 => QueryAllAsync<TArg, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -230,7 +230,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
                 => QueryAllAsync<TArg, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -244,7 +244,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
                 => QueryAllAsync<TArg, TModel>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
 
 
@@ -261,7 +261,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public async Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel: class, new()
+            public async Task<IList<TModel>> QueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
 			{
                 var result = new List<TModel>();
                 if (string.IsNullOrEmpty(sprocName))
@@ -322,7 +322,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
                 => QueryFirstAsync<TArg, TModel>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -337,7 +337,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
                 => QueryFirstAsync<TArg, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -352,7 +352,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
                 => QueryFirstAsync<TArg, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -364,7 +364,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryFirstAsync<object, TModel>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -378,7 +378,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryFirstAsync<object, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -392,7 +392,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryFirstAsync<object, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
 
 
@@ -407,7 +407,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryFirstAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken)
                 => QueryFirstAsync<object, TModel>(sprocName, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -423,7 +423,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>The first non-null object obtained from any shard.</returns>
-            public async Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public async Task<TModel> QueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
             {
                 var result = default(TModel);
                 if (string.IsNullOrEmpty(sprocName))
@@ -489,17 +489,17 @@ namespace ArgentSea
             }
             #endregion
             #region List
+
             /// <summary>
             /// Returns a list of objects created by the specified delegate.
             /// </summary>
             /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<object, TModel>(sprocName, parameters, null, null, resultHandler, null, cancellationToken);
+            public Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+                => MapListAsync<TModel>(sprocName, parameters, null, null, cancellationToken);
 
             /// <summary>
             /// Returns a list of objects created by the specified delegate.
@@ -508,11 +508,22 @@ namespace ArgentSea
             /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<object, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
+            public Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+                => MapListAsync<TModel>(sprocName, parameters, null, shardParameterName, cancellationToken);
+
+            /// <summary>
+            /// Returns a list of objects created by the specified delegate.
+            /// </summary>
+            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
+            public Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
+                => MapListAsync<TModel>(sprocName, parameters, shardParameterValues, null, cancellationToken);
 
             /// <summary>
             /// Returns a list of objects created by the specified delegate.
@@ -522,83 +533,9 @@ namespace ArgentSea
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<object, TModel>(sprocName, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
-
-            /// <summary>
-            /// Returns a list of objects created by the specified delegate.
-            /// </summary>
-            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
-            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<object, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
-
-            /// <summary>
-            /// Returns a list of objects created by the specified delegate.
-            /// </summary>
-            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
-            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
-            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
-            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<TArg, TModel>(sprocName, parameters, null, null, resultHandler, dataObject, cancellationToken);
-
-            /// <summary>
-            /// Returns a list of objects created by the specified delegate.
-            /// </summary>
-            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
-            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
-            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
-            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<TArg, TModel>(sprocName, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
-
-            /// <summary>
-            /// Returns a list of objects created by the specified delegate.
-            /// </summary>
-            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
-            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
-            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
-            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
-                => ListAsync<TArg, TModel>(sprocName, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
-
-            /// <summary>
-            /// Returns a list of objects created by the specified delegate.
-            /// </summary>
-            /// <typeparam name="TArg">The optional object type to be passed to the handler.</typeparam>
-            /// <typeparam name="TModel">The data type of the objects in the list result.</typeparam>
-            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
-            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
-            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
-            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
-            /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of TModel objects, built by the delegate from the data results.</returns>
-            public async Task<IList<TModel>> ListAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : class, new()
+            public async Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
             {
                 var result = new List<TModel>();
                 if (string.IsNullOrEmpty(sprocName))
@@ -4125,7 +4062,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<TModel> MapOutputAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
 
@@ -4138,7 +4075,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult : class, new()
@@ -4154,7 +4091,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4172,7 +4109,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4192,7 +4129,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4214,7 +4151,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4238,7 +4175,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4264,7 +4201,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4292,7 +4229,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4314,7 +4251,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            public Task<TModel> MapOutputAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 => _manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromOutResultsHandler<TShard, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
 
@@ -4328,7 +4265,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult : class, new()
@@ -4345,7 +4282,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4364,7 +4301,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4385,7 +4322,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4408,7 +4345,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4433,7 +4370,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4460,7 +4397,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4489,7 +4426,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> GetOutAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4512,7 +4449,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<TModel> MapReaderAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, false, null, cancellationToken);
 
@@ -4526,7 +4463,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4544,7 +4481,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4564,7 +4501,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4586,7 +4523,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4610,7 +4547,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4646,7 +4583,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            public Task<TModel> MapReaderAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 => _manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderResultsHandler<TShard, TModel>, false, null, cancellationToken);
 
@@ -4661,7 +4598,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4680,7 +4617,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4701,7 +4638,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4724,7 +4661,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4749,7 +4686,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4776,7 +4713,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()
@@ -4805,7 +4742,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
-            public Task<TModel> ReadAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
                 where TReaderResult0 : class, new()

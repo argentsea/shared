@@ -19,7 +19,6 @@ namespace ArgentSea
 	/// <param name="logger">A logger instance for writing logs.</param>
 	/// <returns>An object of the defined type.</returns>
 	public delegate TModel QueryResultModelHandler<TShard, TArg, TModel>(TShard shardId, string sprocName, TArg optionalArgument, DbDataReader rdr, DbParameterCollection parameters, string connectionDescription, ILogger logger) 
-		where TModel : class, new() 
 		where TShard: IComparable;
 
 }

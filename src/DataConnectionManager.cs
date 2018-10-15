@@ -143,7 +143,6 @@ namespace ArgentSea
 
 
         internal async Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, int shardParameterOrdinal, Dictionary<string, object> parameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
-            where TModel : class, new()
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
@@ -253,7 +252,7 @@ namespace ArgentSea
 			throw new UnexpectedSqlResultException($"Database query {sprocName} expected to output a type of {typeof(TValue).ToString()}, but no output values were found.");
 		}
 
-		private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, TShard shardId, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+		private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, TShard shardId, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
 		{
 			var result = default(TModel);
 			cancellationToken.ThrowIfCancellationRequested();

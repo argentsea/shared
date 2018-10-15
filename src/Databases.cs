@@ -136,7 +136,7 @@ namespace ArgentSea
 			/// <param name="parameters">The query parameters.</param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
 			/// <returns>A list containing an object for each data row.</returns>
-			public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+			public Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
 				=> _manager.ListAsync<TModel>(sprocName, parameters, -1, null, cancellationToken);
 
             #region GetOut overloads
@@ -516,7 +516,7 @@ namespace ArgentSea
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-            public Task<TModel> QueryAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<int, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryAsync<TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<int, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) 
 				=> _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, resultHandler, isTopOne, null, cancellationToken);
 
             /// <summary>
@@ -531,7 +531,7 @@ namespace ArgentSea
             /// <param name="optionalArgument"></param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-			public Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<int, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+			public Task<TModel> QueryAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, QueryResultModelHandler<int, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
 				=> _manager.QueryAsync<TArg, TModel>(sprocName, parameters, -1, null, resultHandler, isTopOne, optionalArgument, cancellationToken);
 
 
