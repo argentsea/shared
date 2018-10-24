@@ -201,7 +201,7 @@ namespace ArgentSea
 					using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken).ConfigureAwait(false))
 					{
 						cancellationToken.ThrowIfCancellationRequested();
-						result = Mapper.MapToList<TModel>(dataReader, _logger);
+						result = Mapper.ToList<TModel>(dataReader, _logger);
 					}
 				}
 			}

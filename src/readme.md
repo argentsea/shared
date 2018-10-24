@@ -12,3 +12,5 @@ Currently, the Argent Sea framework supports both
 and *[PostgreSql](https://github.com/argentsea/pg)* data platforms. 
 This project contains the shared code used by both the ArgentSea.Sql 
 project and the ArgentSea.Pg project.
+
+The site home page is at http://www.argentsea.com. The documentation is located at http://docs.argentsea.com.

@@ -29,7 +29,6 @@ namespace ArgentSea
         /// <returns>The parameter value as a byte[].</returns>
         public static byte[] GetBytes(this DbParameter prm) => prm.Value as byte[];
 
-
         /// <summary>
         /// Gets an Int64 value from the output parameter.
         /// </summary>

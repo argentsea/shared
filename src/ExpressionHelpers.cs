@@ -251,11 +251,6 @@ namespace ArgentSea
         }
         public static void ReadOutParameterBinaryExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
-            //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
-            //var expAssignPrm = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
-            //expressions.Add(expAssignPrm);
-            //logger.SqlExpressionLog(expAssignPrm);
-
             var expSet = Expression.Assign(expProperty, Expression.Call(staticType.GetMethod(getMethodName), expPrm));
             var expIf = Expression.IfThenElse(
                 Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
@@ -264,6 +259,25 @@ namespace ArgentSea
                 );
             expressions.Add(expIf);
         }
+
+        public static void ReadOutParameterArrayExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        {
+            if (!propertyType.IsArray)
+            {
+                throw new Exception("The property must be an array type to have an array attribute.");
+            }
+            Type genericType = propertyType.GetElementType();
+            var mi = staticType.GetMethod(getMethodName).MakeGenericMethod(genericType);
+
+            var expSet = Expression.Assign(expProperty, Expression.Call(mi, expPrm));
+            var expIf = Expression.IfThenElse(
+                Expression.NotEqual(expPrm, Expression.Constant(null, typeof(DbParameter))),
+                expSet,
+                Expression.Call(typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.SqlParameterNotFound)), new Expression[] { expLogger, Expression.Constant(parameterName, typeof(string)), Expression.Constant(propertyType, typeof(Type)) })
+                );
+            expressions.Add(expIf);
+        }
+
 
         public static void ReaderStringExpressions(string columnName, Expression expProperty, IList<MethodCallExpression> columnLookupExpressions, IList<Expression> expressions, ParameterExpression prmSqlRdr, ParameterExpression expOrdinals, ParameterExpression expOrdinal, ref int propIndex, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {

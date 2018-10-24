@@ -3575,7 +3575,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
-            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
                 => _manager.ListAsync<TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
 
             /// <summary>
@@ -3586,7 +3586,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
-            public Task<IList<TModel>> ListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
                 => _manager.ListAsync<TModel>(sprocName, parameters, -1, null, cancellationToken);
 
 
