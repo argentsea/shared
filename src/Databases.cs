@@ -110,9 +110,10 @@ namespace ArgentSea
                     drc = new DataResilienceConfiguration();
                 }
 
+                config.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
+
                 _manager = new DataConnectionManager<int>(0, parent._dataProviderServices, drc,
 					config.GetConnectionString(), config.ConnectionDescription, parent._logger);
-                config.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
 			}
 			public string ConnectionString { get => _manager.ConnectionString; }
 

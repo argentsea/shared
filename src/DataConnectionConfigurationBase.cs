@@ -66,15 +66,19 @@ namespace ArgentSea
 
         protected SecurityConfiguration GetSecurityConfiguration()
         {
-            if (_credentials != null && _credentials.Count > 0 && !string.IsNullOrEmpty(_securityKey))
+            if (_credentials is null || _credentials.Count == 0)
             {
-                if (!_credentials.TryGetValue(_securityKey, out var securityInfo))
-                {
-                    throw new Exception($"Connection {this.ConnectionDescription} specifies a credential strategy of “{ _securityKey }” is not defined in in the list of credentials.");
-                }
-                return securityInfo;
+                throw new Exception("No database credentials have been defined.");
             }
-            return null;
+            if (string.IsNullOrEmpty(_securityKey))
+            {
+                throw new Exception($"The database security key, used to identify login credentials, was not provided on connection {this.ConnectionDescription}.");
+            }
+            if (!_credentials.TryGetValue(_securityKey, out var securityInfo))
+            {
+                throw new Exception($"Connection {this.ConnectionDescription} specifies a credential strategy of “{ _securityKey }” is not defined in in the list of credentials.");
+            }
+            return securityInfo;
         }
 
         public string SecurityKey
