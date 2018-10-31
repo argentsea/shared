@@ -6,12 +6,10 @@ work from a list of known types, the options are actually more limited.
  
 The type also needs to be supported by the corresponding database engine; 
 for example, there is no obvious way to save uint, ushort, ulong, and 
-sbyte types in SQL Server.
+sbyte types in SQL Server or PostgreSQL.
 
-### Overview
 The ShardKey and ShardChild generics support all “built in” simple C# value types 
-except bool, and also string, Guid, DateTime, TimeSpan, and DateTimeOffset. 
-They also support the corresponding Nullable types and Enum types.
+(except bool). They also support the corresponding Nullable types and Enum types.
 
 ### Type List
 To make this explicit, this is an exhausive list of supported data types:
