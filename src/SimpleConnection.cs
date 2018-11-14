@@ -7,20 +7,59 @@ using System.Text;
 
 namespace ArgentSea
 {
-    class SimpleDbConnection : IConnectionConfiguration
+    public class SimpleDbConnection : IDataConnection
     {
         public string ConnectionDescription { get; set; }
 
         public string ConnectionString { get; set; }
-
-        public string ResilienceKey { get { return null; } }
 
         public string GetConnectionString()
         {
             return ConnectionString;
         }
 
-        public void SetConfigurationOptions(DataSecurityOptions securityOptions, DataResilienceOptions resilienceStrategiesOptions)
+        public int? RetryCount { get; set; }
+
+        public int? CircuitBreakerFailureCount { get; set; }
+
+        public int? CircuitBreakerTestInterval { get; set; }
+
+        public SequenceLengthening? RetryLengthening { get; set; }
+
+        public int? RetryInterval { get; set; }
+
+        public TimeSpan GetRetryTimespan(int attempt)
+        {
+            long result;
+            var retryLengthening = SequenceLengthening.Fibonacci;
+            int retryInterval = 250;
+            if (this.RetryLengthening.HasValue)
+            {
+                retryLengthening = this.RetryLengthening.Value;
+            }
+            if (this.RetryInterval.HasValue)
+            {
+                retryInterval = this.RetryInterval.Value;
+            }
+            switch (retryLengthening)
+            {
+                case SequenceLengthening.HalfSquare:
+                    result = ((attempt * attempt) / 2) * retryInterval;
+                    break;
+                case SequenceLengthening.Linear:
+                    result = attempt * retryInterval;
+                    break;
+                case SequenceLengthening.Squaring:
+                    result = retryInterval * (long)Math.Pow(2, attempt - 1);
+                    break;
+                default: //Finonacci is default
+                    result = (attempt + (attempt - 1)) * retryInterval;
+                    break;
+            }
+            return TimeSpan.FromMilliseconds(result);
+        }
+
+        public void SetAmbientConfiguration(DataConnectionConfigurationBase notUsed1, DataConnectionConfigurationBase notUsed2, DataConnectionConfigurationBase notUsed3)
         {
             //
         }

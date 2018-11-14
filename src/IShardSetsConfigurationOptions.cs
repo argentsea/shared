@@ -13,8 +13,8 @@ namespace ArgentSea
     /// This interface is used by provider specific implementations. It is unlikely that you would implement this in consumer code.
     /// </summary>
     /// <typeparam name="TShard"></typeparam>
-    public interface IShardSetConfigurationOptions<TShard> where TShard : IComparable
+    public interface IShardSetsConfigurationOptions<TShard> where TShard : IComparable
     {
-		IShardConnectionsConfiguration<TShard>[] ShardSetsInternal { get; }
-	}
+		IShardSetConnectionsConfiguration<TShard>[] ShardSetsInternal { get; }
+    }
 }

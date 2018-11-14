@@ -23,21 +23,18 @@ namespace ArgentSea
     /// </summary>
     /// <typeparam name="TShard">The type of the ShardId.</typeparam>
     /// <typeparam name="TConfiguration">A provider-specific implementation of IShardSetConfigurationOptions.</typeparam>
-    public abstract class ShardSetsBase<TShard, TConfiguration> : ICollection where TShard : IComparable where TConfiguration : class, IShardSetConfigurationOptions<TShard>, new()
+    public abstract class ShardSetsBase<TShard, TConfiguration> : ICollection where TShard : IComparable where TConfiguration : class, IShardSetsConfigurationOptions<TShard>, new()
     {
         private readonly object syncRoot = new Lazy<object>();
         private readonly ImmutableDictionary<string, ShardSet> dtn;
-
-        private readonly DataSecurityOptions _securityOptions;
-        private readonly DataResilienceOptions _resilienceStrategiesOptions;
         private readonly IDataProviderServiceFactory _dataProviderServices;
+        private readonly DataConnectionConfigurationBase _globalConfiguration;
         private readonly ILogger _logger;
 
-        public ShardSetsBase(
+        public  ShardSetsBase(
                 IOptions<TConfiguration> configOptions,
-                IOptions<DataSecurityOptions> securityOptions,
-                IOptions<DataResilienceOptions> resilienceStrategiesOptions,
                 IDataProviderServiceFactory dataProviderServices, 
+                DataConnectionConfigurationBase globalConfiguration,
                 ILogger<ShardSetsBase<TShard, TConfiguration>> logger)
         {
             this._logger = logger;
@@ -45,9 +42,8 @@ namespace ArgentSea
             {
                 logger.LogWarning("The ShardSets collection is missing required data connection information. Your application configuration may be missing a shard configuration section.");
             }
-            this._securityOptions = securityOptions?.Value;
-            this._resilienceStrategiesOptions = resilienceStrategiesOptions?.Value;
             this._dataProviderServices = dataProviderServices;
+            this._globalConfiguration = globalConfiguration;
             var bdr = ImmutableDictionary.CreateBuilder<string, ShardSet>();
             if (!(configOptions?.Value?.ShardSetsInternal is null))
             {
@@ -92,7 +88,7 @@ namespace ArgentSea
             private readonly object syncRoot = new Lazy<object>();
             private readonly ImmutableDictionary<TShard, ShardInstance> dtn;
 
-            public ShardSet(ShardSetsBase<TShard, TConfiguration> parent, IShardConnectionsConfiguration<TShard> config)
+            public ShardSet(ShardSetsBase<TShard, TConfiguration> parent, IShardSetConnectionsConfiguration<TShard> config)
             {
                 var bdr = ImmutableDictionary.CreateBuilder<TShard, ShardInstance>();
                 foreach (var shd in config.ShardsInternal)
@@ -101,9 +97,11 @@ namespace ArgentSea
                     {
                         throw new Exception($"A shard set’s connection configuration was not valid; the configuration provider returned null.");
                     }
-                    shd.ReadConnectionInternal.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
-                    shd.WriteConnectionInternal.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
-                    bdr.Add(shd.ShardId, new ShardInstance(parent, shd.ShardId, shd.ReadConnectionInternal, shd.WriteConnectionInternal));
+                    var shardSetsConfig = config as DataConnectionConfigurationBase;
+                    var shardConfig = shd as DataConnectionConfigurationBase;
+                    shd.ReadConnectionInternal.SetAmbientConfiguration(parent._globalConfiguration, shardSetsConfig, shardConfig);
+                    shd.WriteConnectionInternal.SetAmbientConfiguration(parent._globalConfiguration, shardSetsConfig, shardConfig);
+                    bdr.Add(shd.ShardId, new ShardInstance(parent, shd.ShardId, shd));
                 }
                 this.dtn = bdr.ToImmutable();
             }
@@ -3490,11 +3488,12 @@ namespace ArgentSea
 
         public class ShardInstance
 		{
-            //public ShardInstance(ShardDataStores<TShard, TConfiguration> parent, TShard shardId, string resilienceStrategyKey, IConnectionConfiguration readConnection, IConnectionConfiguration writeConnection)
-            public ShardInstance(ShardSetsBase<TShard, TConfiguration> parent, TShard shardId, IConnectionConfiguration readConnection, IConnectionConfiguration writeConnection)
+            public ShardInstance(ShardSetsBase<TShard, TConfiguration> parent, TShard shardId, IShardConnectionConfiguration<TShard> shardConnection)
             {
 				this.ShardId = shardId;
-                if (readConnection is null && !(writeConnection is null))
+                var readConnection = shardConnection.ReadConnectionInternal;
+                var writeConnection = shardConnection.WriteConnectionInternal;
+                if (shardConnection.ReadConnectionInternal is null && !(shardConnection.WriteConnectionInternal is null))
                 {
                     readConnection = writeConnection;
                 }
@@ -3515,30 +3514,10 @@ namespace ArgentSea
         {
             internal readonly DataConnectionManager<TShard> _manager;
 
-            internal DataConnection(ShardSetsBase<TShard, TConfiguration> parent, TShard shardId, IConnectionConfiguration config)
+            internal DataConnection(ShardSetsBase<TShard, TConfiguration> parent, TShard shardId, IDataConnection config)
             {
-                var resilienceStrategies = parent?._resilienceStrategiesOptions?.DataResilienceStrategies;
-                DataResilienceConfiguration drc = null;
-                if (!(resilienceStrategies is null))
-                {
-                    foreach (var rs in resilienceStrategies)
-                    {
-                        if (rs.ResilienceKey == config.ResilienceKey)
-                        {
-                            drc = rs;
-                            break;
-                        }
-                    }
-                }
-                if (drc is null)
-                {
-                    drc = new DataResilienceConfiguration();
-                }
-
                 _manager = new DataConnectionManager<TShard>(shardId,
-                    parent._dataProviderServices,
-                    drc,
-                    config.GetConnectionString(),
+                    parent._dataProviderServices, config,
                     $"shard number { shardId.ToString() } on connection { config.ConnectionDescription }",
                     parent._logger);
             }
@@ -4055,7 +4034,6 @@ namespace ArgentSea
 			public Task RunAsync(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 => _manager.RunAsync(sprocName, parameters, -1, null, cancellationToken);
             #endregion
-
             #region GetOut overloads
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.

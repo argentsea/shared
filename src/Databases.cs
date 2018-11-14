@@ -25,16 +25,14 @@ namespace ArgentSea
 	{
 		private readonly object syncRoot = new Lazy<object>();
 		private readonly ImmutableDictionary<string, DataConnection> dtn;
-        private readonly DataSecurityOptions _securityOptions;
-        private readonly DataResilienceOptions _resilienceStrategiesOptions;
         private readonly IDataProviderServiceFactory _dataProviderServices;
+        private readonly DataConnectionConfigurationBase _globalConfiguration;
         private readonly ILogger _logger;
 
         public DatabasesBase(
             IOptions<TConfiguration> configOptions,
-            IOptions<DataSecurityOptions> securityOptions,
-            IOptions<DataResilienceOptions> resilienceStrategiesOptions,
             IDataProviderServiceFactory dataProviderServices,
+            DataConnectionConfigurationBase globalConfiguration,
             ILogger<DatabasesBase<TConfiguration>> logger)
 		{
 
@@ -44,9 +42,7 @@ namespace ArgentSea
             {
                 logger.LogWarning("The Databases collection is missing required database connection information. Your application configuration may be missing a database configuration section.");
             }
-
-            this._securityOptions = securityOptions?.Value;
-            this._resilienceStrategiesOptions = resilienceStrategiesOptions?.Value;
+            this._globalConfiguration = globalConfiguration;
             this._dataProviderServices = dataProviderServices;
             if (!(configOptions?.Value?.DbConnectionsInternal is null))
             {
@@ -93,30 +89,11 @@ namespace ArgentSea
 		{
 			private readonly DataConnectionManager<int> _manager;
 
-			internal DataConnection(DatabasesBase<TConfiguration> parent, IConnectionConfiguration config)
+			internal DataConnection(DatabasesBase<TConfiguration> parent, IDataConnection config)
 			{
-                var resilienceStrategies = parent?._resilienceStrategiesOptions?.DataResilienceStrategies;
-                DataResilienceConfiguration drc = null;
-                if (!(resilienceStrategies is null))
-                {
-                    foreach (var rs in resilienceStrategies)
-                    {
-                        if (rs.ResilienceKey == config.ResilienceKey)
-                        {
-                            drc = rs;
-                            break;
-                        }
-                    }
-                }
-                if (drc is null)
-                {
-                    drc = new DataResilienceConfiguration();
-                }
+                config.SetAmbientConfiguration(parent._globalConfiguration, null, null);
 
-                config.SetConfigurationOptions(parent._securityOptions, parent._resilienceStrategiesOptions);
-
-                _manager = new DataConnectionManager<int>(0, parent._dataProviderServices, drc,
-					config.GetConnectionString(), config.ConnectionDescription, parent._logger);
+                _manager = new DataConnectionManager<int>(0, parent._dataProviderServices, config, config.ConnectionDescription, parent._logger);
 			}
 			public string ConnectionString { get => _manager.ConnectionString; }
 

@@ -16,52 +16,67 @@ using Polly;
 
 namespace ArgentSea
 {
-    internal class DataConnectionManager<TShard> where TShard: IComparable //<TConfiguration> where TConfiguration : class, IDbDataConfigurationOptions, new()
+    internal class DataConnectionManager<TShard> where TShard: IComparable
 	{
 		#region Private variables and constructors
 		private readonly ILogger _logger;
 		private readonly Dictionary<string, Policy> _commandPolicy = new Dictionary<string, Policy>();
-		private DataResilienceConfiguration _resilienceStrategy;
 		private readonly IDataProviderServiceFactory _dataProviderServices;
-		private readonly string _connectionString;
+        private readonly IDataConnection _connectionConfig;
 		private readonly string _connectionName;
         private readonly TShard _shardId;
 
-        //private Policy ConnectionPolicy { get; set; }
-		//private Dictionary<string, Policy> CommandPolicies { get; set; } = new Dictionary<string, Policy>();
+        private const int DefaultRetryCount = 6;
+        private const int DefaultCircuitBreakerTestInterval = 5000; // 5 seconds
+        private const int DefaultCircuitBreakerFailureCount = 20;
 
-        internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, DataResilienceConfiguration resilienceStrategy, string connectionString, string connectionName, ILogger logger)
+        internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, IDataConnection connectionConfig, string connectionName, ILogger logger)
 		{
 			this._logger = logger;
             this._dataProviderServices = dataProviderServices;
-            this._resilienceStrategy = resilienceStrategy;
-            this._connectionString = connectionString;
 			this._connectionName = connectionName;
             _shardId = shardId;
+            _connectionConfig = connectionConfig;
         }
 		#endregion
 		#region Private helper methods
 		private Policy GetCommandResiliencePolicy(string sprocName)
 		{
 			Policy result;
-			var retryPolicy = Policy.Handle<DbException>(ex =>
+            int retryCnt = DefaultRetryCount;
+            int cbTestInterval = DefaultCircuitBreakerTestInterval;
+            int cbFailureCount = DefaultCircuitBreakerFailureCount;
+
+            if (_connectionConfig.RetryCount.HasValue)
+            {
+                retryCnt = _connectionConfig.RetryCount.Value;
+            }
+            if (_connectionConfig.CircuitBreakerTestInterval.HasValue)
+            {
+                cbTestInterval = _connectionConfig.CircuitBreakerTestInterval.Value;
+            }
+            if (_connectionConfig.CircuitBreakerFailureCount.HasValue)
+            {
+                cbFailureCount = _connectionConfig.CircuitBreakerFailureCount.Value;
+            }
+            var retryPolicy = Policy.Handle<DbException>(ex =>
 					this._dataProviderServices.GetIsErrorTransient(ex)
 				)
 				.WaitAndRetryAsync(
-					retryCount: this._resilienceStrategy.RetryCount,
-					sleepDurationProvider: attempt => this._resilienceStrategy.HandleRetryTimespan(attempt),
+					retryCount: retryCnt,
+					sleepDurationProvider: attempt => this._connectionConfig.GetRetryTimespan(attempt),
 					onRetry: (exception, timeSpan, retryCount, context) => this.HandleCommandRetry(sprocName, this._connectionName, retryCount, exception)
 				);
 
-			if (this._resilienceStrategy.CircuitBreakerFailureCount < 1)
+			if (this._connectionConfig.CircuitBreakerFailureCount < 1)
 			{
 				result = retryPolicy;
 			}
 			else
 			{
 				var circuitBreakerPolicy = Policy.Handle<Exception>().CircuitBreakerAsync(
-					exceptionsAllowedBeforeBreaking: this._resilienceStrategy.CircuitBreakerFailureCount,
-					durationOfBreak: TimeSpan.FromMilliseconds(this._resilienceStrategy.CircuitBreakerTestInterval)
+					exceptionsAllowedBeforeBreaking: cbFailureCount,
+					durationOfBreak: TimeSpan.FromMilliseconds(cbTestInterval)
 					);
 				result = circuitBreakerPolicy.Wrap(retryPolicy);
 			}
@@ -85,7 +100,7 @@ namespace ArgentSea
 
 		#region Public properties
 
-		public string ConnectionString { get => this._connectionString; }
+		public string ConnectionString { get => this._connectionConfig.GetConnectionString(); }
 
         #endregion
 
@@ -191,7 +206,7 @@ namespace ArgentSea
 		{
 			IList<TModel> result = null;
 			cancellationToken.ThrowIfCancellationRequested();
-			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
+			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString()))
 			{
 				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -219,7 +234,7 @@ namespace ArgentSea
             TValue result = default(TValue);
 			cancellationToken.ThrowIfCancellationRequested();
 			//SqlExceptionsEncountered.Clear();
-			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
+			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString()))
 			{
 				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -259,7 +274,7 @@ namespace ArgentSea
 		{
 			var result = default(TModel);
 			cancellationToken.ThrowIfCancellationRequested();
-			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
+			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString()))
 			{
 				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -288,7 +303,7 @@ namespace ArgentSea
 		private async Task ExecuteRunAsync(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			using (var connection = this._dataProviderServices.NewConnection(this._connectionString))
+			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString()))
 			{
 				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
