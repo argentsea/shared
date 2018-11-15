@@ -14,6 +14,8 @@ namespace ArgentSea
     {
         string DatabaseKey { get; set; }
 
-        IDataConnection DataConnectionInternal { get; }
+        IDataConnection ReadConnectionInternal { get; }
+
+        IDataConnection WriteConnectionInternal { get; }
     }
 }

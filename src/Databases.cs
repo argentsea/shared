@@ -24,7 +24,7 @@ namespace ArgentSea
     public abstract class DatabasesBase<TConfiguration> : ICollection where TConfiguration : class, IDatabaseConfigurationOptions, new()
 	{
 		private readonly object syncRoot = new Lazy<object>();
-		private readonly ImmutableDictionary<string, DataConnection> dtn;
+        private readonly ImmutableDictionary<string, Database> dtn;
         private readonly IDataProviderServiceFactory _dataProviderServices;
         private readonly DataConnectionConfigurationBase _globalConfiguration;
         private readonly ILogger _logger;
@@ -46,24 +46,29 @@ namespace ArgentSea
             this._dataProviderServices = dataProviderServices;
             if (!(configOptions?.Value?.DbConnectionsInternal is null))
             {
-                var bdr = ImmutableDictionary.CreateBuilder<string, DataConnection>();
+                var bdr = ImmutableDictionary.CreateBuilder<string, Database>();
                 foreach (var db in configOptions.Value.DbConnectionsInternal)
                 {
                     if (db is null)
                     {
                         throw new Exception($"A database connection configuration was not valid; the configuration provider returned null.");
                     }
-                    bdr.Add(db.DatabaseKey, new DataConnection(this, db.DataConnectionInternal));
+
+
+                    var dbConfig = db as DataConnectionConfigurationBase;
+                    db.ReadConnectionInternal.SetAmbientConfiguration(_globalConfiguration, null, dbConfig);
+                    db.WriteConnectionInternal.SetAmbientConfiguration(_globalConfiguration, null, dbConfig);
+                    bdr.Add(db.DatabaseKey, new Database(this, db));
                 }
                 this.dtn = bdr.ToImmutable();
             }
             else
             {
-                dtn = ImmutableDictionary<string, DataConnection>.Empty;
+                dtn = ImmutableDictionary<string, Database>.Empty;
             }
 
 		}
-		public DataConnection this[string key]
+        public Database this[string key]
 		{
 			get { return dtn[key]; }
 		}
@@ -78,12 +83,34 @@ namespace ArgentSea
 		public object SyncRoot => syncRoot;
 
 		public void CopyTo(Array array, int index)
-			=> this.dtn.Values.ToImmutableList().CopyTo((DataConnection[])array, index);
+			=> this.dtn.Values.ToImmutableList().CopyTo((Database[])array, index);
 
 		public IEnumerator GetEnumerator() => this.dtn.GetEnumerator();
-	
+
 
         #region Nested classes
+        public class Database
+        {
+            public Database(DatabasesBase<TConfiguration> parent, IDatabaseConnectionConfiguration connection)
+            {
+                var readConnection = connection.ReadConnectionInternal;
+                var writeConnection = connection.WriteConnectionInternal;
+                if (connection.ReadConnectionInternal is null && !(connection.WriteConnectionInternal is null))
+                {
+                    readConnection = writeConnection;
+                }
+                else if (writeConnection is null && !(readConnection is null))
+                {
+                    writeConnection = readConnection;
+                }
+                this.Read = new DataConnection(parent, readConnection);
+                this.Write = new DataConnection(parent, writeConnection);
+            }
+            public DataConnection Read { get; }
+
+            public DataConnection Write { get; }
+
+        }
 
         public class DataConnection
 		{
@@ -91,8 +118,6 @@ namespace ArgentSea
 
 			internal DataConnection(DatabasesBase<TConfiguration> parent, IDataConnection config)
 			{
-                config.SetAmbientConfiguration(parent._globalConfiguration, null, null);
-
                 _manager = new DataConnectionManager<int>(0, parent._dataProviderServices, config, config.ConnectionDescription, parent._logger);
 			}
 			public string ConnectionString { get => _manager.ConnectionString; }
@@ -528,6 +553,7 @@ namespace ArgentSea
 
 			#endregion
 		}
-		#endregion
+        #endregion
     }
+
 }
