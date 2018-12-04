@@ -31,6 +31,7 @@ namespace Microsoft.Scripting.Ast {
 #else
 namespace System.Linq.Expressions {
 #endif
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
 		internal sealed class DebugViewWriter : ExpressionVisitor
 		{
