@@ -14,6 +14,7 @@ namespace ArgentSea
 	public interface IShardSetConnectionsConfiguration<TShard> where TShard : IComparable
     {
         string ShardSetName { get; set; }
+        TShard DefaultShardId { get; set; }
         IShardConnectionConfiguration<TShard>[] ShardsInternal { get; }
     }
 }
