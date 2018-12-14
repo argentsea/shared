@@ -22,10 +22,10 @@ namespace ArgentSea
         /// Initializes a new instance of the <see cref="UnexpectedMultiRowResultException" /> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public UnexpectedMultiRowResultException(string message)
-            : base(message)
-        {
-        }
+        //public UnexpectedMultiRowResultException(string message)
+        //    : base(message)
+        //{
+        //}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnexpectedMultiRowResultException" /> class.
@@ -37,8 +37,8 @@ namespace ArgentSea
         {
         }
 
-        public UnexpectedMultiRowResultException(string procedureName, string connectionDescription)
-            : base($"Procedure {procedureName} on connection {connectionDescription} returned multiple records when only one was expected.")
+        public UnexpectedMultiRowResultException(string procedureName)
+            : base($"Procedure {procedureName} returned multiple records when only one was expected.")
         {
 
         }

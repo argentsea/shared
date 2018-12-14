@@ -821,7 +821,8 @@ namespace ArgentSea
             {
                 throw new Exception($"The data reader provide is null.");
             }
-            if (DBNull.Value.Equals(rdr?.IsDBNull(ordinal)))
+            //if (DBNull.Value.Equals(rdr?.IsDBNull(ordinal)))
+            if (rdr.IsDBNull(ordinal))
             {
                 logger.RequiredPropertyIsDbNull(modelName, rdr.GetName(ordinal));
                 return true;
