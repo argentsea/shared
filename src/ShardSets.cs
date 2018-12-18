@@ -913,6 +913,86 @@ namespace ArgentSea
                 return result;
             }
             #endregion
+            #region Run
+            /// <summary>
+            /// Runs the specified stored procedure on the Write connecton on all shards.
+            /// </summary>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns></returns>
+            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                => RunAllAsync(sprocName, parameters, null, null, cancellationToken);
+
+            /// <summary>
+            /// Runs the specified stored procedure on the Write connecton on all shards.
+            /// </summary>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns></returns>
+            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                => RunAllAsync(sprocName, parameters, null, shardParameterName, cancellationToken);
+
+            /// <summary>
+            /// Runs the specified stored procedure on the Write connecton on all shards.
+            /// </summary>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns></returns>
+            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+                => RunAllAsync(sprocName, parameters, shardParameterValues, null, cancellationToken);
+
+            /// <summary>
+            /// Runs the specified stored procedure on the Write connecton on all shards.
+            /// </summary>
+            /// <param name="sprocName">The name of the stored procedure or function to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            public async Task RunAllAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            {
+                if (string.IsNullOrEmpty(sprocName))
+                {
+                    throw new ArgumentNullException(nameof(sprocName));
+                }
+                if (parameters == null)
+                {
+                    throw new ArgumentNullException(nameof(parameters));
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+                var tsks = new List<Task>();
+                var cancelTokenSource = new CancellationTokenSource();
+                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
+                {
+                    if (shardParameterValues is null)
+                    {
+                        foreach (var shardId in dtn.Keys)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
+                            tsks.Add(this.dtn[shardId].Write._manager.RunAsync(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken));
+                        }
+                    }
+                    else
+                    {
+                        var shardParameters = ParseShardParameterValues(shardParameterValues);
+                        foreach (var shardTuple in shardParameters)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
+                            tsks.Add(this.dtn[shardTuple.Key].Write._manager.RunAsync(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken));
+                        }
+                    }
+                    await Task.WhenAll(tsks).ConfigureAwait(false);
+                }
+            }
+
+            #endregion
             #region MapReaderAllAsync
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
