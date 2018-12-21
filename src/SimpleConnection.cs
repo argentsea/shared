@@ -59,7 +59,7 @@ namespace ArgentSea
             return TimeSpan.FromMilliseconds(result);
         }
 
-        public void SetAmbientConfiguration(DataConnectionConfigurationBase notUsed1, DataConnectionConfigurationBase notUsed2, DataConnectionConfigurationBase notUsed3)
+        public void SetAmbientConfiguration(DataConnectionConfigurationBase notUsed1, DataConnectionConfigurationBase notUsed2, DataConnectionConfigurationBase notUsed3, DataConnectionConfigurationBase notUsed4)
         {
             //
         }

@@ -25,6 +25,6 @@ namespace ArgentSea
 
         int? CircuitBreakerTestInterval { get; }
 
-        void SetAmbientConfiguration(DataConnectionConfigurationBase globalProperties, DataConnectionConfigurationBase shardSetProperties, DataConnectionConfigurationBase shardProperties);
+        void SetAmbientConfiguration(DataConnectionConfigurationBase globalProperties, DataConnectionConfigurationBase readWriteProperties, DataConnectionConfigurationBase shardSetProperties, DataConnectionConfigurationBase shardProperties);
     }
 }

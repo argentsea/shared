@@ -15,6 +15,6 @@ namespace ArgentSea
     /// <typeparam name="TShard"></typeparam>
     public interface IShardSetsConfigurationOptions<TShard> where TShard : IComparable
     {
-		IShardSetConnectionsConfiguration<TShard>[] ShardSetsInternal { get; }
+		IShardSetConnectionsConfiguration<TShard>[] ShardSetsConfigInternal { get; }
     }
 }

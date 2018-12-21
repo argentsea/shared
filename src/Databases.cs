@@ -56,8 +56,8 @@ namespace ArgentSea
 
 
                     var dbConfig = db as DataConnectionConfigurationBase;
-                    db.ReadConnectionInternal.SetAmbientConfiguration(_globalConfiguration, null, dbConfig);
-                    db.WriteConnectionInternal.SetAmbientConfiguration(_globalConfiguration, null, dbConfig);
+                    db.ReadConnectionInternal.SetAmbientConfiguration(_globalConfiguration, null, null, dbConfig);
+                    db.WriteConnectionInternal.SetAmbientConfiguration(_globalConfiguration, null, null, dbConfig);
                     bdr.Add(db.DatabaseKey, new Database(this, db));
                 }
                 this.dtn = bdr.ToImmutable();

@@ -37,7 +37,7 @@ namespace ArgentSea
             /// <param name="parameters">The parameters to be passed to the procedure or function.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns></returns>
-            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task RunAsync(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 => _shardSet.RunAllAsync(sprocName, parameters, null, null, cancellationToken);
 
             /// <summary>
@@ -48,7 +48,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns></returns>
-            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            public Task RunAsync(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 => _shardSet.RunAllAsync(sprocName, parameters, null, shardParameterName, cancellationToken);
 
             /// <summary>
@@ -59,7 +59,7 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns></returns>
-            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
+            public Task RunAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, CancellationToken cancellationToken)
                 => _shardSet.RunAllAsync(sprocName, parameters, shardParameterValues, null, cancellationToken);
 
             /// <summary>
@@ -70,7 +70,7 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            public Task RunAllAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            public Task RunAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 => _shardSet.RunAllAsync(sprocName, parameters, shardParameterValues, shardParameterName, cancellationToken);
 
             #endregion
@@ -1640,7 +1640,6 @@ namespace ArgentSea
                 => _shardSet.WriteQueryAllAsync<object, TModel>(sprocName, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             #endregion
-
         }
     }
 }

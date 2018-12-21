@@ -31,7 +31,7 @@ namespace ArgentSea
             {
                 var bdr = ImmutableDictionary.CreateBuilder<TShard, ShardInstance>();
                 _defaultShardId = config.DefaultShardId;
-                foreach (var shd in config.ShardsInternal)
+                foreach (var shd in config.ShardsConfigInternal)
                 {
                     if (shd is null)
                     {
@@ -39,8 +39,10 @@ namespace ArgentSea
                     }
                     var shardSetsConfig = config as DataConnectionConfigurationBase;
                     var shardConfig = shd as DataConnectionConfigurationBase;
-                    shd.ReadConnectionInternal.SetAmbientConfiguration(parent._globalConfiguration, shardSetsConfig, shardConfig);
-                    shd.WriteConnectionInternal.SetAmbientConfiguration(parent._globalConfiguration, shardSetsConfig, shardConfig);
+                    var readConfig = config.ReadConfigInternal as DataConnectionConfigurationBase;
+                    var writeConfig = config.WriteConfigInternal as DataConnectionConfigurationBase;
+                    shd.ReadConnectionInternal.SetAmbientConfiguration(parent._globalConfiguration, shardSetsConfig, readConfig, shardConfig);
+                    shd.WriteConnectionInternal.SetAmbientConfiguration(parent._globalConfiguration, shardSetsConfig, writeConfig, shardConfig);
                     bdr.Add(shd.ShardId, new ShardInstance(parent, shd.ShardId, shd));
                 }
                 this.dtn = bdr.ToImmutable();

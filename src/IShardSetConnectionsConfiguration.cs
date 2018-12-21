@@ -15,6 +15,9 @@ namespace ArgentSea
     {
         string ShardSetName { get; set; }
         TShard DefaultShardId { get; set; }
-        IShardConnectionConfiguration<TShard>[] ShardsInternal { get; }
+        IShardConnectionConfiguration<TShard>[] ShardsConfigInternal { get; }
+        IShardConnectionConfiguration<TShard> ReadConfigInternal { get; }
+        IShardConnectionConfiguration<TShard> WriteConfigInternal { get; }
+
     }
 }

@@ -39,16 +39,16 @@ namespace ArgentSea
                 ILogger<ShardSetsBase<TShard, TConfiguration>> logger)
         {
             this._logger = logger;
-            if (configOptions?.Value?.ShardSetsInternal is null)
+            if (configOptions?.Value?.ShardSetsConfigInternal is null)
             {
                 logger.LogWarning("The ShardSets collection is missing required data connection information. Your application configuration may be missing a shard configuration section.");
             }
             this._dataProviderServices = dataProviderServices;
             this._globalConfiguration = globalConfiguration;
             var bdr = ImmutableDictionary.CreateBuilder<string, ShardSet>();
-            if (!(configOptions?.Value?.ShardSetsInternal is null))
+            if (!(configOptions?.Value?.ShardSetsConfigInternal is null))
             {
-                foreach (var set in configOptions.Value.ShardSetsInternal)
+                foreach (var set in configOptions.Value.ShardSetsConfigInternal)
                 {
                     if (set is null)
                     {
