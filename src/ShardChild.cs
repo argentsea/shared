@@ -2,8 +2,8 @@
 // See the LICENSE file in the repository root for more information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Runtime.Serialization;
+
 
 namespace ArgentSea
 {
@@ -13,7 +13,8 @@ namespace ArgentSea
     /// <typeparam name="TShard"></typeparam>
     /// <typeparam name="TRecord"></typeparam>
     /// <typeparam name="TChild"></typeparam>
-    public struct ShardChild<TShard, TRecord, TChild> : IEquatable<ShardChild<TShard, TRecord, TChild>> 
+    [Serializable]
+    public struct ShardChild<TShard, TRecord, TChild> : IEquatable<ShardChild<TShard, TRecord, TChild>>, ISerializable
         where TShard : IComparable
         where TRecord : IComparable
         where TChild : IComparable
@@ -39,8 +40,19 @@ namespace ArgentSea
 		{
 			//
 		}
+        /// <summary>
+        /// ISerializer constructor
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
+        public ShardChild(SerializationInfo info, StreamingContext context)
+        {
+            var tmp = FromExternalString(info.GetString("ShardChild"));
+            _key = tmp.Key;
+            _childId = tmp.ChildId;
+        }
 
-		public TChild ChildId
+        public TChild ChildId
 		{
 			get { return _childId; }
 		}
@@ -183,6 +195,10 @@ namespace ArgentSea
             {
                 return new ShardChild<TShard, TRecord, TChild>(new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord)), default(TChild));
             }
+        }
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("ShardChild", ToExternalString());
         }
     }
 }

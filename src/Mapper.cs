@@ -991,10 +991,10 @@ namespace ArgentSea
 				}
 				else
 				{
-                    if (isNoShardId)
-                    {
-                        throw new Exception($"The shard map attribute does not specify a shardId parameter/column and the procedure was invoked without providing a shardId; therefore no shardId could be determined.");
-                    }
+                    //if (isNoShardId)
+                    //{
+                    //    throw new Exception($"The shard map attribute does not specify a shardId parameter/column and the procedure was invoked without providing a shardId; therefore no shardId could be determined.");
+                    //}
 					if (tShardId.IsValueType)
 					{
 						nonrequiredExpressions.Add(Expression.Assign(expDataShardId, Expression.Convert(expShardArgument, expDataShardId.Type)));

@@ -152,7 +152,7 @@ namespace ArgentSea
 			}
             parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
             var result = await this._commandPolicy[sprocName].ExecuteAsync(newToken =>
-				ExecuteQueryToListAsync<TModel>(sprocName, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
+				ExecuteQueryToListAsync<TModel>(_shardId, sprocName, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
 			var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
 			_logger.TraceDbCmdExecuted(sprocName, this._connectionName, elapsedMS);
@@ -201,7 +201,7 @@ namespace ArgentSea
 		#endregion
 		#region Private Handlers
 
-		private async Task<IList<TModel>> ExecuteQueryToListAsync<TModel>(string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, CancellationToken cancellationToken) 
+		private async Task<IList<TModel>> ExecuteQueryToListAsync<TModel>(TShard shardId, string sprocName, DbParameterCollection parameters, Dictionary<string, object> parameterValues, CancellationToken cancellationToken) 
             where TModel : class, new()
 		{
 			IList<TModel> result = null;
@@ -219,7 +219,7 @@ namespace ArgentSea
 					using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken).ConfigureAwait(false))
 					{
 						cancellationToken.ThrowIfCancellationRequested();
-						result = Mapper.ToList<TModel>(dataReader, _logger);
+						result = Mapper.ToList<TShard, TModel>(dataReader, shardId, _logger);
 					}
 				}
 			}

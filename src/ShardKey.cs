@@ -2,16 +2,15 @@
 // See the LICENSE file in the repository root for more information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace ArgentSea
 {
     /// <summary>
     /// Immutable class representing a sharded record with a “compound” key: the (virtual) shardId and the (database) recordId.
     /// </summary>
-    public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>> where TShard : IComparable where TRecord : IComparable
+    [Serializable]
+    public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>>, ISerializable where TShard : IComparable where TRecord : IComparable
 	{
 		private TShard _shardId;
 		private TRecord _recordId;
@@ -46,8 +45,19 @@ namespace ArgentSea
 		{
 
 		}
-
-			#endregion
+        /// <summary>
+        /// ISerializer constructor
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
+        public ShardKey(SerializationInfo info, StreamingContext context)
+        {
+            var tmp = FromExternalString(info.GetString("ShardKey"));
+            _origin = tmp.Origin;
+            _shardId = tmp.ShardId;
+            _recordId = tmp.RecordId;
+        }
+		#endregion
 		#region Public Properties and Method
 
 		public TShard ShardId
@@ -416,7 +426,9 @@ namespace ArgentSea
 
 			return BitConverter.ToInt32(new byte[] { (byte)result1, (byte)result2, (byte)result3, (byte)result4 }, 0);
 		}
-		public static bool operator ==(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
+
+
+        public static bool operator ==(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
 		{
 			return sk1.Equals(sk2);
 		}
@@ -431,6 +443,10 @@ namespace ArgentSea
 				return new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord));
 			}
 		}
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("ShardKey", ToExternalString());
+        }
     }
 }
 
