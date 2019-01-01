@@ -97,7 +97,23 @@ namespace ArgentSea
             {
                 throw new ArgumentException(nameof(value));
             }
-            var aValues = Convert.FromBase64String(value.Substring(1).Replace('_', '+').Replace('~', '/'));
+            string subValue = value.Substring(2);
+
+            int origCheckSumHigh = CharToCheckSum(value[0]);
+            int origCheckSumLow = CharToCheckSum(value[1]);
+            int origCheckSum = ((origCheckSumHigh & 0x3f) << 6) | origCheckSumLow;
+            if ((origCheckSum & 0x400) == 0x400)
+            {
+                subValue += "=";
+            }
+            if ((origCheckSum & 0x800) == 0x800)
+            {
+                subValue += "=";
+            }
+            origCheckSum &= 0x3FF;
+            subValue = subValue.Replace('_', '+').Replace('~', '/');
+
+            var aValues = Convert.FromBase64String(subValue);
 
             for (int i = 0; i < aValues.Length; i++)
             {
@@ -127,37 +143,11 @@ namespace ArgentSea
                 }
             }
 
-            var charCheckSum = value.ToCharArray()[0];
-            int origCheckSum;
-            if ('A' <= charCheckSum && charCheckSum <= 'Z')
-            {
-                origCheckSum = (int)charCheckSum - 0x41;
-            }
-            else if ('a' <= charCheckSum && charCheckSum <= 'z')
-            {
-                origCheckSum = ((int)charCheckSum - 0x61) + 26;
-            }
-            else if ('0' <= charCheckSum && charCheckSum <= '9')
-            {
-                origCheckSum = ((int)charCheckSum - 0x30) + 52;
-            }
-            else if ('+' == charCheckSum)
-            {
-                origCheckSum = 62;
-            }
-            else if ('/' == charCheckSum)
-            {
-                origCheckSum = 63;
-            }
-            else
-            {
-                throw new Exception("External key string has been corrupted.");
-            }
             int checkSum = 0;
             foreach (var chr in aValues)
             {
                 checkSum += chr;
-                checkSum &= 0x3f;
+                checkSum &= 0x3ff;
             }
             if (origCheckSum != checkSum)
             {
@@ -177,29 +167,9 @@ namespace ArgentSea
             foreach (var chr in value)
             {
                 checkSum += chr;
-                checkSum &= 0x3f;
+                checkSum &= 0x3ff;
             }
-            char checkSumChr;
-            if (checkSum < 26)
-            {
-                checkSumChr = (char)(0x41 + checkSum);
-            }
-            else if (checkSum < 52)
-            {
-                checkSumChr = (char)(0x61 + (checkSum - 26));
-            }
-            else if (checkSum < 62)
-            {
-                checkSumChr = (char)(0x30 + (checkSum - 52));
-            }
-            else if (checkSum == 62)
-            {
-                checkSumChr = '+';
-            }
-            else
-            {
-                checkSumChr = '/';
-            }
+
             for (int i = 0; i < value.Length; i++)
             {
                 if (i % 6 == 0)
@@ -227,7 +197,74 @@ namespace ArgentSea
                     value[i] ^= 77;
                 }
             }
-            return checkSumChr + Convert.ToBase64String(value).Replace('+', '_').Replace('/', '~');
+            var base64Value = Convert.ToBase64String(value).Replace('+', '_').Replace('/', '~');
+            if (base64Value[base64Value.Length - 1] == '=')
+            {
+                checkSum |= 0x400;
+            }
+            if (base64Value[base64Value.Length - 2] == '=')
+            {
+                checkSum |= 0x800;
+            }
+            var checkSumCharHigh = CheckSumToChar(checkSum >> 6).ToString();
+            var checkSumCharLow = CheckSumToChar(checkSum & 0x3f).ToString();
+
+            return checkSumCharHigh + checkSumCharLow + base64Value.TrimEnd('=');
+        }
+
+        private static char CheckSumToChar(int checkSum)
+        {
+            char result;
+            if (checkSum < 26)
+            {
+                result = (char)(0x41 + checkSum);
+            }
+            else if (checkSum < 52)
+            {
+                result = (char)(0x61 + (checkSum - 26));
+            }
+            else if (checkSum < 62)
+            {
+                result = (char)(0x30 + (checkSum - 52));
+            }
+            else if (checkSum == 62)
+            {
+                result = '+';
+            }
+            else
+            {
+                result = '/';
+            }
+            return result;
+        }
+        private static int CharToCheckSum(char charCheckSum)
+        {
+            int origCheckSum;
+            if ('A' <= charCheckSum && charCheckSum <= 'Z')
+            {
+                origCheckSum = (int)charCheckSum - 0x41;
+            }
+            else if ('a' <= charCheckSum && charCheckSum <= 'z')
+            {
+                origCheckSum = ((int)charCheckSum - 0x61) + 26;
+            }
+            else if ('0' <= charCheckSum && charCheckSum <= '9')
+            {
+                origCheckSum = ((int)charCheckSum - 0x30) + 52;
+            }
+            else if ('+' == charCheckSum)
+            {
+                origCheckSum = 62;
+            }
+            else if ('/' == charCheckSum)
+            {
+                origCheckSum = 63;
+            }
+            else
+            {
+                throw new Exception("External key string has been corrupted.");
+            }
+            return origCheckSum;
         }
     }
 }
