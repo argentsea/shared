@@ -105,10 +105,10 @@ namespace ArgentSea
             if ((origCheckSum & 0x400) == 0x400)
             {
                 subValue += "=";
-            }
-            if ((origCheckSum & 0x800) == 0x800)
-            {
-                subValue += "=";
+                if ((origCheckSum & 0x800) == 0x800)
+                {
+                    subValue += "=";
+                }
             }
             origCheckSum &= 0x3FF;
             subValue = subValue.Replace('_', '+').Replace('~', '/');
@@ -201,10 +201,10 @@ namespace ArgentSea
             if (base64Value[base64Value.Length - 1] == '=')
             {
                 checkSum |= 0x400;
-            }
-            if (base64Value[base64Value.Length - 2] == '=')
-            {
-                checkSum |= 0x800;
+                if (base64Value[base64Value.Length - 2] == '=')
+                {
+                    checkSum |= 0x800;
+                }
             }
             var checkSumCharHigh = CheckSumToChar(checkSum >> 6).ToString();
             var checkSumCharLow = CheckSumToChar(checkSum & 0x3f).ToString();

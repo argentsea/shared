@@ -175,7 +175,7 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel>(string sprocName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TModel : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TShard, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -364,7 +364,7 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel>(string sprocName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TModel : class, new()
-                => _manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromOutResultsHandler<TShard, TModel, Mapper.DummyType, TModel>, false, null, cancellationToken);
+                => _manager.QueryAsync<object, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromOutResultsHandler<TShard, TModel>, false, null, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.

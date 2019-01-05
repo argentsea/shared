@@ -216,7 +216,7 @@ namespace ArgentSea
         /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
         public static TModel ToModel<TModel>(this DbDataReader rdr, ILogger logger)
             where TModel : class, new()
-            => ToModel<int, TModel>(rdr, 0, logger);
+            => ToModel<BadShardType, TModel>(rdr, null, logger);
 
         /// <summary>
         /// Accepts a single-row data reader object and returns a an object instance of the specified type using Mapping attributes.
@@ -1334,7 +1334,10 @@ namespace ArgentSea
             ILogger logger)
             where TShard : IComparable
             where TModel : class, new()
-            => Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+        {
+            MoveRdrToEnd(rdr);
+            return Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+        }
 
 
         /// <summary>
@@ -1367,7 +1370,8 @@ namespace ArgentSea
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
             var resultList = Mapper.ToList<TShard, TReaderResult>(rdr, shardId, logger);
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 3, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1416,7 +1420,8 @@ namespace ArgentSea
             {
                 resultList1 = new List<TReaderResult1>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 7, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1476,7 +1481,8 @@ namespace ArgentSea
             {
                 resultList2 = new List<TReaderResult2>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 15, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1547,7 +1553,8 @@ namespace ArgentSea
             {
                 resultList3 = new List<TReaderResult3>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 31, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1629,7 +1636,8 @@ namespace ArgentSea
             {
                 resultList4 = new List<TReaderResult4>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 63, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1722,7 +1730,8 @@ namespace ArgentSea
             {
                 resultList5 = new List<TReaderResult5>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 127, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1826,7 +1835,8 @@ namespace ArgentSea
             {
                 resultList6 = new List<TReaderResult6>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, Mapper.DummyType, TModel>(shardId, sprocName, 255, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1941,7 +1951,8 @@ namespace ArgentSea
             {
                 resultList7 = new List<TReaderResult7>();
             }
-            var resultOutPrms = Mapper.ToModel<TModel>(parameters, logger);
+            MoveRdrToEnd(rdr);
+            var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(shardId, sprocName, 511, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -2937,6 +2948,17 @@ namespace ArgentSea
                 return lambda.Compile();
             }
             throw new Exception("Invalid recordSetFlags value");
+        }
+        private static void MoveRdrToEnd(DbDataReader rdr)
+        {
+            if (!(rdr is null) && !rdr.IsClosed)
+            {
+                while (rdr.NextResult())
+                {
+                    //skip any unprocessed recordset results (if any),
+                    //Out parameters are at the end of the TDS stream on SQL Server.
+                }
+            }
         }
 
         #endregion
