@@ -1369,12 +1369,12 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            var resultList = Mapper.ToList<TShard, TReaderResult>(rdr, shardId, logger);
+            var resultList = (List<TReaderResult>)Mapper.ToList<TShard, TReaderResult>(rdr, shardId, logger);
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 3, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList, resultOutPrms, logger);
         }
 
@@ -1409,12 +1409,12 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
+            List<TReaderResult1> resultList1;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1424,7 +1424,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 7, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultOutPrms, logger);
         }
 
@@ -1461,13 +1461,13 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1475,7 +1475,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -1485,7 +1485,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 15, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultOutPrms, logger);
         }
 
@@ -1524,14 +1524,14 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1539,7 +1539,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -1547,7 +1547,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -1557,7 +1557,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 31, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultOutPrms, logger);
         }
 
@@ -1598,15 +1598,15 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1614,7 +1614,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -1622,7 +1622,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -1630,7 +1630,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -1640,7 +1640,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 63, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultOutPrms, logger);
         }
 
@@ -1683,16 +1683,16 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
-            IList<TReaderResult5> resultList5;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
+            List<TReaderResult5> resultList5;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1700,7 +1700,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -1708,7 +1708,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -1716,7 +1716,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -1724,7 +1724,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList5 = Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
+                resultList5 = (List<TReaderResult5>)Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
             }
             else
             {
@@ -1734,7 +1734,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 127, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultOutPrms, logger);
         }
 
@@ -1779,17 +1779,17 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
-            IList<TReaderResult5> resultList5;
-            IList<TReaderResult6> resultList6;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
+            List<TReaderResult5> resultList5;
+            List<TReaderResult6> resultList6;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1797,7 +1797,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -1805,7 +1805,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -1813,7 +1813,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -1821,7 +1821,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList5 = Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
+                resultList5 = (List<TReaderResult5>)Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
             }
             else
             {
@@ -1829,7 +1829,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList6 = Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
+                resultList6 = (List<TReaderResult6>)Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
             }
             else
             {
@@ -1839,7 +1839,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, Mapper.DummyType, TModel>(shardId, sprocName, 255, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultOutPrms, logger);
         }
 
@@ -1886,18 +1886,18 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
-            IList<TReaderResult5> resultList5;
-            IList<TReaderResult6> resultList6;
-            IList<TReaderResult7> resultList7;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
+            List<TReaderResult5> resultList5;
+            List<TReaderResult6> resultList6;
+            List<TReaderResult7> resultList7;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -1905,7 +1905,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -1913,7 +1913,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -1921,7 +1921,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -1929,7 +1929,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList5 = Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
+                resultList5 = (List<TReaderResult5>)Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
             }
             else
             {
@@ -1937,7 +1937,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList6 = Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
+                resultList6 = (List<TReaderResult6>)Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
             }
             else
             {
@@ -1945,7 +1945,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList7 = Mapper.ToList<TShard, TReaderResult7>(rdr, shardId, logger);
+                resultList7 = (List<TReaderResult7>)Mapper.ToList<TShard, TReaderResult7>(rdr, shardId, logger);
             }
             else
             {
@@ -1955,7 +1955,7 @@ namespace ArgentSea
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(shardId, sprocName, 511, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, resultOutPrms, logger);
         }
         #endregion
@@ -1989,10 +1989,10 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            var resultList = Mapper.ToList<TShard, TModel>(rdr, shardId, logger);
+            var resultList = (List<TModel>)Mapper.ToList<TShard, TModel>(rdr, shardId, logger);
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TModel, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType>(shardId, sprocName, 2, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TModel>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TModel>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList, logger);
         }
 
@@ -2028,12 +2028,12 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
+            List<TReaderResult1> resultList1;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2041,7 +2041,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 6, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, logger);
         }
 
@@ -2079,13 +2079,13 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2093,7 +2093,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -2101,7 +2101,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 14, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, logger);
         }
 
@@ -2141,14 +2141,14 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2156,7 +2156,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -2164,7 +2164,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -2172,7 +2172,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 30, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, logger);
         }
 
@@ -2214,15 +2214,15 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2230,7 +2230,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -2238,7 +2238,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -2246,7 +2246,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -2254,7 +2254,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 62, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, logger);
         }
 
@@ -2298,16 +2298,16 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
-            IList<TReaderResult5> resultList5;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
+            List<TReaderResult5> resultList5;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2315,7 +2315,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -2323,7 +2323,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -2331,7 +2331,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -2339,7 +2339,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList5 = Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
+                resultList5 = (List<TReaderResult5>)Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
             }
             else
             {
@@ -2347,7 +2347,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 126, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5> , ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5> , ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, logger);
         }
 
@@ -2393,17 +2393,17 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
-            IList<TReaderResult5> resultList5;
-            IList<TReaderResult6> resultList6;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
+            List<TReaderResult5> resultList5;
+            List<TReaderResult6> resultList6;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2411,7 +2411,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -2419,7 +2419,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -2427,7 +2427,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -2435,7 +2435,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList5 = Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
+                resultList5 = (List<TReaderResult5>)Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
             }
             else
             {
@@ -2443,7 +2443,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList6 = Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
+                resultList6 = (List<TReaderResult6>)Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
             }
             else
             {
@@ -2451,7 +2451,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, Mapper.DummyType, TModel>(shardId, sprocName, 254, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, logger);
         }
 
@@ -2499,18 +2499,18 @@ namespace ArgentSea
             where TModel : class, new()
         {
             ValidateDataReader(sprocName, rdr, connectionDescription, logger);
-            IList<TReaderResult1> resultList1;
-            IList<TReaderResult2> resultList2;
-            IList<TReaderResult3> resultList3;
-            IList<TReaderResult4> resultList4;
-            IList<TReaderResult5> resultList5;
-            IList<TReaderResult6> resultList6;
-            IList<TReaderResult7> resultList7;
+            List<TReaderResult1> resultList1;
+            List<TReaderResult2> resultList2;
+            List<TReaderResult3> resultList3;
+            List<TReaderResult4> resultList4;
+            List<TReaderResult5> resultList5;
+            List<TReaderResult6> resultList6;
+            List<TReaderResult7> resultList7;
 
-            var resultList0 = Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
+            var resultList0 = (List<TReaderResult0>)Mapper.ToList<TShard, TReaderResult0>(rdr, shardId, logger);
             if (rdr.NextResult())
             {
-                resultList1 = Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
+                resultList1 = (List<TReaderResult1>)Mapper.ToList<TShard, TReaderResult1>(rdr, shardId, logger);
             }
             else
             {
@@ -2518,7 +2518,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList2 = Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
+                resultList2 = (List<TReaderResult2>)Mapper.ToList<TShard, TReaderResult2>(rdr, shardId, logger);
             }
             else
             {
@@ -2526,7 +2526,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList3 = Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
+                resultList3 = (List<TReaderResult3>)Mapper.ToList<TShard, TReaderResult3>(rdr, shardId, logger);
             }
             else
             {
@@ -2534,7 +2534,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList4 = Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
+                resultList4 = (List<TReaderResult4>)Mapper.ToList<TShard, TReaderResult4>(rdr, shardId, logger);
             }
             else
             {
@@ -2542,7 +2542,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList5 = Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
+                resultList5 = (List<TReaderResult5>)Mapper.ToList<TShard, TReaderResult5>(rdr, shardId, logger);
             }
             else
             {
@@ -2550,7 +2550,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList6 = Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
+                resultList6 = (List<TReaderResult6>)Mapper.ToList<TShard, TReaderResult6>(rdr, shardId, logger);
             }
             else
             {
@@ -2558,7 +2558,7 @@ namespace ArgentSea
             }
             if (rdr.NextResult())
             {
-                resultList7 = Mapper.ToList<TShard, TReaderResult7>(rdr, shardId, logger);
+                resultList7 = (List<TReaderResult7>)Mapper.ToList<TShard, TReaderResult7>(rdr, shardId, logger);
             }
             else
             {
@@ -2566,7 +2566,7 @@ namespace ArgentSea
             }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getRstObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(shardId, sprocName, 510, logger), LazyThreadSafetyMode.ExecutionAndPublication));
-            var sqlObjectDelegate = (Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, ILogger, TModel>)lazySqlObjectDelegate.Value;
+            var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, logger);
         }
         #endregion
@@ -2593,7 +2593,7 @@ namespace ArgentSea
 			}
 		}
 
-        //private static Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TOutResult, ILogger, TModel>
+        //private static Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, TOutResult, ILogger, TModel>
         private static Delegate BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TOutResult>
 			(TShard shardId, string procedureName, int recordSetFlags, ILogger logger)
 			where TShard : IComparable
@@ -2612,15 +2612,15 @@ namespace ArgentSea
 			var expressions = new List<Expression>();
             var expShardId = Expression.Parameter(typeof(TShard), "shardId");
             var expProcName = Expression.Parameter(typeof(string), "sprocName");
-			var expResultSet0 = Expression.Parameter(typeof(IList<TReaderResult0>), "rstResult0");
-			var expResultSet1 = Expression.Parameter(typeof(IList<TReaderResult1>), "rstResult1");
-			var expResultSet2 = Expression.Parameter(typeof(IList<TReaderResult2>), "rstResult2");
-			var expResultSet3 = Expression.Parameter(typeof(IList<TReaderResult3>), "rstResult3");
-			var expResultSet4 = Expression.Parameter(typeof(IList<TReaderResult4>), "rstResult4");
-			var expResultSet5 = Expression.Parameter(typeof(IList<TReaderResult5>), "rstResult5");
-			var expResultSet6 = Expression.Parameter(typeof(IList<TReaderResult6>), "rstResult6");
-			var expResultSet7 = Expression.Parameter(typeof(IList<TReaderResult7>), "rstResult7");
-			var expResultOut = Expression.Parameter(typeof(TOutResult), "outPrmsResult");
+            var expResultSet0 = Expression.Parameter(typeof(List<TReaderResult0>), "rstResult0");
+            var expResultSet1 = Expression.Parameter(typeof(List<TReaderResult1>), "rstResult1");
+            var expResultSet2 = Expression.Parameter(typeof(List<TReaderResult2>), "rstResult2");
+            var expResultSet3 = Expression.Parameter(typeof(List<TReaderResult3>), "rstResult3");
+            var expResultSet4 = Expression.Parameter(typeof(List<TReaderResult4>), "rstResult4");
+            var expResultSet5 = Expression.Parameter(typeof(List<TReaderResult5>), "rstResult5");
+            var expResultSet6 = Expression.Parameter(typeof(List<TReaderResult6>), "rstResult6");
+            var expResultSet7 = Expression.Parameter(typeof(List<TReaderResult7>), "rstResult7");
+            var expResultOut = Expression.Parameter(typeof(TOutResult), "outPrmsResult");
 			var expLogger = Expression.Parameter(typeof(ILogger), "logger");
 			var expModel = Expression.Variable(typeof(TModel), "model");
 			var expCount = Expression.Variable(typeof(int), "count");
@@ -2715,44 +2715,84 @@ namespace ArgentSea
                 //Iterate over any List<> properties and set any List<resultSet> that match.
                 foreach (var prop in props)
                 {
-                    if ((recordSetFlags & 2) == 2 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult0>)) && !isRdrResult0Used)
+                    if ((recordSetFlags & 2) == 2 && prop.PropertyType == expResultSet0.Type && !isRdrResult0Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet0));
                         isRdrResult0Used = true;
                     }
-                    else if ((recordSetFlags & 4) == 4 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult1>)) && !isRdrResult1Used)
+                    else if ((recordSetFlags & 2) == 2 && prop.PropertyType.IsAssignableFrom(expResultSet0.Type) && !isRdrResult0Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet0, prop.PropertyType)));
+                        isRdrResult0Used = true;
+                    }
+                    else if ((recordSetFlags & 4) == 4 && prop.PropertyType == expResultSet1.Type && !isRdrResult1Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet1));
                         isRdrResult1Used = true;
                     }
-                    else if ((recordSetFlags & 8) == 8 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult2>)) && !isRdrResult2Used)
+                    else if ((recordSetFlags & 4) == 4 && prop.PropertyType.IsAssignableFrom(expResultSet1.Type) && !isRdrResult1Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet1, prop.PropertyType)));
+                        isRdrResult1Used = true;
+                    }
+                    else if ((recordSetFlags & 8) == 8 && prop.PropertyType == expResultSet2.Type && !isRdrResult2Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet2));
                         isRdrResult2Used = true;
                     }
-                    else if ((recordSetFlags & 16) == 16 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult3>)) && !isRdrResult3Used)
+                    else if ((recordSetFlags & 8) == 8 && prop.PropertyType.IsAssignableFrom(expResultSet2.Type) && !isRdrResult2Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet2, prop.PropertyType)));
+                        isRdrResult2Used = true;
+                    }
+                    else if ((recordSetFlags & 16) == 16 && prop.PropertyType == expResultSet3.Type && !isRdrResult3Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet3));
                         isRdrResult3Used = true;
                     }
-                    else if ((recordSetFlags & 32) == 32 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult4>)) && !isRdrResult4Used)
+                    else if ((recordSetFlags & 16) == 16 && prop.PropertyType.IsAssignableFrom(expResultSet3.Type) && !isRdrResult3Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet3, prop.PropertyType)));
+                        isRdrResult3Used = true;
+                    }
+                    else if ((recordSetFlags & 32) == 32 && prop.PropertyType == expResultSet4.Type && !isRdrResult4Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet4));
                         isRdrResult4Used = true;
                     }
-                    else if ((recordSetFlags & 64) == 64 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult5>)) && !isRdrResult5Used)
+                    else if ((recordSetFlags & 32) == 32 && prop.PropertyType.IsAssignableFrom(expResultSet4.Type) && !isRdrResult4Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet4, prop.PropertyType)));
+                        isRdrResult4Used = true;
+                    }
+                    else if ((recordSetFlags & 64) == 64 && prop.PropertyType == expResultSet5.Type && !isRdrResult5Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet5));
                         isRdrResult5Used = true;
                     }
-                    else if ((recordSetFlags & 128) == 128 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult6>)) && !isRdrResult6Used)
+                    else if ((recordSetFlags & 64) == 64 && prop.PropertyType.IsAssignableFrom(expResultSet5.Type) && !isRdrResult5Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet5, prop.PropertyType)));
+                        isRdrResult5Used = true;
+                    }
+                    else if ((recordSetFlags & 128) == 128 && prop.PropertyType == expResultSet6.Type && !isRdrResult6Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet6));
                         isRdrResult6Used = true;
                     }
-                    else if ((recordSetFlags & 256) == 256 && prop.PropertyType.IsAssignableFrom(typeof(IList<TReaderResult7>)) && !isRdrResult7Used)
+                    else if ((recordSetFlags & 128) == 128 && prop.PropertyType.IsAssignableFrom(expResultSet6.Type) && !isRdrResult6Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet6, prop.PropertyType)));
+                        isRdrResult6Used = true;
+                    }
+                    else if ((recordSetFlags & 256) == 256 && prop.PropertyType == expResultSet7.Type && !isRdrResult7Used)
                     {
                         expressions.Add(Expression.Assign(Expression.Property(expModel, prop), expResultSet7));
+                        isRdrResult7Used = true;
+                    }
+                    else if ((recordSetFlags & 256) == 256 && prop.PropertyType.IsAssignableFrom(expResultSet7.Type) && !isRdrResult7Used)
+                    {
+                        expressions.Add(Expression.Assign(Expression.Property(expModel, prop), Expression.Convert(expResultSet7, prop.PropertyType)));
                         isRdrResult7Used = true;
                     }
                 }
@@ -2854,112 +2894,112 @@ namespace ArgentSea
             if (recordSetFlags == 2)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TModel>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TModel>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 3)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 6)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 7)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 14)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 15)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 30)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 31)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 62)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 63)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 126)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 127)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 254)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 255)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 510)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 511)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expResultOut, expLogger };
-                var lambda = Expression.Lambda<Func<TShard, string, IList<TReaderResult0>, IList<TReaderResult1>, IList<TReaderResult2>, IList<TReaderResult3>, IList<TReaderResult4>, IList<TReaderResult5>, IList<TReaderResult6>, IList<TReaderResult7>, TModel, ILogger, TModel>>(expBlock, prms);
+                var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, TModel, ILogger, TModel>>(expBlock, prms);
                 logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
