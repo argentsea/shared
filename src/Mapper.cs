@@ -519,7 +519,7 @@ namespace ArgentSea
 				}
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
-					//MemberExpression expProperty = Expression.Property(expModel, prop);
+                    ExpressionHelpers.TryInstantiateMapToModel(prop, expProperty, expressions);
 					IterateInMapProperties(prop.PropertyType, expressions, variables, prmSqlPrms, expProperty, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
 				}
 			}
@@ -675,7 +675,7 @@ namespace ArgentSea
 				}
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
-					IterateSetOutParameters(prop.PropertyType, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+                    IterateSetOutParameters(prop.PropertyType, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
 				}
 			}
 		}
@@ -765,7 +765,8 @@ namespace ArgentSea
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
 					MemberExpression expProperty = Expression.Property(expModel, prop);
-					IterateGetOutParameters(tShard, prop.PropertyType, expShardArgument, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expProperty, expLogger, exitLabel, logger);
+                    ExpressionHelpers.TryInstantiateMapToModel(prop, expProperty, requiredExpressions);
+                    IterateGetOutParameters(tShard, prop.PropertyType, expShardArgument, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expProperty, expLogger, exitLabel, logger);
 				}
 			}
 		}
@@ -1217,7 +1218,8 @@ namespace ArgentSea
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
 					MemberExpression expProperty = Expression.Property(expModel, prop);
-					IterateRdrColumns(tShard, prop.PropertyType, expProperty, expShardArgument, columnLookupExpressions, variableExpressions, requiredExpressions, nonrequiredExpressions, expRdr, expOrdinalsArg, expOrdinal, ref propIndex, expLogger, exitLabel, logger);
+                    ExpressionHelpers.TryInstantiateMapToModel(prop, expProperty, requiredExpressions);
+                    IterateRdrColumns(tShard, prop.PropertyType, expProperty, expShardArgument, columnLookupExpressions, variableExpressions, requiredExpressions, nonrequiredExpressions, expRdr, expOrdinalsArg, expOrdinal, ref propIndex, expLogger, exitLabel, logger);
 				}
 			}
 
