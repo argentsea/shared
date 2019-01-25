@@ -10,7 +10,7 @@ namespace ArgentSea
     /// This class adds extension methods which simplify getting typed .NET values from (output) parameters.
     /// Because these methods reference the abstract DbParameterCollection, these methods are available in the derived classes:
     /// <list type="bullet">
-    /// <item><see cref="QueryParameterCollection"/>QueryParameterCollection</item>see></item>
+    /// <item><see cref="ParameterCollection"/>QueryParameterCollection</item>see></item>
     /// <item>SqlParameterCollection</item>
     /// <item>NpgsqlParameterCollection</item>
     /// </list>

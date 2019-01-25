@@ -15,7 +15,7 @@ namespace ArgentSea
         /// <summary>
         /// Initializes a new instance of the <see cref="UnexpectedSqlResultException" /> class with no error message.
         /// </summary>
-        public UnexpectedSqlResultException()
+        public UnexpectedSqlResultException() : base("The query results are missing an expected value.")
         {
         }
 

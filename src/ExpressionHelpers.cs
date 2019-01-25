@@ -187,7 +187,7 @@ namespace ArgentSea
             //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
             //var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
             //expressions.Add(expAssign);
-            //logger.SqlExpressionLog(expAssign);
+            //logger?.SqlExpressionLog(expAssign);
 
             if (propertyType.IsEnum)
             {
@@ -235,7 +235,7 @@ namespace ArgentSea
             //var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
             //var expAssign = Expression.Assign(expPrm, Expression.Call(miGetParameter, expPrms, Expression.Constant(parameterName, typeof(string))));
             //expressions.Add(expAssign);
-            //logger.SqlExpressionLog(expAssign);
+            //logger?.SqlExpressionLog(expAssign);
 
             MethodCallExpression expGet;
             if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -569,7 +569,7 @@ namespace ArgentSea
 			}
 			if (DBNull.Value.Equals(prm.Value))
 			{
-				logger.RequiredPropertyIsDbNull(modelName, parameterName);
+				logger?.RequiredPropertyIsDbNull(modelName, parameterName);
 				return true;
 			}
 			return false;
@@ -583,7 +583,7 @@ namespace ArgentSea
             //if (DBNull.Value.Equals(rdr?.IsDBNull(ordinal)))
             if (rdr.IsDBNull(ordinal))
             {
-                logger.RequiredPropertyIsDbNull(modelName, rdr.GetName(ordinal));
+                logger?.RequiredPropertyIsDbNull(modelName, rdr.GetName(ordinal));
                 return true;
             }
             return false;

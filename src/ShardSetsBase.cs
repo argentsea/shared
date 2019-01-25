@@ -41,7 +41,7 @@ namespace ArgentSea
             this._logger = logger;
             if (configOptions?.Value?.ShardSetsConfigInternal is null)
             {
-                logger.LogWarning("The ShardSets collection is missing required data connection information. Your application configuration may be missing a shard configuration section.");
+                logger?.LogWarning("The ShardSets collection is missing required data connection information. Your application configuration may be missing a shard configuration section.");
             }
             this._dataProviderServices = dataProviderServices;
             this._globalConfiguration = globalConfiguration;

@@ -20,7 +20,7 @@ namespace ArgentSea
 
         DbCommand NewCommand(string storedProcedureName, DbConnection connection);
 
-        void SetParameters(DbCommand cmd, DbParameterCollection parameters, Dictionary<string, object> parameterValues);
+        void SetParameters(DbCommand cmd, string[] parmeterNames, DbParameterCollection parameters, Dictionary<string, object> parameterValues);
 
     }
 

@@ -17,6 +17,7 @@ namespace ArgentSea
     {
         public enum EventIdentifier
         {
+            ConnectionStringBuilt,
             LogExpressionTreeCreation,
             MapperSqlParameterNotFound,
             MapperSqlColumnNotFound,
@@ -41,6 +42,7 @@ namespace ArgentSea
             RequiredPropertyIsDbNull
         }
 
+        private static readonly Action<ILogger, string, Exception> _sqlConnectionStringBuilt;
         private static readonly Action<ILogger, Type, Exception> _sqlInParameterCacheMiss;
         private static readonly Action<ILogger, Type, Exception> _sqlInParameterCacheHit;
         private static readonly Action<ILogger, Type, Exception> _sqlSetOutParameterCacheMiss;
@@ -84,6 +86,7 @@ namespace ArgentSea
         {
             //_sqlCreate = LoggerMessage.Define<string, Type, string>(LogLevel.Debug, new EventId((int)EventIdentifier.EventDelegate, nameof(SqlDelegateCreated)), "Created delegate for {source} for object type {type}: \r\n{{{text}}}");
 
+            _sqlConnectionStringBuilt = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.ConnectionStringBuilt, nameof(SqlConnectionStringBuilt)), "A new connection string was built with a value of {ConnectString}.");
             _sqlInParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheMiss)), "No cached delegate for creating input parameters was initialized for type {TModel}; this is normal for the first execution.");
             _sqlInParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheHit)), "The cached delegate for creating input parameters was already initialized for type {TModel}.");
             _sqlSetOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was initialized for type {TModel}; this is normal for the first execution.");
@@ -122,6 +125,9 @@ namespace ArgentSea
             _sqlReaderExpressionTreeOrdinalsCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} ordinals to data reader values as:\r\n{code}.");
             _sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
         }
+
+        public static void SqlConnectionStringBuilt(this ILogger logger, string connectionString)
+            => _sqlConnectionStringBuilt(logger, connectionString, null);
 
         /// <summary>
         /// If the log level is set to Information, logs when a parameter attribute exists but was not found in the parameters collection.

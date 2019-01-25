@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
@@ -13,7 +14,7 @@ namespace ArgentSea
 
         public string ConnectionString { get; set; }
 
-        public string GetConnectionString()
+        public string GetConnectionString(ILogger logger)
         {
             return ConnectionString;
         }

@@ -352,7 +352,7 @@ namespace ArgentSea
 			IterateInMapProperties(tModel, expressions, variables, prmSqlPrms, prmObjInstance, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
 			var inBlock = Expression.Block(variables, expressions);
 			var lmbIn = Expression.Lambda<Action<DbParameterCollection, HashSet<string>, ILogger, TModel>>(inBlock, exprInPrms);
-			logger.CreatedExpressionTreeForSetInParameters(tModel, inBlock);
+			logger?.CreatedExpressionTreeForSetInParameters(tModel, inBlock);
 			return lmbIn.Compile();
 		}
 		private static void IterateInMapProperties(Type tModel, List<Expression> expressions, List<ParameterExpression> variables, ParameterExpression prmSqlPrms, Expression expModel, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
@@ -541,7 +541,7 @@ namespace ArgentSea
 
 			var outBlock = Expression.Block(expressions);
 			var lmbOut = Expression.Lambda<Action<DbParameterCollection, HashSet<string>, ILogger>>(outBlock, exprOutPrms);
-			logger.CreatedExpressionTreeForSetOutParameters(TModel, outBlock);
+			logger?.CreatedExpressionTreeForSetOutParameters(TModel, outBlock);
 			return lmbOut.Compile();
 		}
 		private static void IterateSetOutParameters(Type TModel, List<Expression> expressions, ParameterExpression prmSqlPrms, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
@@ -734,7 +734,7 @@ namespace ArgentSea
 			initialExpressions.Add(Expression.Label(expExitLabel, Expression.Constant(null, tModel)));
 			var expBlock = Expression.Block(variableExpressions, initialExpressions);
 			var lambda = Expression.Lambda<Func<TShard, DbParameterCollection, ILogger, object>>(expBlock, expressionPrms);
-			logger.CreatedExpressionTreeForReadOutParameters(tModel, expBlock);
+			logger?.CreatedExpressionTreeForReadOutParameters(tModel, expBlock);
 			return lambda.Compile();
 		}
 		private static void IterateGetOutParameters(Type tShard, Type tModel, ParameterExpression expShardArgument, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
@@ -1186,8 +1186,8 @@ namespace ArgentSea
             var expOrdinalArray = Expression.NewArrayInit(typeof(int), columnLookupExpressions.ToArray());
             //var lambdaOrdinals = Expression.Lambda<Func<DbDataReader, int[]>>(expOrdinalArray, new ParameterExpression[] { prmSqlRdr, expOrdinalsArg });
             var lambdaOrdinals = Expression.Lambda<Func<DbDataReader, int[]>>(expOrdinalArray, new ParameterExpression[] { prmSqlRdr });
-            logger.CreatedExpressionTreeForReaderOrdinals(tModel, expOrdinalArray);
-            logger.CreatedExpressionTreeForReaderRowData(tModel, expDataBlock);
+            logger?.CreatedExpressionTreeForReaderOrdinals(tModel, expOrdinalArray);
+            logger?.CreatedExpressionTreeForReaderRowData(tModel, expDataBlock);
 
             return (lambdaDataRow.Compile(), lambdaOrdinals.Compile());
 		}
@@ -1300,12 +1300,12 @@ namespace ArgentSea
         {
             if (rdr is null)
             {
-                logger.DataReaderIsNull(sprocName, connectionDescription);
+                logger?.DataReaderIsNull(sprocName, connectionDescription);
                 throw new Exception($"The procedure {sprocName} on connection {connectionDescription} did not return a data reader object.");
             }
             if (rdr.IsClosed)
             {
-                logger.DataReaderIsClosed(sprocName, connectionDescription);
+                logger?.DataReaderIsClosed(sprocName, connectionDescription);
                 throw new Exception($"The procedure {sprocName} on connection {connectionDescription} returned a data reader that is not open.");
             }
         }
@@ -2581,7 +2581,7 @@ namespace ArgentSea
 			}
 			else if (resultList.Count == 0)
 			{
-				logger.LogDebug($"Procedure {procedureName} returned an empty base result.");
+				logger?.LogDebug($"Procedure {procedureName} returned an empty base result.");
 				return null;
 			}
 			else if (resultList.Count > 1)
@@ -2647,7 +2647,7 @@ namespace ArgentSea
 
             var tModel = typeof(TModel);
 			// 1. Try to create an instance of our result class.
-			using (logger.BuildSqlResultsHandlerScope(procedureName, tModel))
+			using (logger?.BuildSqlResultsHandlerScope(procedureName, tModel))
 			{
 				//Set base type to some result value, if we can.
 				if ((recordSetFlags & 1) == 1 && resultType == typeof(TOutResult))
@@ -2897,112 +2897,112 @@ namespace ArgentSea
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TModel>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 3)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 6)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 7)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 14)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 15)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 30)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 31)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 62)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 63)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 126)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 127)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 254)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 255)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 510)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             if (recordSetFlags == 511)
             {
                 var prms = new ParameterExpression[] { expShardId, expProcName, expResultSet0, expResultSet1, expResultSet2, expResultSet3, expResultSet4, expResultSet5, expResultSet6, expResultSet7, expResultOut, expLogger };
                 var lambda = Expression.Lambda<Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, TModel, ILogger, TModel>>(expBlock, prms);
-                logger.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
+                logger?.CreatedExpressionTreeForModel(tModel, procedureName, expBlock);
                 return lambda.Compile();
             }
             throw new Exception("Invalid recordSetFlags value");

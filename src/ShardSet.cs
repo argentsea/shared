@@ -423,12 +423,12 @@ namespace ArgentSea
                 return result;
             }
             #region internal ShardSet query methods
-            internal async Task<IList<TModel>> ReadQueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            internal async Task<IList<TModel>> ReadQueryAllAsync<TArg, TModel>(Query query, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
             {
                 var result = new List<TModel>();
-                if (string.IsNullOrEmpty(sprocName))
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
                 {
-                    throw new ArgumentNullException(nameof(sprocName));
+                    throw new ArgumentNullException(nameof(query));
                 }
                 if (parameters == null)
                 {
@@ -446,7 +446,7 @@ namespace ArgentSea
                         foreach (var shardId in dtn.Keys)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<TArg, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, false, dataObject, cancellationToken));
+                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, false, dataObject, cancellationToken));
                         }
                     }
                     else
@@ -455,7 +455,7 @@ namespace ArgentSea
                         foreach (var shardTuple in shardParameters)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<TArg, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, resultHandler, false, dataObject, cancellationToken));
+                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, resultHandler, false, dataObject, cancellationToken));
                         }
                     }
                     await Task.WhenAll(tsks).ConfigureAwait(false);
@@ -471,12 +471,12 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<TModel> ReadQueryFirstAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            internal async Task<TModel> ReadQueryFirstAsync<TArg, TModel>(Query query, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
             {
                 var result = default(TModel);
-                if (string.IsNullOrEmpty(sprocName))
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
                 {
-                    throw new ArgumentNullException(nameof(sprocName));
+                    throw new ArgumentNullException(nameof(query));
                 }
                 if (parameters == null)
                 {
@@ -494,7 +494,7 @@ namespace ArgentSea
                         foreach (var shardId in dtn.Keys)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<TArg, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, false, dataObject, cancellationToken));
+                            tsks.Add(this.dtn[shardId].Read._manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, false, dataObject, cancellationToken));
                         }
                     }
                     else
@@ -503,7 +503,7 @@ namespace ArgentSea
                         foreach (var shardTuple in shardParameters)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<TArg, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, resultHandler, false, dataObject, cancellationToken));
+                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, resultHandler, false, dataObject, cancellationToken));
                         }
                     }
                     while (tsks.Count > 0)
@@ -536,12 +536,12 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<IList<TModel>> MapListAsync<TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            internal async Task<IList<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
             {
                 var result = new List<TModel>();
-                if (string.IsNullOrEmpty(sprocName))
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
                 {
-                    throw new ArgumentNullException(nameof(sprocName));
+                    throw new ArgumentNullException(nameof(query));
                 }
                 if (parameters == null)
                 {
@@ -559,7 +559,7 @@ namespace ArgentSea
                         foreach (var shardId in dtn.Keys)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Read._manager.ListAsync<TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken));
+                            tsks.Add(this.dtn[shardId].Read._manager.ListAsync<TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken));
                         }
                     }
                     else
@@ -568,7 +568,7 @@ namespace ArgentSea
                         foreach (var shardTuple in shardParameters)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.ListAsync<TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken));
+                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.ListAsync<TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken));
                         }
                     }
                     await Task.WhenAll(tsks).ConfigureAwait(false);
@@ -584,11 +584,11 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task RunAllAsync(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task RunAllAsync(Query query, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
             {
-                if (string.IsNullOrEmpty(sprocName))
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
                 {
-                    throw new ArgumentNullException(nameof(sprocName));
+                    throw new ArgumentNullException(nameof(query));
                 }
                 if (parameters == null)
                 {
@@ -606,7 +606,7 @@ namespace ArgentSea
                         foreach (var shardId in dtn.Keys)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Write._manager.RunAsync(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken));
+                            tsks.Add(this.dtn[shardId].Write._manager.RunAsync(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken));
                         }
                     }
                     else
@@ -615,19 +615,19 @@ namespace ArgentSea
                         foreach (var shardTuple in shardParameters)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Write._manager.RunAsync(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken));
+                            tsks.Add(this.dtn[shardTuple.Key].Write._manager.RunAsync(query, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken));
                         }
                     }
                     await Task.WhenAll(tsks).ConfigureAwait(false);
                 }
             }
 
-            internal async Task<IList<TModel>> WriteQueryAllAsync<TArg, TModel>(string sprocName, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            internal async Task<IList<TModel>> WriteQueryAllAsync<TArg, TModel>(Query query, DbParameterCollection parameters, IEnumerable<ShardParameterValue<TShard>> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
             {
                 var result = new List<TModel>();
-                if (string.IsNullOrEmpty(sprocName))
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
                 {
-                    throw new ArgumentNullException(nameof(sprocName));
+                    throw new ArgumentNullException(nameof(query));
                 }
                 if (parameters == null)
                 {
@@ -645,7 +645,7 @@ namespace ArgentSea
                         foreach (var shardId in dtn.Keys)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
-                            tsks.Add(this.dtn[shardId].Write._manager.QueryAsync<TArg, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, false, dataObject, cancellationToken));
+                            tsks.Add(this.dtn[shardId].Write._manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, false, dataObject, cancellationToken));
                         }
                     }
                     else
@@ -654,7 +654,7 @@ namespace ArgentSea
                         foreach (var shardTuple in shardParameters)
                         {
                             parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
-                            tsks.Add(this.dtn[shardTuple.Key].Write._manager.QueryAsync<TArg, TModel>(sprocName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, resultHandler, false, dataObject, cancellationToken));
+                            tsks.Add(this.dtn[shardTuple.Key].Write._manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, resultHandler, false, dataObject, cancellationToken));
                         }
                     }
                     await Task.WhenAll(tsks).ConfigureAwait(false);

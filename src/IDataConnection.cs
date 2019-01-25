@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
@@ -15,7 +16,7 @@ namespace ArgentSea
         /// When overridden in a derived class, returns the ADO.NET connection string from the various connection propeties. Typically, a ConnectionStringBuilder is used for this purpose.
         /// </summary>
         /// <returns></returns>
-        string GetConnectionString();
+        string GetConnectionString(ILogger logger);
 
         int? RetryCount { get;  }
 
