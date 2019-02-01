@@ -20,7 +20,7 @@ namespace ArgentSea
     /// [MapShardChild('C', "ParentRecordId", "ChildRecordId")]
     /// [MapToSqlSmallInt("ParentRecordId")]
     /// [MapToSqlNVarChar("ChildRecordId", 255)]
-    /// public ShardChild<byte, short, string>? ChildShard2 { get; set; } = null;
+    /// public ShardChild&lt;byte, short, string&gt;? ChildShard2 { get; set; } = null;
     /// </code>
     /// </example>
 	public class MapShardChildAttribute : Attribute

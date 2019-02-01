@@ -10,7 +10,7 @@ namespace ArgentSea
     /// This class adds extension methods which simplify getting typed .NET values from (output) parameters.
     /// Because these methods reference the abstract DbParameterCollection, these methods are available in the derived classes:
     /// <list type="bullet">
-    /// <item><see cref="ParameterCollection"/>QueryParameterCollection</item>see></item>
+    /// <item><see cref="ArgentSea.ParameterCollection" /></item>
     /// <item>SqlParameterCollection</item>
     /// <item>NpgsqlParameterCollection</item>
     /// </list>
@@ -41,10 +41,10 @@ namespace ArgentSea
         public static long GetLong(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(long), prm.ParameterName) : (long)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltInt64&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Int64&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltInt64&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Int64&gt;.</returns>
         public static long? GetNullableLong(this DbParameter prm) => prm.Value as long?;
 
         /// <summary>
@@ -56,10 +56,10 @@ namespace ArgentSea
         public static int GetInteger(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(int), prm.ParameterName) : (int)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltInt32&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Int32&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltInt32&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Int32&gt;.</returns>
         public static int? GetNullableInteger(this DbParameter prm) => prm.Value as int?;
 
         /// <summary>
@@ -71,10 +71,10 @@ namespace ArgentSea
         public static short GetShort(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(short), prm.ParameterName) : (short)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltInt16&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Int16&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltInt16&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Int16&gt;.</returns>
         public static short? GetNullableShort(this DbParameter prm) => prm.Value as short?;
 
         /// <summary>
@@ -86,10 +86,10 @@ namespace ArgentSea
         public static byte GetByte(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(byte), prm.ParameterName) : (byte)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltByte&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Byte&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltByte&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Byte&gt;.</returns>
         public static byte? GetNullableByte(this DbParameter prm) => prm.Value as byte?;
 
         /// <summary>
@@ -101,10 +101,10 @@ namespace ArgentSea
         public static bool GetBoolean(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(bool), prm.ParameterName) : (bool)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltBoolean&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Boolean&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltBoolean&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Boolean&gt;.</returns>
         public static bool? GetNullableBoolean(this DbParameter prm) => prm.Value as bool?;
 
         /// <summary>
@@ -116,10 +116,10 @@ namespace ArgentSea
         public static decimal GetDecimal(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(decimal), prm.ParameterName) : (decimal)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltDecimal&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Decimal&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltDecimal&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Decimal&gt;.</returns>
         public static decimal? GetNullableDecimal(this DbParameter prm) => prm.Value as decimal?;
 
         /// <summary>
@@ -140,10 +140,10 @@ namespace ArgentSea
 		}
 
         /// <summary>
-		/// Gets a Nullable&ltDouble&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Double&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltDouble&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Double&gt;.</returns>
 		public static double? GetNullableDouble(this DbParameter prm)
 			=> prm.Value as double?;
 
@@ -165,10 +165,10 @@ namespace ArgentSea
 		}
 
         /// <summary>
-		/// Gets a Nullable&ltFloat&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Float&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltFloat&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Float&gt;.</returns>
 		public static float? GetNullableFloat(this DbParameter prm)
 			=> prm.Value as float?;
 
@@ -190,10 +190,10 @@ namespace ArgentSea
 		}
 
         /// <summary>
-		/// Gets a Nullable&ltGuid&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;Guid&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltGuid&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;Guid&gt;.</returns>
 		public static Guid? GetNullableGuid(this DbParameter prm)
 		{
 			if (System.DBNull.Value.Equals(prm.Value))
@@ -215,10 +215,10 @@ namespace ArgentSea
 		public static DateTime GetDateTime(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(DateTime), prm.ParameterName) : (DateTime)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltDateTime&gt) value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;DateTime&gt;) value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltDateTime&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;DateTime&gt;.</returns>
         public static DateTime? GetNullableDateTime(this DbParameter prm) => prm.Value as DateTime?;
 
         /// <summary>
@@ -230,10 +230,10 @@ namespace ArgentSea
         public static DateTimeOffset GetDateTimeOffset(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(DateTimeOffset), prm.ParameterName) : (DateTimeOffset)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltDateTimeOffset&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;DateTimeOffset&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltDateTimeOffset&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;DateTimeOffset&gt;.</returns>
         public static DateTimeOffset? GetNullableDateTimeOffset(this DbParameter prm) => prm.Value as DateTimeOffset?;
 
         /// <summary>
@@ -245,10 +245,10 @@ namespace ArgentSea
         public static TimeSpan GetTimeSpan(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(TimeSpan), prm.ParameterName) : (TimeSpan)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&ltTimeSpan&gt value from the output parameter, or null if the parameter value is DbNull.
+		/// Gets a Nullable&lt;TimeSpan&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
-        /// <returns>The parameter value as a Nullable&ltTimeSpan&gt.</returns>
+        /// <returns>The parameter value as a Nullable&lt;TimeSpan&gt;.</returns>
         public static TimeSpan? GetNullableTimeSpan(this DbParameter prm) => prm.Value as TimeSpan?;
 		#endregion
 

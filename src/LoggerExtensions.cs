@@ -52,7 +52,7 @@ namespace ArgentSea
         private static readonly Action<ILogger, Type, Exception> _sqlReaderCacheMiss;
         private static readonly Action<ILogger, Type, Exception> _sqlReaderCacheHit;
         private static readonly Action<ILogger, string, Type, Exception> _sqlParameterNotFound;
-        private static readonly Action<ILogger, string, Type, Exception> _sqlFieldNotFound;
+        private static readonly Action<ILogger, string, string, Exception> _sqlFieldNotFound;
         private static readonly Action<ILogger, string, Exception> _sqlMapperInTrace;
         private static readonly Action<ILogger, string, Exception> _sqlMapperSetOutTrace;
         private static readonly Action<ILogger, string, Exception> _sqlMapperGetOutTrace;
@@ -96,7 +96,7 @@ namespace ArgentSea
             _sqlReaderCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheMiss)), "No cached delegate for mapping a data reader was initialized for type {TModel}; this is normal for the first execution.");
             _sqlReaderCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheHit)), "The cached delegate for mapping a data reader was already initialized for type {TModel}.");
             _sqlParameterNotFound = LoggerMessage.Define<string, Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlParameterNotFound, nameof(SqlParameterNotFound)), "Sql Parameter {parameterName} was defined on {Type} but was not found among the provided output parameters.");
-            _sqlFieldNotFound = LoggerMessage.Define<string, Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlColumnNotFound, nameof(SqlFieldNotFound)), "Sql Parameter {parameterName} was defined on {TModel} but was not found in output parameters.");
+            _sqlFieldNotFound = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlColumnNotFound, nameof(SqlFieldNotFound)), "Column {columnName} was defined on {modelName} but was not found in the result set.");
             _sqlMapperInTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperInTrace, nameof(TraceInMapperProperty)), "In-parameter mapper is now processing property {name}.");
             _sqlMapperSetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperSetOutTrace, nameof(TraceSetOutMapperProperty)), "Set out-parameter mapper is now processing property {name}.");
             _sqlMapperGetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperGetOutTrace, nameof(TraceGetOutMapperProperty)), "Get out-parameter mapper is now processing property {name}.");
@@ -144,8 +144,8 @@ namespace ArgentSea
         /// <param name="logger"></param>
         /// <param name="columnName"></param>
         /// <param name="TModel"></param>
-        public static void SqlFieldNotFound(this ILogger logger, string columnName, Type TModel)
-            => _sqlFieldNotFound(logger, columnName, TModel, null);
+        public static void SqlFieldNotFound(this ILogger logger, string columnName, string modelName)
+            => _sqlFieldNotFound(logger, columnName, modelName, null);
         public static void SqlInParametersCacheHit(this ILogger logger, Type TModel)
             => _sqlInParameterCacheHit(logger, TModel, null);
 

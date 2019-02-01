@@ -6,9 +6,14 @@ using System.Runtime.CompilerServices;
 
 namespace ArgentSea
 {
-    public class Procedure : Query
+    public class QueryProcedure : Query
     {
-        public Procedure(string sprocName, string[] parameterNames)
+        public QueryProcedure(string sprocName)
+            : base(sprocName, sprocName, null)
+        {
+
+        }
+        public QueryProcedure(string sprocName, string[] parameterNames)
             : base(sprocName, sprocName, parameterNames)
         {
 

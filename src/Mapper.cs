@@ -257,7 +257,7 @@ namespace ArgentSea
                 LoggingExtensions.SqlReadOutParametersCacheMiss(logger, tModel);
             }
 
-            int[] ordinals = ((Func<DbDataReader, int[]>)lazySqlRdrDelegate.Value.Ordinals)(rdr);
+            int[] ordinals = ((Func<DbDataReader, ILogger, int[]>)lazySqlRdrDelegate.Value.Ordinals)(rdr, logger);
             if (rdr.Read())
             {
                 result = ((Func<TShard, DbDataReader, int[], ILogger, TModel>)lazySqlRdrDelegate.Value.RowData)(shardId, rdr, ordinals, logger);
@@ -320,7 +320,7 @@ namespace ArgentSea
                 LoggingExtensions.SqlReadOutParametersCacheMiss(logger, tModel);
             }
 
-            int[] ordinals = ((Func<DbDataReader, int[]>)lazySqlRdrDelegate.Value.Ordinals)(rdr);
+            int[] ordinals = ((Func<DbDataReader, ILogger, int[]>)lazySqlRdrDelegate.Value.Ordinals)(rdr, logger);
             while (rdr.Read())
             {
                 var item = ((Func<TShard, DbDataReader, int[], ILogger, TModel>)lazySqlRdrDelegate.Value.RowData)(shardId, rdr, ordinals, logger);
@@ -1139,7 +1139,7 @@ namespace ArgentSea
 		}
 
 
-		private static (Func<TShard, DbDataReader, int[], ILogger, TModel> DataRow, Func<DbDataReader, int[]> Ordinals) BuildReaderMapDelegate<TShard, TModel>(ILogger logger) 
+		private static (Func<TShard, DbDataReader, int[], ILogger, TModel> DataRow, Func<DbDataReader, ILogger, int[]> Ordinals) BuildReaderMapDelegate<TShard, TModel>(ILogger logger) 
             where TShard : IComparable
             where TModel : class, new()
         {
@@ -1155,7 +1155,8 @@ namespace ArgentSea
 			var expOrdinal = Expression.Variable(typeof(int), "ordinal");
 			variableExpressions.Add(expOrdinal);
 			var expOrdinalsArg = Expression.Parameter(typeof(int[]), "ordinals");
-			//variableExpressions.Add(expOrdinalArg);
+            //variableExpressions.Add(expOrdinalArg);
+            //variableExpressions.Add(expLogger);
 
 			var initialExpressions = new List<Expression>();
 			var columnLookupExpressions = new List<MethodCallExpression>();
@@ -1185,7 +1186,7 @@ namespace ArgentSea
 
             var expOrdinalArray = Expression.NewArrayInit(typeof(int), columnLookupExpressions.ToArray());
             //var lambdaOrdinals = Expression.Lambda<Func<DbDataReader, int[]>>(expOrdinalArray, new ParameterExpression[] { prmSqlRdr, expOrdinalsArg });
-            var lambdaOrdinals = Expression.Lambda<Func<DbDataReader, int[]>>(expOrdinalArray, new ParameterExpression[] { prmSqlRdr });
+            var lambdaOrdinals = Expression.Lambda<Func<DbDataReader, ILogger, int[]>>(expOrdinalArray, new ParameterExpression[] { prmSqlRdr, expLogger });
             logger?.CreatedExpressionTreeForReaderOrdinals(tModel, expOrdinalArray);
             logger?.CreatedExpressionTreeForReaderRowData(tModel, expDataBlock);
 
@@ -1312,7 +1313,7 @@ namespace ArgentSea
 
         #region Handle Complex Models with both DataReader and Output Paramters
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1343,7 +1344,7 @@ namespace ArgentSea
 
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1381,7 +1382,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1431,7 +1432,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1492,7 +1493,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1564,7 +1565,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1647,7 +1648,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1741,7 +1742,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1846,7 +1847,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using output parameters and data reader results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1964,7 +1965,7 @@ namespace ArgentSea
 
         #region Handle Complex Models with DataReader results
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -1999,7 +2000,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -2048,7 +2049,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -2108,7 +2109,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -2179,7 +2180,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -2261,7 +2262,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -2354,7 +2355,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
@@ -2458,7 +2459,7 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// A <see cref="ArgentSea.QueryResultModelHandler" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TShard, TArg, TModel}" /> compatible method which uses Mapping attributes to return a instance of TModel using data reader (SELECT) results.
         /// </summary>
         /// <typeparam name="TShard">The type of the shard identifier.</typeparam>
         /// <typeparam name="TModel">The type of the return value.</typeparam>
