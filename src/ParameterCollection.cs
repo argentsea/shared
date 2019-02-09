@@ -14,9 +14,7 @@ namespace ArgentSea
     /// </summary>
     public class ParameterCollection : DbParameterCollection
     {
-        //private readonly Dictionary<string, DbParameter> _dtn = new Dictionary<string, DbParameter>();
         private readonly List<DbParameter> _lst = new List<DbParameter>();
-        //private readonly OrderedDictionary _dtn = new OrderedDictionary();
 
         public override int Count => this._lst.Count;
 

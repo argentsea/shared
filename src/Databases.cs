@@ -68,15 +68,9 @@ namespace ArgentSea
             }
 
 		}
-        public Database this[string key]
-		{
-			get { return dtn[key]; }
-		}
+        public Database this[string key] => dtn[key];
 
-		public int Count
-		{
-			get { return dtn.Count; }
-		}
+		public int Count => dtn.Count;
 
 		public bool IsSynchronized => true;
 

@@ -33,7 +33,7 @@ namespace System.Linq.Expressions {
 #endif
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-		internal sealed class DebugViewWriter : ExpressionVisitor
+		public sealed class DebugViewWriter : ExpressionVisitor
 		{
 			[Flags]
 			private enum Flow
@@ -153,7 +153,7 @@ namespace System.Linq.Expressions {
 			/// <summary>
 			/// Write out the given AST
 			/// </summary>
-			internal static void WriteTo(Expression node, TextWriter writer)
+			public static void WriteTo(Expression node, TextWriter writer)
 			{
 				Debug.Assert(node != null);
 				Debug.Assert(writer != null);

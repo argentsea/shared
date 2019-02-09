@@ -236,7 +236,6 @@ namespace ArgentSea
 			//SqlExceptionsEncountered.Clear();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
 			{
-				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 				cancellationToken.ThrowIfCancellationRequested();
 				using (var cmd = this._dataProviderServices.NewCommand(query.Sql, connection))
@@ -276,7 +275,6 @@ namespace ArgentSea
 			cancellationToken.ThrowIfCancellationRequested();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
 			{
-				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
 				cancellationToken.ThrowIfCancellationRequested();
@@ -305,7 +303,6 @@ namespace ArgentSea
 			cancellationToken.ThrowIfCancellationRequested();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
 			{
-				//await this._connectPolicy.ExecuteAsync(() => connection.OpenAsync(cancellationToken)).ConfigureAwait(false);
 				await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
 				cancellationToken.ThrowIfCancellationRequested();
@@ -317,6 +314,20 @@ namespace ArgentSea
 				}
 			}
 		}
-		#endregion
-	}
+
+        private async Task ExecuteBatchAsync<TModel>(QueryBatch<TShard, TModel> batch, CancellationToken cancellationToken) where TModel : class, new()
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
+            {
+                using (var trn = connection.BeginTransaction())
+                {
+                    await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+                    await batch.Execute(_shardId, connection, _connectionName, _dataProviderServices, _logger, cancellationToken);
+                    trn.Commit();
+                }
+            }
+        }
+        #endregion
+    }
 }

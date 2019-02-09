@@ -16,10 +16,11 @@ namespace ArgentSea
     /// </summary>
 	public sealed class MultipleMapAttributesException : Exception
 	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MultipleMapAttributesException" /> class with no error message.
-		/// </summary>
-		public MultipleMapAttributesException()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MultipleMapAttributesException" /> class with no error message.
+        /// </summary>
+        public MultipleMapAttributesException()
+            : base("Multiple mapping attributes were found on the same property.")
 		{
 		}
 
@@ -49,6 +50,9 @@ namespace ArgentSea
 		public MultipleMapAttributesException(PropertyInfo property)
 			: base($"Multiple data mapping attributes found. Class {property.DeclaringType} cannot map property {property.Name} to multiple database parameters. If this is required, you must explicitly code data property assignments.")
 		{
+            this.Property = property;
 		}
+
+        public PropertyInfo Property { get; }
 	}
 }

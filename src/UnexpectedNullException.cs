@@ -47,7 +47,11 @@ namespace ArgentSea
         public UnexpectedNullException(Type expectedType, string columnName)
 			: base($"The database column {columnName} unexpectedly returned a “null” value and cannot be assigned to a {expectedType.ToString()}.")
 		{
+            this.ExpectedType = expectedType;
+            this.ColumnName = columnName;
 		}
+        public Type ExpectedType { get; }
 
+        public string ColumnName { get;  }
 	}
 }

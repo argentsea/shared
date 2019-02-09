@@ -348,14 +348,19 @@ namespace ArgentSea
             var exprInPrms = new ParameterExpression[] { prmSqlPrms, expIgnoreParameters, expLogger, prmObjInstance };
 			//var prmTypedInstance = Expression.TypeAs(prmObjInstance, tModel);  //Our cached delegates accept neither generic nor dynamic arguments. We have to pass object then cast.
 			var noDupPrmNameList = new HashSet<string>();
-			//expressions.Add(prmTypedInstance);
-			IterateInMapProperties(tModel, expressions, variables, prmSqlPrms, prmObjInstance, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
-			var inBlock = Expression.Block(variables, expressions);
+            //expressions.Add(prmTypedInstance);
+            var foundPrms = false;
+            IterateInMapProperties(tModel, expressions, variables, prmSqlPrms, prmObjInstance, expIgnoreParameters, expLogger, noDupPrmNameList, ref foundPrms, logger);
+            if (!foundPrms)
+            {
+                throw new NoMappingAttributesFoundException();
+            }
+            var inBlock = Expression.Block(variables, expressions);
 			var lmbIn = Expression.Lambda<Action<DbParameterCollection, HashSet<string>, ILogger, TModel>>(inBlock, exprInPrms);
 			logger?.CreatedExpressionTreeForSetInParameters(tModel, inBlock);
 			return lmbIn.Compile();
 		}
-		private static void IterateInMapProperties(Type tModel, List<Expression> expressions, List<ParameterExpression> variables, ParameterExpression prmSqlPrms, Expression expModel, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
+		private static void IterateInMapProperties(Type tModel, List<Expression> expressions, List<ParameterExpression> variables, ParameterExpression prmSqlPrms, Expression expModel, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ref bool foundPrms, ILogger logger)
 		{
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceInMapperProperty));
 			foreach (var prop in tModel.GetProperties())
@@ -430,6 +435,7 @@ namespace ArgentSea
                                 Expression.Assign(expNullableShardId, Expression.Constant(null, expNullableShardId.Type))
                                 ));
                             attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableShardId, expNullableShardId.Type, expLogger, logger);
+                            foundPrms = true;
                         }
                         if (attrPM.Name == recordIdPrm)
                         {
@@ -456,6 +462,7 @@ namespace ArgentSea
                                 Expression.Assign(expNullableRecordId, Expression.Constant(null, expNullableRecordId.Type))
                                 ));
                             attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableRecordId, expNullableRecordId.Type, expLogger, logger);
+                            foundPrms = true;
                         }
                         if (isShardChild && attrPM.Name == childIdPrm)
                         {
@@ -482,19 +489,20 @@ namespace ArgentSea
                                 Expression.Assign(expNullableChildId, Expression.Constant(null, expNullableChildId.Type))
                                 ));
                             attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableChildId, expNullableChildId.Type, expLogger, logger);
+                            foundPrms = true;
                         }
                     }
                     if (!string.IsNullOrEmpty(shardIdPrm) && !foundShardId)
                     {
-                        throw new Exception($"The shard attribute specified a shardId attribute named {shardIdPrm}, but the attribute was not found. Remove this argument if you do not have a Shard Id.");
+                        throw new ArgentSea.MapAttributeMissingException(MapAttributeMissingException.ShardElement.ShardId, shardIdPrm);
                     }
                     if (!foundRecordId)
                     {
-                        throw new Exception($"The shard attribute specified a recordId attribute named {recordIdPrm}, but the attribute was not found.");
+                        throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.RecordId, recordIdPrm);
                     }
                     if (isShardChild && !foundChildId)
                     {
-                        throw new Exception($"The ShardChild attribute specified a childId attribute named {childIdPrm}, but the attribute was not found.");
+                        throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.ChildId, childIdPrm);
                     }
                 }
                 else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
@@ -515,17 +523,18 @@ namespace ArgentSea
 						}
 						//MemberExpression expProperty = Expression.Property(expModel, prop);
 						attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expProperty, prop.PropertyType, expLogger, logger);
-					}
-				}
+                        foundPrms = true;
+                    }
+                }
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
                     ExpressionHelpers.TryInstantiateMapToModel(prop, expProperty, expressions);
-					IterateInMapProperties(prop.PropertyType, expressions, variables, prmSqlPrms, expProperty, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+					IterateInMapProperties(prop.PropertyType, expressions, variables, prmSqlPrms, expProperty, expIgnoreParameters, expLogger, noDupPrmNameList, ref foundPrms, logger);
 				}
 			}
-		}
+        }
 
-		private static Action<DbParameterCollection, HashSet<string>, ILogger> BuildOutSetDelegate(Type TModel, ILogger logger)
+        private static Action<DbParameterCollection, HashSet<string>, ILogger> BuildOutSetDelegate(Type TModel, ILogger logger)
 		{
 			var expressions = new List<Expression>();
 
@@ -537,18 +546,24 @@ namespace ArgentSea
 
 			var exprOutPrms = new ParameterExpression[] { prmSqlPrms, expIgnoreParameters, expLogger };
 
-			IterateSetOutParameters(TModel, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+            bool foundPrms = false;
+            IterateSetOutParameters(TModel, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, ref foundPrms, logger);
+            if (!foundPrms)
+            {
+                throw new NoMappingAttributesFoundException();
+            }
 
-			var outBlock = Expression.Block(expressions);
+            var outBlock = Expression.Block(expressions);
 			var lmbOut = Expression.Lambda<Action<DbParameterCollection, HashSet<string>, ILogger>>(outBlock, exprOutPrms);
 			logger?.CreatedExpressionTreeForSetOutParameters(TModel, outBlock);
 			return lmbOut.Compile();
 		}
-		private static void IterateSetOutParameters(Type TModel, List<Expression> expressions, ParameterExpression prmSqlPrms, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ILogger logger)
+		private static void IterateSetOutParameters(Type TModel, List<Expression> expressions, ParameterExpression prmSqlPrms, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, ref bool foundPrms, ILogger logger)
 		{
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceSetOutMapperProperty));
-			//Loop through all object properties:
-			foreach (var prop in TModel.GetProperties())
+
+            //Loop through all object properties:
+            foreach (var prop in TModel.GetProperties())
 			{
                 var isShardKey = prop.IsDefined(typeof(MapShardKeyAttribute), true);
                 var isShardChild = prop.IsDefined(typeof(MapShardChildAttribute), true);
@@ -597,6 +612,7 @@ namespace ArgentSea
                                 throw new InvalidMapTypeException(prop, attrPM.SqlType);
                             }
                             attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
+                            foundPrms = true;
                         }
                         if (attrPM.Name == recordIdPrm)
                         {
@@ -614,6 +630,7 @@ namespace ArgentSea
                                 throw new InvalidMapTypeException(prop, attrPM.SqlType);
                             }
                             attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
+                            foundPrms = true;
                         }
                         if (isShardChild && attrPM.Name == childIdPrm)
                         {
@@ -631,19 +648,20 @@ namespace ArgentSea
                                 throw new InvalidMapTypeException(prop, attrPM.SqlType);
                             }
                             attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
+                            foundPrms = true;
                         }
                     }
                     if (!string.IsNullOrEmpty(shardIdPrm) && !foundShardId)
                     {
-                        throw new Exception($"The shard attribute specified a shardId attribute named {shardIdPrm}, but the attribute was not found. Remove this argument if you do not have a Shard Id.");
+                        throw new ArgentSea.MapAttributeMissingException(MapAttributeMissingException.ShardElement.ShardId, shardIdPrm);
                     }
                     if (!foundRecordId)
                     {
-                        throw new Exception($"The shard attribute specified a recordId attribute named {recordIdPrm}, but the attribute was not found.");
+                        throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.RecordId, recordIdPrm);
                     }
                     if (isShardChild && !foundChildId)
                     {
-                        throw new Exception($"The ShardChild attribute specified a childId attribute named {childIdPrm}, but the attribute was not found.");
+                        throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.ChildId, childIdPrm);
                     }
                 }
                 else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
@@ -671,11 +689,12 @@ namespace ArgentSea
 							throw new InvalidMapTypeException(prop, attrPM.SqlType);
 						}
 						attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
-					}
-				}
+                        foundPrms = true;
+                    }
+                }
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
-                    IterateSetOutParameters(prop.PropertyType, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, logger);
+                    IterateSetOutParameters(prop.PropertyType, expressions, prmSqlPrms, expIgnoreParameters, expLogger, noDupPrmNameList, ref foundPrms, logger);
 				}
 			}
 		}
@@ -726,7 +745,12 @@ namespace ArgentSea
             };
 			var subsequentExpressions = new List<Expression>();
 
-			IterateGetOutParameters(tShard, tModel, expShardArgument, expSprocParameters, expPrm, variableExpressions, initialExpressions, subsequentExpressions, expModel, expLogger, expExitLabel, logger);
+            var foundPrms = false;
+            IterateGetOutParameters(tShard, tModel, expShardArgument, expSprocParameters, expPrm, variableExpressions, initialExpressions, subsequentExpressions, expModel, expLogger, expExitLabel, ref foundPrms, logger);
+            if (!foundPrms)
+            {
+                throw new NoMappingAttributesFoundException();
+            }
 
 			subsequentExpressions.Add(Expression.Goto(expExitLabel, expModel)); //return value;
 
@@ -737,17 +761,18 @@ namespace ArgentSea
 			logger?.CreatedExpressionTreeForReadOutParameters(tModel, expBlock);
 			return lambda.Compile();
 		}
-		private static void IterateGetOutParameters(Type tShard, Type tModel, ParameterExpression expShardArgument, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+		private static void IterateGetOutParameters(Type tShard, Type tModel, ParameterExpression expShardArgument, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ref bool foundPrms, ILogger logger)
 		{
 
-			foreach (var prop in tModel.GetProperties())
+            foreach (var prop in tModel.GetProperties())
 			{
 				if ((prop.IsDefined(typeof(MapShardKeyAttribute), true) || prop.IsDefined(typeof(MapShardChildAttribute), true)) && prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
                     int notUsed = 0;
                     HandleShardKeyChild(true, prop, tShard, tModel, expShardArgument, expSprocParameters, expPrm, null, null, null, null, ref notUsed, variableExpressions, requiredExpressions, nonrequiredExpressions, expModel, expLogger, exitLabel, logger);
-				}
-				else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
+                    foundPrms = true;
+                }
+                else if (prop.IsDefined(typeof(ParameterMapAttributeBase), true))
 				{
 					bool alreadyFound = false;
 					var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
@@ -760,18 +785,19 @@ namespace ArgentSea
 						}
 						alreadyFound = true;
 						HandleOutProperty(attrPM, prop, tModel, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expModel, expLogger, exitLabel, logger);
-					}
-				}
+                        foundPrms = true;
+                    }
+                }
 				else if (prop.IsDefined(typeof(MapToModel)) && !prop.PropertyType.IsValueType)
 				{
 					MemberExpression expProperty = Expression.Property(expModel, prop);
                     ExpressionHelpers.TryInstantiateMapToModel(prop, expProperty, requiredExpressions);
-                    IterateGetOutParameters(tShard, prop.PropertyType, expShardArgument, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expProperty, expLogger, exitLabel, logger);
+                    IterateGetOutParameters(tShard, prop.PropertyType, expShardArgument, expSprocParameters, expPrm, variableExpressions, requiredExpressions, nonrequiredExpressions, expProperty, expLogger, exitLabel, ref foundPrms, logger);
 				}
 			}
-		}
+        }
 
-		private static void HandleOutProperty(ParameterMapAttributeBase attrPM, PropertyInfo prop, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
+        private static void HandleOutProperty(ParameterMapAttributeBase attrPM, PropertyInfo prop, Type tModel, ParameterExpression expSprocParameters, ParameterExpression expPrm, List<ParameterExpression> variableExpressions, List<Expression> requiredExpressions, List<Expression> nonrequiredExpressions, Expression expModel, ParameterExpression expLogger, LabelTarget exitLabel, ILogger logger)
 		{
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
 			var expCallLog = Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name));
@@ -1172,7 +1198,10 @@ namespace ArgentSea
 
             //Loop through all object properties:
             IterateRdrColumns(tShard, tModel, expModel, expShardArgument, columnLookupExpressions, variableExpressions, initialExpressions, subsequentExpressions, prmSqlRdr, expOrdinalsArg, expOrdinal, ref propIndex, expLogger, expExitLabel, logger);
-
+            if (propIndex == 0)
+            {
+                throw new NoMappingAttributesFoundException();
+            }
             subsequentExpressions.Add(Expression.Goto(expExitLabel, expModel)); //return value;
 
             var resultExpressions = new List<Expression>();

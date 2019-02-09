@@ -18,28 +18,17 @@ namespace ArgentSea
         public enum EventIdentifier
         {
             ConnectionStringBuilt,
-            LogExpressionTreeCreation,
+            ExpressionTreeCreation,
             MapperSqlParameterNotFound,
             MapperSqlColumnNotFound,
-            MapperInParameterCacheStatus,
-            MapperSetOutParameterCache,
-            MapperSetOutParameterCacheStatus,
-            MapperReadOutParameterCacheStatus,
-            MapperReaderCacheStatus,
-            MapperInTrace,
-            MapperSetOutTrace,
-            MapperGetOutTrace,
-            MapperRdrTrace,
-            MapperShardKeyNull,
-            MapperShardChildNull,
+            MapperCacheStatus,
+            MapperProcessTrace,
+            UnexpectedDbNull,
             MapperResultsReaderInvalid,
-            LogCmdExecuted,
-            LogConnectRetry,
-            LogCommandRetry,
-            LogCircuitBreakerOn,
-            LogCircuitBreakerTest,
-            LogCircuitBreakerOff,
-            RequiredPropertyIsDbNull
+            CmdExecuted,
+            ConnectRetry,
+            CommandRetry,
+            CircuitBreaker
         }
 
         private static readonly Action<ILogger, string, Exception> _sqlConnectionStringBuilt;
@@ -87,43 +76,43 @@ namespace ArgentSea
             //_sqlCreate = LoggerMessage.Define<string, Type, string>(LogLevel.Debug, new EventId((int)EventIdentifier.EventDelegate, nameof(SqlDelegateCreated)), "Created delegate for {source} for object type {type}: \r\n{{{text}}}");
 
             _sqlConnectionStringBuilt = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.ConnectionStringBuilt, nameof(SqlConnectionStringBuilt)), "A new connection string was built with a value of {ConnectString}.");
-            _sqlInParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheMiss)), "No cached delegate for creating input parameters was initialized for type {TModel}; this is normal for the first execution.");
-            _sqlInParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperInParameterCacheStatus, nameof(SqlInParametersCacheHit)), "The cached delegate for creating input parameters was already initialized for type {TModel}.");
-            _sqlSetOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was initialized for type {TModel}; this is normal for the first execution.");
-            _sqlSetOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperSetOutParameterCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was already initialized for type {TModel}.");
-            _sqlReadOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReadOutParameterCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was initialized for type {TModel}; this is normal for the first execution.");
-            _sqlReadOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperReadOutParameterCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was already initialized for type {TModel}.");
-            _sqlReaderCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheMiss)), "No cached delegate for mapping a data reader was initialized for type {TModel}; this is normal for the first execution.");
-            _sqlReaderCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperReaderCacheStatus, nameof(SqlReaderCacheHit)), "The cached delegate for mapping a data reader was already initialized for type {TModel}.");
+            _sqlInParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlInParametersCacheMiss)), "No cached delegate for creating input parameters was initialized for type {TModel}; this is normal for the first execution.");
+            _sqlInParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlInParametersCacheHit)), "The cached delegate for creating input parameters was already initialized for type {TModel}.");
+            _sqlSetOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was initialized for type {TModel}; this is normal for the first execution.");
+            _sqlSetOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was already initialized for type {TModel}.");
+            _sqlReadOutParameterCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlSetOutParametersCacheMiss)), "No cached delegate for creating output parameters was initialized for type {TModel}; this is normal for the first execution.");
+            _sqlReadOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was already initialized for type {TModel}.");
+            _sqlReaderCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlReaderCacheMiss)), "No cached delegate for mapping a data reader was initialized for type {TModel}; this is normal for the first execution.");
+            _sqlReaderCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlReaderCacheHit)), "The cached delegate for mapping a data reader was already initialized for type {TModel}.");
             _sqlParameterNotFound = LoggerMessage.Define<string, Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlParameterNotFound, nameof(SqlParameterNotFound)), "Sql Parameter {parameterName} was defined on {Type} but was not found among the provided output parameters.");
             _sqlFieldNotFound = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlColumnNotFound, nameof(SqlFieldNotFound)), "Column {columnName} was defined on {modelName} but was not found in the result set.");
-            _sqlMapperInTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperInTrace, nameof(TraceInMapperProperty)), "In-parameter mapper is now processing property {name}.");
-            _sqlMapperSetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperSetOutTrace, nameof(TraceSetOutMapperProperty)), "Set out-parameter mapper is now processing property {name}.");
-            _sqlMapperGetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperGetOutTrace, nameof(TraceGetOutMapperProperty)), "Get out-parameter mapper is now processing property {name}.");
-            _sqlMapperRdrTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperRdrTrace, nameof(TraceRdrMapperProperty)), "Data reader field mapper is now processing property {name}.");
-            _sqlShardKeyNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardKeyNull, nameof(TraceRdrMapperProperty)), "The {name} shard key could not be built because one of the input values was dbNull. The shard key value was {shardKey}.");
-            _sqlShardChildNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.MapperShardChildNull, nameof(TraceRdrMapperProperty)), "The {name} shard child could not be built because one or two of the input values was dbNull. The shard child value was {shardChild}.");
+            _sqlMapperInTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperProcessTrace, nameof(TraceInMapperProperty)), "In-parameter mapper is now processing property {name}.");
+            _sqlMapperSetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperProcessTrace, nameof(TraceSetOutMapperProperty)), "Set out-parameter mapper is now processing property {name}.");
+            _sqlMapperGetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperProcessTrace, nameof(TraceGetOutMapperProperty)), "Get out-parameter mapper is now processing property {name}.");
+            _sqlMapperRdrTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperProcessTrace, nameof(TraceRdrMapperProperty)), "Data reader field mapper is now processing property {name}.");
+            _sqlShardKeyNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.UnexpectedDbNull, nameof(TraceRdrMapperProperty)), "The {name} shard key could not be built because one of the input values was dbNull. The shard key value was {shardKey}.");
+            _sqlShardChildNull = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.UnexpectedDbNull, nameof(TraceRdrMapperProperty)), "The {name} shard child could not be built because one or two of the input values was dbNull. The shard child value was {shardChild}.");
             _buildSqlResultsHandlerScope = LoggerMessage.DefineScope<string, Type>("Build logic to convert sql procedure {name} results to result {type}");
-            _sqlDbCmdExecutedTrace = LoggerMessage.Define<string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceDbCmdExecuted)), "Executed command {name} on Db connection {connectionName} in {milliseconds} milliseconds.");
-            _sqlShardCmdExecutedTrace = LoggerMessage.Define<string, string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.LogCmdExecuted, nameof(TraceShardCmdExecuted)), "Executed command {name} on ShardSet {shardSet} connection {shardId} in {milliseconds} milliseconds.");
-            _sqlConnectRetry = LoggerMessage.Define<string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.LogConnectRetry, nameof(RetryingDbConnection)), "Initiating automatic connection retry for transient error on Db connection {connectionName}. This is attempt number {attempt}.");
-            _sqlCommandRetry = LoggerMessage.Define<string, string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.LogCommandRetry, nameof(RetryingDbCommand)), "Initiating automatic command retry for transient error on command {name} on Db connection {connectionName}. This is attempt number {attempt}.");
-            _sqlConnectionCircuitBreakerOn = LoggerMessage.Define<string>(LogLevel.Critical, new EventId((int)EventIdentifier.LogCircuitBreakerOn, nameof(CiruitBreakingDbConnection)), "Circuit breaking failing connection on Db connection {connectionName}. Most subsequent calls to this connection will fail.");
-            _sqlCommandCircuitBreakerOn = LoggerMessage.Define<string, string>(LogLevel.Critical, new EventId((int)EventIdentifier.LogCircuitBreakerOn, nameof(CiruitBreakingDbCommand)), "Circuit breaking failing command {name} on Db connection {connectionName}.");
-            _sqlConnectionCircuitBreakerTest = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerTest, nameof(CiruitBrokenDbConnectionTest)), "Circuit broken connection {connectionName} is being retested.");
-            _sqlCommandCircuitBreakerTest = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerTest, nameof(CiruitBrokenDbCommandTest)), "Circuit broken command {name} on Db connection {connectionName} is being retested.");
-            _sqlConnectionCircuitBreakerOff = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerOff, nameof(CiruitBrokenDbConnectionRestored)), "Circuit broken connection {connectionName} is restored.");
-            _sqlCommandCircuitBreakerOff = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.LogCircuitBreakerOff, nameof(CiruitBrokenDbCommandRestored)), "Circuit broken command {name} on Db connection {connectionName} is restored.");
+            _sqlDbCmdExecutedTrace = LoggerMessage.Define<string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.CmdExecuted, nameof(TraceDbCmdExecuted)), "Executed command {name} on Db connection {connectionName} in {milliseconds} milliseconds.");
+            _sqlShardCmdExecutedTrace = LoggerMessage.Define<string, string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.CmdExecuted, nameof(TraceShardCmdExecuted)), "Executed command {name} on ShardSet {shardSet} connection {shardId} in {milliseconds} milliseconds.");
+            _sqlConnectRetry = LoggerMessage.Define<string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.ConnectRetry, nameof(RetryingDbConnection)), "Initiating automatic connection retry for transient error on Db connection {connectionName}. This is attempt number {attempt}.");
+            _sqlCommandRetry = LoggerMessage.Define<string, string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.CommandRetry, nameof(RetryingDbCommand)), "Initiating automatic command retry for transient error on command {name} on Db connection {connectionName}. This is attempt number {attempt}.");
+            _sqlConnectionCircuitBreakerOn = LoggerMessage.Define<string>(LogLevel.Critical, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBreakingDbConnection)), "Circuit breaking failing connection on Db connection {connectionName}. Most subsequent calls to this connection will fail.");
+            _sqlCommandCircuitBreakerOn = LoggerMessage.Define<string, string>(LogLevel.Critical, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBreakingDbCommand)), "Circuit breaking failing command {name} on Db connection {connectionName}.");
+            _sqlConnectionCircuitBreakerTest = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBrokenDbConnectionTest)), "Circuit broken connection {connectionName} is being retested.");
+            _sqlCommandCircuitBreakerTest = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBrokenDbCommandTest)), "Circuit broken command {name} on Db connection {connectionName} is being retested.");
+            _sqlConnectionCircuitBreakerOff = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBrokenDbConnectionRestored)), "Circuit broken connection {connectionName} is restored.");
+            _sqlCommandCircuitBreakerOff = LoggerMessage.Define<string, string>(LogLevel.Information, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBrokenDbCommandRestored)), "Circuit broken command {name} on Db connection {connectionName} is restored.");
             _sqlMapperReaderIsNull = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsNull)), "Expected data reader object was null from procedure {sproc} on connection {connectionName}.");
             _sqlMapperReaderIsClosed = LoggerMessage.Define<string, string>(LogLevel.Error, new EventId((int)EventIdentifier.MapperResultsReaderInvalid, nameof(DataReaderIsClosed)), "Expected data reader object was closed from procedure {sproc} on connection {connectionName}.");
-            _sqlRequiredValueIsDbNull = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.RequiredPropertyIsDbNull, nameof(RequiredPropertyIsDbNull)), "Request for object {model} returned null because database parameter {parameterName} was null. This may mean the object was not found in the database.");
+            _sqlRequiredValueIsDbNull = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.UnexpectedDbNull, nameof(RequiredPropertyIsDbNull)), "Request for object {model} returned null because database parameter {parameterName} was null. This may mean the object was not found in the database.");
 
-            _sqlGetInExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForSetInParameters)), "Compiled code to map model {model} to input parameters as:\r\n{code}.");
-            _sqlSetOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForSetOutParameters)), "Compiled code to map model {model} to set output parameters as:\r\n{code}.");
-            _sqlReadOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReadOutParameters)), "Compiled code to map model {model} to read output parameters as:\r\n{code}.");
-            _sqlReaderExpressionTreeDataRowCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} to data reader row values as:\r\n{code}.");
-            _sqlReaderExpressionTreeOrdinalsCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} ordinals to data reader values as:\r\n{code}.");
-            _sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.LogExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
+            _sqlGetInExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForSetInParameters)), "Compiled code to map model {model} to input parameters as:\r\n{code}.");
+            _sqlSetOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForSetOutParameters)), "Compiled code to map model {model} to set output parameters as:\r\n{code}.");
+            _sqlReadOutExpressionTreeCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForReadOutParameters)), "Compiled code to map model {model} to read output parameters as:\r\n{code}.");
+            _sqlReaderExpressionTreeDataRowCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} to data reader row values as:\r\n{code}.");
+            _sqlReaderExpressionTreeOrdinalsCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} ordinals to data reader values as:\r\n{code}.");
+            _sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
         }
 
         public static void SqlConnectionStringBuilt(this ILogger logger, string connectionString)

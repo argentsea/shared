@@ -49,10 +49,22 @@ namespace ArgentSea
 		public InvalidMapTypeException(PropertyInfo property, int sqlType)
 			: base($"Sql type mismatch: Class {property.DeclaringType} cannot map property {property.Name} of type {property.PropertyType.GetType().ToString()} to data type enumeration with numeric value of {sqlType.ToString()}.")
 		{
-		}
-		public InvalidMapTypeException(string variableName, Type type, int sqlType)
+            this.VariableName = property.Name;
+            this.VariableType = property.PropertyType;
+            this.SqlType = sqlType;
+        }
+        public InvalidMapTypeException(string variableName, Type type, int sqlType)
 			: base($"Sql type mismatch: {variableName} cannot be mapped because type {type.ToString()} does not map to data type enumeration with numeric value of {sqlType.ToString()}.")
 		{
+            this.VariableName = variableName;
+            this.VariableType = type;
+            this.SqlType = sqlType;
 		}
+
+        public string VariableName { get; }
+
+        public Type VariableType { get; }
+
+        public int SqlType { get; }
 	}
 }

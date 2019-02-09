@@ -13,7 +13,7 @@ namespace ArgentSea
         /// Initializes a new instance of the <see cref="ParameterNotFoundException" /> class with no error message.
         /// </summary>
         public ParameterNotFoundException()
-            : base ("A parameter name is define in the statement or procedure’s parameter names set, but a corresponding parameter was not provided.")
+            : base ("A parameter name is defined in the statement or procedure’s parameter names set, but a corresponding parameter was not provided.")
         {
         }
 
