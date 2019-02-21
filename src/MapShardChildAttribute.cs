@@ -25,22 +25,15 @@ namespace ArgentSea
     /// </example>
 	public class MapShardChildAttribute : Attribute
 	{
-		public MapShardChildAttribute(DataOrigin origin, string shardIdName, string recordIdName, string childIdName)
-		{
-			this.Origin = origin;
-			this.ShardIdName = shardIdName;
-			this.RecordIdName = recordIdName;
-			this.ChildIdName = childIdName;
-		}
-
-        public MapShardChildAttribute(char originValue, string shardIdName, string recordIdName, string childIdName)
+        public MapShardChildAttribute(char origin, string shardIdName, string recordIdName, string childIdName)
         {
-            this.Origin = new DataOrigin(originValue);
+            this.Origin = origin;
             this.ShardIdName = shardIdName;
             this.RecordIdName = recordIdName;
             this.ChildIdName = childIdName;
         }
-        public MapShardChildAttribute(DataOrigin origin, string recordIdName, string childIdName)
+
+        public MapShardChildAttribute(char origin, string recordIdName, string childIdName)
         {
             this.Origin = origin;
             this.ShardIdName = null;
@@ -48,15 +41,7 @@ namespace ArgentSea
             this.ChildIdName = childIdName;
         }
 
-        public MapShardChildAttribute(char originValue, string recordIdName, string childIdName)
-        {
-            this.Origin = new DataOrigin(originValue);
-            this.ShardIdName = null;
-            this.RecordIdName = recordIdName;
-            this.ChildIdName = childIdName;
-        }
-
-        public DataOrigin Origin { get; set; }
+        public char Origin { get; set; }
 
 		public virtual string ShardIdName { get; set; }
 

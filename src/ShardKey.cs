@@ -3,6 +3,8 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ArgentSea
 {
@@ -14,7 +16,7 @@ namespace ArgentSea
 	{
 		private TShard _shardId;
 		private TRecord _recordId;
-		private DataOrigin _origin;
+		private char _origin;
 
         /// <summary>
         /// 
@@ -24,26 +26,15 @@ namespace ArgentSea
         /// <param name="recordId"></param>
         /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
         #region Constructors
-        public ShardKey(DataOrigin origin, TShard shardId, TRecord recordId)
+        public ShardKey(char origin, TShard shardId, TRecord recordId)
 		{
-			if (origin.SourceIndicator == '0' && (shardId.CompareTo(default(TShard)) != 0 || recordId.CompareTo(default(TRecord)) != 0))
+			if (origin == '0' && (shardId.CompareTo(default(TShard)) != 0 || recordId.CompareTo(default(TRecord)) != 0))
 			{
 				throw new InvalidShardArgumentsException();
 			}
 			_origin = origin;
 			_shardId = shardId;
 			_recordId = recordId;
-		}
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dataOrigin"></param>
-        /// <param name="shardId"></param>
-        /// <param name="recordId"></param>
-        /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
-		public ShardKey(char dataOrigin, TShard shardId, TRecord recordId) : this(new DataOrigin(dataOrigin), shardId, recordId)
-		{
-
 		}
         /// <summary>
         /// ISerializer constructor
@@ -68,7 +59,7 @@ namespace ArgentSea
 		{
 			get { return _recordId; }
 		}
-		public DataOrigin Origin
+		public char Origin
 		{
 			get
 			{
@@ -79,12 +70,12 @@ namespace ArgentSea
 		{
 			get
 			{
-				return this._origin.SourceIndicator == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId.CompareTo(default(TShard)) == 0;
+				return this._origin == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId.CompareTo(default(TShard)) == 0;
 			}
 		}
 		public override string ToString()
 		{
-			return $"{{ \"origin\": \"{_origin.SourceIndicator}\", \"shardId\": \"{_shardId.ToString()}\", \"recordId\": \"{_recordId.ToString()}\"}}";
+			return $"{{ \"origin\": \"{_origin}\", \"shardId\": \"{_shardId.ToString()}\", \"recordId\": \"{_recordId.ToString()}\"}}";
 		}
 
 		#endregion
@@ -181,7 +172,7 @@ namespace ArgentSea
 
 		internal byte[] ToArray()
 		{
-			var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin.SourceIndicator });
+			var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin });
 			var shardData = GetValueBytes(this._shardId);
 			var recordData = GetValueBytes(this._recordId);
 			var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + 1];
@@ -328,7 +319,7 @@ namespace ArgentSea
 			TRecord recordId = default(TRecord);
 
 			int orgnLen = aValues[0] & 3;
-			var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
+			var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
 			var pos = orgnLen + 1;
 
 			var typeShard = typeof(TShard);
@@ -337,9 +328,92 @@ namespace ArgentSea
 			recordId = ConvertFromBytes(aValues, ref pos, typeRecord);
 			return new ShardKey<TShard, TRecord>(orgn, shardId, recordId);
 		}
-		public bool Equals(ShardKey<TShard, TRecord> other)
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, return a distinct list of shard Ids.
+        /// </summary>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        public static ShardsValues<TShard> ShardList<TModel>(IList<TModel> records) where TModel: IKeyedModel<TShard, TRecord>
+        {
+            var result = new ShardsValues<TShard>();
+            foreach (var record in records)
+            {
+                if (!result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Merge two lists by iterating master list and using replacement entry where keys match.
+        /// </summary>
+        /// <typeparam name="TModel">The of the list values.</typeparam>
+        /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
+        /// <param name="replacements">A list of more complete records.</param>
+        /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
+        /// <returns></returns>
+        public static IList<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+        {
+            if (master is null)
+            {
+                throw new ArgumentNullException(nameof(master));
+            }
+            if (replacements is null)
+            {
+                throw new ArgumentNullException(nameof(replacements));
+            }
+            var result = new List<TModel>(master);
+            var track = new bool[replacements.Count];
+            for (var i = 0; i < result.Count; i++)
+            {
+                for (var j = 0; j < replacements.Count; j++)
+                {
+                    if (result[i].Key.Equals(replacements[j].Key))
+                    {
+                        result[i] = replacements[j];
+                        track[j] = true;
+                        break;
+                    }
+                }
+            }
+            if (appendUnmatchedReplacements)
+            {
+                for (var i = 0; i < track.Length; i++)
+                {
+                    if (track[i])
+                    {
+                        result.Add(replacements[i]);
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId"></param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, IList<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
+        {
+            var result = new ShardsValues<TShard>();
+            foreach (var record in records)
+            {
+                if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+        public bool Equals(ShardKey<TShard, TRecord> other)
 		{
-			return (other.Origin.SourceIndicator == _origin.SourceIndicator) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
+			return (other.Origin == _origin) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
 		}
 		public override bool Equals(object obj)
 		{
@@ -349,12 +423,12 @@ namespace ArgentSea
 			}
 
 			var other = (ShardKey<TShard, TRecord>)obj;
-			return (other.Origin.SourceIndicator == _origin.SourceIndicator) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
+			return (other.Origin == _origin) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
 		}
 		public override int GetHashCode()
 		{
 
-			var aOgn = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin.SourceIndicator });
+			var aOgn = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin });
 			var aShd = GetValueBytes(this._shardId);
 			var aRec = GetValueBytes(this._recordId);
 			byte[] aDtm = null;
@@ -440,12 +514,14 @@ namespace ArgentSea
 		{
 			get
 			{
-				return new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord));
+				return new ShardKey<TShard, TRecord>('0', default(TShard), default(TRecord));
 			}
 		}
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("ShardKey", ToExternalString());
+            info.AddValue("ShardId", _shardId.ToString());
+            info.AddValue("RecordId", _recordId.ToString());
         }
     }
 }

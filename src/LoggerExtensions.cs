@@ -52,7 +52,7 @@ namespace ArgentSea
         private static readonly Action<ILogger, string, string, long, Exception> _sqlDbCmdExecutedTrace;
         private static readonly Action<ILogger, string, string, string, long, Exception> _sqlShardCmdExecutedTrace;
         private static readonly Action<ILogger, string, int, Exception> _sqlConnectRetry;
-        private static readonly Action<ILogger, string, string, int, Exception> _sqlCommandRetry;
+        //private static readonly Action<ILogger, string, string, int, Exception> _sqlCommandRetry;
         private static readonly Action<ILogger, string, Exception> _sqlConnectionCircuitBreakerOn;
         private static readonly Action<ILogger, string, string, Exception> _sqlCommandCircuitBreakerOn;
         private static readonly Action<ILogger, string, Exception> _sqlConnectionCircuitBreakerTest;
@@ -96,7 +96,7 @@ namespace ArgentSea
             _sqlDbCmdExecutedTrace = LoggerMessage.Define<string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.CmdExecuted, nameof(TraceDbCmdExecuted)), "Executed command {name} on Db connection {connectionName} in {milliseconds} milliseconds.");
             _sqlShardCmdExecutedTrace = LoggerMessage.Define<string, string, string, long>(LogLevel.Trace, new EventId((int)EventIdentifier.CmdExecuted, nameof(TraceShardCmdExecuted)), "Executed command {name} on ShardSet {shardSet} connection {shardId} in {milliseconds} milliseconds.");
             _sqlConnectRetry = LoggerMessage.Define<string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.ConnectRetry, nameof(RetryingDbConnection)), "Initiating automatic connection retry for transient error on Db connection {connectionName}. This is attempt number {attempt}.");
-            _sqlCommandRetry = LoggerMessage.Define<string, string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.CommandRetry, nameof(RetryingDbCommand)), "Initiating automatic command retry for transient error on command {name} on Db connection {connectionName}. This is attempt number {attempt}.");
+            //_sqlCommandRetry = LoggerMessage.Define<string, string, int>(LogLevel.Warning, new EventId((int)EventIdentifier.CommandRetry, nameof(RetryingDbCommand)), "Initiating automatic command retry for transient error on command {name} on Db connection {connectionName}. This is attempt number {attempt}.");
             _sqlConnectionCircuitBreakerOn = LoggerMessage.Define<string>(LogLevel.Critical, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBreakingDbConnection)), "Circuit breaking failing connection on Db connection {connectionName}. Most subsequent calls to this connection will fail.");
             _sqlCommandCircuitBreakerOn = LoggerMessage.Define<string, string>(LogLevel.Critical, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBreakingDbCommand)), "Circuit breaking failing command {name} on Db connection {connectionName}.");
             _sqlConnectionCircuitBreakerTest = LoggerMessage.Define<string>(LogLevel.Information, new EventId((int)EventIdentifier.CircuitBreaker, nameof(CiruitBrokenDbConnectionTest)), "Circuit broken connection {connectionName} is being retested.");
@@ -201,8 +201,8 @@ namespace ArgentSea
         public static void RetryingDbConnection(this ILogger logger, string connectionName, int attemptCount, Exception exception)
             => _sqlConnectRetry(logger, connectionName, attemptCount, exception);
 
-        public static void RetryingDbCommand(this ILogger logger, string commandName, string connectionName, int attemptCount, Exception exception)
-            => _sqlCommandRetry(logger, commandName, connectionName, attemptCount, exception);
+        //public static void RetryingDbCommand(this ILogger logger, string commandName, string connectionName, int attemptCount, Exception exception)
+        //    => _sqlCommandRetry(logger, commandName, connectionName, attemptCount, exception);
 
         public static void CiruitBreakingDbConnection(this ILogger logger, string connectionName)
             => _sqlConnectionCircuitBreakerOn(logger, connectionName, null);

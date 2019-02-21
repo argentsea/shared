@@ -545,8 +545,18 @@ namespace ArgentSea
             public Task RunAsync(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
 				=> _manager.RunAsync(query, parameters, -1, null, cancellationToken);
 
-			#endregion
-		}
+            /// <summary>
+            /// Execute a set of commands within a single transaction.
+            /// </summary>
+            /// <typeparam name="TResult">The optional return type specified in the batch.</typeparam>
+            /// <param name="batch">The QueryBatch object.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>The last valid TResult type returned by the collection of commands.</returns>
+            public Task<TResult> RunAsync<TResult>(DatabaseBatch<TResult> batch, CancellationToken cancellationToken)
+                => _manager.RunBatchAsync<TResult>(batch, cancellationToken);
+
+            #endregion
+        }
         #endregion
     }
 

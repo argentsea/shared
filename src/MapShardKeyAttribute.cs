@@ -13,32 +13,20 @@ namespace ArgentSea
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class MapShardKeyAttribute : Attribute
     {
-        public MapShardKeyAttribute(DataOrigin origin, string shardIdName, string recordIdName)
-		{
-			this.Origin = origin;
-			this.ShardIdName = shardIdName;
-			this.RecordIdName = recordIdName;
-		}
-        public MapShardKeyAttribute(char originValue, string shardIdName, string recordIdName)
+        public MapShardKeyAttribute(char origin, string shardIdName, string recordIdName)
         {
-            this.Origin = new DataOrigin(originValue);
+            this.Origin = origin;
             this.ShardIdName = shardIdName;
             this.RecordIdName = recordIdName;
         }
-        public MapShardKeyAttribute(char originValue, string recordIdName)
-        {
-            this.Origin = new DataOrigin(originValue);
-            this.ShardIdName = null;
-            this.RecordIdName = recordIdName;
-        }
-        public MapShardKeyAttribute(DataOrigin origin, string recordIdName)
+        public MapShardKeyAttribute(char origin, string recordIdName)
         {
             this.Origin = origin;
             this.ShardIdName = null;
             this.RecordIdName = recordIdName;
         }
 
-        public DataOrigin Origin { get; set; }
+        public char Origin { get; set; }
 
 		public virtual string ShardIdName { get; set; }
 

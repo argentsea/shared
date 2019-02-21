@@ -927,21 +927,21 @@ namespace ArgentSea
 				string shardParameterName = null;
 				string recordParameterName = null;
 				string childParameterName = null;
-				NewExpression expDataOrigin;
+                ConstantExpression expDataOrigin;
 				if (isShardChild)
 				{
 					var shardPM = prop.GetCustomAttribute<MapShardChildAttribute>(true);
 					shardParameterName = shardPM.ShardIdName;
 					recordParameterName = shardPM.RecordIdName;
 					childParameterName = shardPM.ChildIdName;
-					expDataOrigin = Expression.New(typeof(DataOrigin).GetConstructor(new[] { typeof(char) }), new[] { Expression.Constant(shardPM.Origin.SourceIndicator, typeof(char)) });
+					expDataOrigin = Expression.Constant(shardPM.Origin, typeof(char));
 				}
 				else
 				{
 					var shardPM = prop.GetCustomAttribute<MapShardKeyAttribute>(true);
 					shardParameterName = shardPM.ShardIdName;
 					recordParameterName = shardPM.RecordIdName;
-					expDataOrigin = Expression.New(typeof(DataOrigin).GetConstructor(new[] { typeof(char) }), new[] { Expression.Constant(shardPM.Origin.SourceIndicator, typeof(char)) });
+					expDataOrigin = Expression.Constant(shardPM.Origin, typeof(char));
 				}
 
 				//ShardId
@@ -1106,13 +1106,13 @@ namespace ArgentSea
 				//Type tShard;
 				if (isShardChild)
 				{
-					constructorTypes = new[] { typeof(DataOrigin), tShardId, tRecordId, tChildId };
+					constructorTypes = new[] { typeof(char), tShardId, tRecordId, tChildId };
 					constructorArgs = new Expression[4];
 					//tShard = typeof(ShardChild<,,>).MakeGenericType(new Type[] { tShardId, tRecordId, tChildId });
 				}
 				else
 				{
-					constructorTypes = new[] { typeof(DataOrigin), tShardId, tRecordId };
+					constructorTypes = new[] { typeof(char), tShardId, tRecordId };
 					constructorArgs = new Expression[3];
 					//tShard = typeof(ShardKey<,>).MakeGenericType(new Type[] { tShardId, tRecordId });
 				}

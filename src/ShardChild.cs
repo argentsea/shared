@@ -3,7 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
-
+using System.Collections.Generic;
 
 namespace ArgentSea
 {
@@ -31,15 +31,11 @@ namespace ArgentSea
             _key = key;
             _childId = childRecordId;
         }
-        public ShardChild(DataOrigin origin, TShard shardId, TRecord recordId, TChild childRecordId)
+        public ShardChild(char origin, TShard shardId, TRecord recordId, TChild childRecordId)
         {
             _key = new ShardKey<TShard, TRecord>(origin, shardId, recordId);
             _childId = childRecordId;
         }
-		public ShardChild(char dataOrigin, TShard shardId, TRecord recordId, TChild childId) : this(new DataOrigin(dataOrigin), shardId, recordId, childId)
-		{
-			//
-		}
         /// <summary>
         /// ISerializer constructor
         /// </summary>
@@ -56,7 +52,7 @@ namespace ArgentSea
 		{
 			get { return _childId; }
 		}
-		public DataOrigin Origin
+		public char Origin
 		{
 			get
 			{
@@ -85,6 +81,89 @@ namespace ArgentSea
             {
                 return this.Key.IsEmpty && this.ChildId.CompareTo(default(TChild)) == 0;
             }
+        }
+        //        public static ShardsValues<TShard> ShardList<TModel>(IList<TModel> records) where TModel: IKeyedModel<TShard, TRecord>
+
+        /// <summary>
+        /// Given a list of Models with ShardChild keys, return a distinct list of shard Ids.
+        /// </summary>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        public static ShardsValues<TShard> ShardList<TModel>(IList<IKeyedChildModel<TShard, TRecord, TChild>> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+        {
+            var result = new ShardsValues<TShard>();
+            foreach (var record in records)
+            {
+                if (!result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Merge two lists by iterating master list and using replacement entry where keys match.
+        /// </summary>
+        /// <typeparam name="TModel">The of the list values.</typeparam>
+        /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
+        /// <param name="replacements">A list of more complete records.</param>
+        /// <returns></returns>
+        public static IList<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+        {
+            if (master is null)
+            {
+                throw new ArgumentNullException(nameof(master));
+            }
+            if (replacements is null)
+            {
+                throw new ArgumentNullException(nameof(replacements));
+            }
+            var result = new List<TModel>(master);
+            var track = new bool[replacements.Count];
+            for (var i = 0; i < result.Count; i++)
+            {
+                for (var j = 0; j < replacements.Count; j++)
+                {
+                    if (result[i].Key.Equals(replacements[j].Key))
+                    {
+                        result[i] = replacements[j];
+                        track[j] = true;
+                        break;
+                    }
+                }
+            }
+            if (appendUnmatchedReplacements)
+            {
+                for (var i = 0; i < track.Length; i++)
+                {
+                    if (track[i])
+                    {
+                        result.Add(replacements[i]);
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId"></param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, IList<TModel> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+        {
+            var result = new ShardsValues<TShard>();
+            foreach (var record in records)
+            {
+                if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
         }
 
         public bool Equals(ShardChild<TShard, TRecord, TChild> other)
@@ -129,7 +208,7 @@ namespace ArgentSea
 
         internal byte[] ToArray()
         {
-            var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this._key.Origin.SourceIndicator });
+            var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this._key.Origin });
             var shardData = ShardKey<TShard, TRecord>.GetValueBytes(this._key.ShardId);
             var recordData = ShardKey<TShard, TRecord>.GetValueBytes(this._key.RecordId);
             var childData = ShardKey<TShard, TRecord>.GetValueBytes(this._childId);
@@ -158,7 +237,7 @@ namespace ArgentSea
         }
         public override string ToString()
         {
-            return $"{{ \"origin\": \"{_key.Origin.SourceIndicator}\", \"shardId\": \"{_key.ShardId.ToString()}\", \"recordId\": \"{_key.RecordId.ToString()}\", \"childRecordId\": \"{this._childId.ToString()}\"}}";
+            return $"{{ \"origin\": \"{_key.Origin}\", \"shardId\": \"{_key.ShardId.ToString()}\", \"recordId\": \"{_key.RecordId.ToString()}\", \"childRecordId\": \"{this._childId.ToString()}\"}}";
         }
         public static ShardChild<TShard, TRecord, TChild> FromExternalString(string value)
         {
@@ -168,7 +247,7 @@ namespace ArgentSea
             TChild childId = default(TChild);
 
             int orgnLen = aValues[0] & 3;
-            var orgn = new DataOrigin(System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0]);
+            var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
             var pos = orgnLen + 1;
 
             var typeShard = typeof(TShard);
@@ -193,12 +272,15 @@ namespace ArgentSea
         {
             get
             {
-                return new ShardChild<TShard, TRecord, TChild>(new ShardKey<TShard, TRecord>(new DataOrigin('0'), default(TShard), default(TRecord)), default(TChild));
+                return new ShardChild<TShard, TRecord, TChild>(new ShardKey<TShard, TRecord>('0', default(TShard), default(TRecord)), default(TChild));
             }
         }
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("ShardChild", ToExternalString());
+            info.AddValue("ShardId", _key.ShardId.ToString());
+            info.AddValue("RecordId", _key.RecordId.ToString());
+            info.AddValue("ChildId", _childId.ToString());
         }
     }
 }
