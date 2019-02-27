@@ -18,11 +18,11 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ParameterNotFoundException" /> class with a specified error message.
+        /// Initializes a new instance of the <see cref="ParameterNotFoundException" /> class with a message about missing the specified parameter.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public ParameterNotFoundException(string message)
-            : base(message)
+        public ParameterNotFoundException(string parameterName)
+            : base($"Expected parameter { parameterName }, but it was not found in the parameter list.")
         {
         }
 

@@ -108,7 +108,17 @@ namespace ArgentSea
         /// <typeparam name="TModel">The of the list values.</typeparam>
         /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
         /// <param name="replacements">A list of more complete records.</param>
-        /// <returns></returns>
+        /// <returns>Merged list.</returns>
+        public static List<TModel> Merge<TModel>(List<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+            => (List<TModel>)Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
+
+        /// <summary>
+        /// Merge two lists by iterating master list and using replacement entry where keys match.
+        /// </summary>
+        /// <typeparam name="TModel">The of the list values.</typeparam>
+        /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
+        /// <param name="replacements">A list of more complete records.</param>
+        /// <returns>Merged list.</returns>
         public static IList<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
         {
             if (master is null)
@@ -145,6 +155,10 @@ namespace ArgentSea
             }
             return result;
         }
+
+
+        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, List<TModel> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+            => ShardListForeign<TModel>(shardId, (IList<TModel>)records);
 
         /// <summary>
         /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.

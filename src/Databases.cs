@@ -116,23 +116,34 @@ namespace ArgentSea
 			}
 			public string ConnectionString { get => _manager.ConnectionString; }
 
-			#region Public data fetch methods
-			/// <summary>
-			/// Connect to the database and return a single value.
-			/// </summary>
-			/// <typeparam name="TValue">The expected type of the return value.</typeparam>
-			/// <param name="sprocName">The stored procedure to call to fetch the value.</param>
-			/// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; will return the value of the first output (or input/output) parameter. If TValue is an int, will also return the sproc return value.</param>
-			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-			/// <returns>The retrieved value.</returns>
-			public Task<TValue> LookupAsync<TValue>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-				=> _manager.LookupAsync<TValue>(query, parameters, -1, cancellationToken);
+            #region Public data fetch methods
+            /// <summary>
+            /// Invokes the query and returns the integer result.
+            /// </summary>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters"></param>
+            /// <param name="cancellationToken"></param>
+            /// <returns></returns>
+            public Task<int> ReturnValueAsync(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                => _manager.ReturnAsync(query, parameters, -1, cancellationToken);
+
+            /// <summary>
+            /// Invokes the query and returns the output parameter or first-row column value matching the “dataName”.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the value to return.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the value.</param>
+            /// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; output parameter should match dataName arguement.</param>
+            /// <param name="dataName">If this values matches the name of a output parameter, then this returns that value; otherwise, this should match the name of a column.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>The output parameter or first-row column retrieved from the query.</returns>
+            public async Task<TValue> ReturnValueAsync<TValue>(Query query, DbParameterCollection parameters, string dataName, CancellationToken cancellationToken)
+                => (await _manager.ReturnAsync<TValue, object, object>(query, dataName, null, null, parameters, null, -1, cancellationToken)).Item1;
 
 			/// <summary>
 			/// Connect to the database and return the values as a list of objects.
 			/// </summary>
 			/// <typeparam name="TModel">The type of object to be listed.</typeparam>
-			/// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+			/// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
 			/// <param name="parameters">The query parameters.</param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
 			/// <returns>A list containing an object for each data row.</returns>
@@ -144,7 +155,7 @@ namespace ArgentSea
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -157,7 +168,7 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
             /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -173,7 +184,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -191,7 +202,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -211,7 +222,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -233,7 +244,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -257,7 +268,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -283,7 +294,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -311,7 +322,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -335,7 +346,7 @@ namespace ArgentSea
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results parameters.
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -349,7 +360,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -367,7 +378,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -387,7 +398,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -409,7 +420,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -433,7 +444,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -459,7 +470,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -487,7 +498,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult7">The eighth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -510,7 +521,7 @@ namespace ArgentSea
 			/// Connect to the database and return the TModel object returned by the delegate.
             /// </summary>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
-			/// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+			/// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
 			/// <param name="parameters">The query parameters.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
@@ -524,7 +535,7 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TArg"></typeparam>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
-			/// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+			/// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
 			/// <param name="parameters">The query parameters.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
@@ -538,7 +549,7 @@ namespace ArgentSea
             /// <summary>
             /// Executes a database procedure or function that does not return a data result.
             /// </summary>
-            /// <param name="sprocName">The stored procedure or function to call.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters with values set.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>Throws an error if not successful.</returns>

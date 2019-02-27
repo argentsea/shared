@@ -25,6 +25,7 @@ namespace ArgentSea
         public class ShardDataConnection
         {
             internal readonly DataConnectionManager<TShard> _manager;
+            private TShard _shardId;
 
             internal ShardDataConnection(ShardSetsBase<TShard, TConfiguration> parent, TShard shardId, IDataConnection config)
             {
@@ -32,39 +33,224 @@ namespace ArgentSea
                     parent._dataProviderServices, config,
                     $"shard number { shardId.ToString() } on connection { config.ConnectionDescription }",
                     parent._logger);
+                _shardId = shardId;
             }
 
             public string ConnectionString { get => _manager.ConnectionString; }
 
             #region Public data fetch methods
-            /// <summary>
-            /// Connect to the database and return a single value.
-            /// </summary>
-            /// <typeparam name="TValue">The expected type of the return value.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the value.</param>
-            /// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; will return the value of the first output (or input/output) parameter. If TValue is an int, will also return the sproc return value.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
-            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-            /// <returns>The retrieved value.</returns>
-            public Task<TValue> LookupAsync<TValue>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                => _manager.LookupAsync<TValue>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
 
             /// <summary>
-            /// Connect to the database and return a single value.
+            /// 
             /// </summary>
-            /// <typeparam name="TValue">The expected type of the return value.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the value.</param>
-            /// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; will return the value of the first output (or input/output) parameter. If TValue is an int, will also return the sproc return value.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-            /// <returns>The retrieved value.</returns>
-            public Task<TValue> LookupAsync<TValue>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                => _manager.LookupAsync<TValue>(query, parameters, -1, cancellationToken);
+            /// <returns></returns>
+            public Task<int> ReturnValueAsync(Query query, CancellationToken cancellationToken)
+                => _manager.ReturnAsync(query, new ParameterCollection(), -1, cancellationToken);
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters. If this does not include a return parameter, one will be added.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<int> ReturnValueAsync(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                => _manager.ReturnAsync(query, parameters, -1, cancellationToken);
+
+            /// <summary>
+            /// Invokes the query and returns the integer result.
+            /// </summary>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters. If this does not include a return parameter, one will be added.</param>
+            /// <param name="shardParameterName"></param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<int> ReturnValueAsync(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                => _manager.ReturnAsync(query, parameters, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
+
+
+            /// <summary>
+            /// Invokes the query and returns the value of the output parameter or first-row column value whose name matches the “dataName”.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="dataName">A value that should match an output parameter name or column name. This value will be used for the result.</param>
+            /// <param name="parameters">The query parameters. If “dataName” argument matches an output parameter name, this will be the value returned.</param>
+            /// <param name="shardParameterName">The name of the parameter who value should be set to the shard Id.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<TValue> ReturnValueAsync<TValue>(Query query, string dataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                => (await _manager.ReturnAsync<TValue, object, object>(query, dataName, null, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken)).Item1;
+
+            /// <summary>
+            /// Invokes the query and returns the value of the output parameter or first-row column value whose name matches the “dataName”.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="dataName">A value that should match an output parameter name or column name. This value will be used for the result.</param>
+            /// <param name="parameters">The query parameters. If “dataName” argument matches an output parameter name, this will be the value returned.</param>
+            /// <param name="shardParameterName">The name of the parameter who value should be set to the shard Id.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<TValue> ReturnValueAsync<TValue>(Query query, string dataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                => (await _manager.ReturnAsync<TValue, object, object>(query, dataName, null, null, parameters, null, -1, cancellationToken)).Item1;
+
+            /// <summary>
+            /// Invokes the query and returns a ShardKey whose ShardId is the current shard and RecordId is obtained from the output parameter or first-row column value whose name matches the “recordDataName”.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardKey</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+            /// <param name="parameters">The query parameters. If “recordDataName” argument matches an output parameter name, that value will be used for the ShardKey.</param>
+            /// <param name="shardParameterName">The name of the parameter who value should be set to the shard Id.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardKey<TShard, TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string recordDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                => new ShardKey<TShard, TRecord>(origin, _shardId, (await _manager.ReturnAsync<TRecord, object, object>(query, recordDataName, null, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken)).Item1);
+
+            /// <summary>
+            /// Invokes the query and returns a ShardKey whose ShardId and RecordId are obtained from the output parameters or first-row column values whose name matches “shardDataName” and “recordDataName” respectively.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+            /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+            /// <param name="parameters">The query parameters. If “shardDataName” and/or “recordDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
+            /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardKey<TShard, TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string shardDataName, string recordDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var result = await _manager.ReturnAsync<TShard, TRecord, object>(query, shardDataName, recordDataName, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
+                return new ShardKey<TShard, TRecord>(origin, result.Item1, result.Item2);
+            }
+
+            /// <summary>
+            /// Invokes the query and returns a ShardChild whose ShardId is the current shard and RecordId and ChildId is obtained from the output parameter or first-row column value whose name matches the “recordDataName” and “childDataName”.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+            /// <typeparam name="TChild"></typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
+            /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardChild.</param>
+            /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardChild<TShard, TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var result = await _manager.ReturnAsync<TRecord, TChild, object>(query, recordDataName, childDataName, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
+                return new ShardChild<TShard, TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
+            }
+
+            /// <summary>
+            /// Invokes the query and returns a ShardChild whose ShardId, RecordId, and ChildId are obtained from the output parameters or first-row column values whose name matches “shardDataName”, “recordDataName”, and “childDataName” respectively.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+            /// <typeparam name="TChild"></typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardChild.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
+            /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardChild.</param>
+            /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardChild.</param>
+            /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardChild<TShard, TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var result = await _manager.ReturnAsync<TShard, TRecord, TChild>(query, shardDataName, recordDataName, childDataName, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
+                return new ShardChild<TShard, TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
+            }
+
+            /// <summary>
+            /// Invokes the query and returns a ShardKey whose ShardId is the current shard and RecordId is obtained from the output parameter or first-row column value whose name matches the “recordDataName”.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardKey</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+            /// <param name="parameters">The query parameters. If “recordDataName” argument matches an output parameter name, that value will be used for the ShardKey.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardKey<TShard, TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string recordDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                => new ShardKey<TShard, TRecord>(origin, _shardId, (await _manager.ReturnAsync<TRecord, object, object>(query, recordDataName, null, null, parameters, null, -1, cancellationToken)).Item1);
+
+            /// <summary>
+            /// Invokes the query and returns a ShardKey whose ShardId and RecordId are obtained from the output parameters or first-row column values whose name matches “shardDataName” and “recordDataName” respectively.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+            /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+            /// <param name="parameters">The query parameters. If “shardDataName” and/or “recordDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardKey<TShard, TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string shardDataName, string recordDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var result = await _manager.ReturnAsync<TShard, TRecord, object>(query, shardDataName, recordDataName, null, parameters, null, -1, cancellationToken);
+                return new ShardKey<TShard, TRecord>(origin, result.Item1, result.Item2);
+            }
+
+            /// <summary>
+            /// Invokes the query and returns a ShardChild whose ShardId is the current shard and RecordId and ChildId is obtained from the output parameter or first-row column value whose name matches the “recordDataName” and “childDataName”.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+            /// <typeparam name="TChild"></typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
+            /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardChild.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardChild<TShard, TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var result = await _manager.ReturnAsync<TRecord, TChild, object>(query, recordDataName, childDataName, null, parameters, null, -1, cancellationToken);
+                return new ShardChild<TShard, TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
+            }
+
+            /// <summary>
+            /// Invokes the query and returns a ShardChild whose ShardId, RecordId, and ChildId are obtained from the output parameters or first-row column values whose name matches “shardDataName”, “recordDataName”, and “childDataName” respectively.
+            /// </summary>
+            /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+            /// <typeparam name="TChild"></typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardChild.</param>
+            /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
+            /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardChild.</param>
+            /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardChild.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public async Task<ShardChild<TShard, TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var result = await _manager.ReturnAsync<TShard, TRecord, TChild>(query, shardDataName, recordDataName, childDataName, parameters, null, -1, cancellationToken);
+                return new ShardChild<TShard, TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
+            }
+
 
             /// <summary>
             /// Connect to the database and return the values as a list of objects.
             /// </summary>
             /// <typeparam name="TModel">The type of object to be listed.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -76,7 +262,7 @@ namespace ArgentSea
             /// Connect to the database and return the values as a list of objects.
             /// </summary>
             /// <typeparam name="TModel">The type of object to be listed.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
@@ -88,7 +274,7 @@ namespace ArgentSea
             /// Connect to the database and return the TModel object returned by the delegate.
             /// </summary>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
@@ -102,7 +288,7 @@ namespace ArgentSea
             /// Connect to the database and return the TModel object returned by the delegate.
             /// </summary>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
@@ -116,7 +302,7 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TArg"></typeparam>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
@@ -132,7 +318,7 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TArg"></typeparam>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
@@ -181,7 +367,7 @@ namespace ArgentSea
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -194,7 +380,7 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
             /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -210,7 +396,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -228,7 +414,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -248,7 +434,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -270,7 +456,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -294,7 +480,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -320,7 +506,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -348,7 +534,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -369,7 +555,7 @@ namespace ArgentSea
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -383,7 +569,7 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
             /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -400,7 +586,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -419,7 +605,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -440,7 +626,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -463,7 +649,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -488,7 +674,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -515,7 +701,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -544,7 +730,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -568,7 +754,7 @@ namespace ArgentSea
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results parameters.
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -582,7 +768,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -600,7 +786,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -620,7 +806,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -642,7 +828,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -666,7 +852,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -692,7 +878,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -720,7 +906,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult7">The eighth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
@@ -741,7 +927,7 @@ namespace ArgentSea
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results parameters.
             /// </summary>
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -756,7 +942,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -775,7 +961,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -796,7 +982,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -819,7 +1005,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -844,7 +1030,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -871,7 +1057,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -900,7 +1086,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult7">The eighth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
-            /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>

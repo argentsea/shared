@@ -354,7 +354,18 @@ namespace ArgentSea
         /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
         /// <param name="replacements">A list of more complete records.</param>
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
-        /// <returns></returns>
+        /// <returns>Merged list.</returns>
+        public static List<TModel> Merge<TModel>(List<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+            => (List<TModel>)Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
+
+        /// <summary>
+        /// Merge two lists by iterating master list and using replacement entry where keys match.
+        /// </summary>
+        /// <typeparam name="TModel">The of the list values.</typeparam>
+        /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
+        /// <param name="replacements">A list of more complete records.</param>
+        /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
+        /// <returns>Merged list.</returns>
         public static IList<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
         {
             if (master is null)
@@ -391,6 +402,16 @@ namespace ArgentSea
             }
             return result;
         }
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId"></param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, List<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
+            => ShardListForeign<TModel>(shardId, (IList<TModel>)records);
 
         /// <summary>
         /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
