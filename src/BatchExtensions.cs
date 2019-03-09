@@ -219,8 +219,6 @@ namespace ArgentSea
             }
             protected internal override async Task<ShardKey<TShard, TRecord>> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {
@@ -272,8 +270,6 @@ namespace ArgentSea
 
             protected internal override async Task<ShardChild<TShard, TRecord, TChildId>> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {
@@ -349,8 +345,6 @@ namespace ArgentSea
             protected internal override async Task<TModel> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 var result = default(TModel);
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {
@@ -392,8 +386,6 @@ namespace ArgentSea
             protected internal override async Task<IList<ShardKey<TShard, TRecord>>> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 var result = new List<ShardKey<TShard, TRecord>>();
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {
@@ -447,8 +439,6 @@ namespace ArgentSea
             protected internal override async Task<IList<ShardChild<TShard, TRecord, TChild>>> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 var result = new List<ShardChild<TShard, TRecord, TChild>>();
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {
@@ -497,8 +487,6 @@ namespace ArgentSea
 
             protected internal override async Task<TRecord> Execute(int shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {

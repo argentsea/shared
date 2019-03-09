@@ -22,7 +22,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         public ParameterNotFoundException(string parameterName)
-            : base($"Expected parameter { parameterName }, but it was not found in the parameter list.")
+            : base($"Expected parameter “{ parameterName }”, but it was not found in the parameter list.")
         {
         }
 

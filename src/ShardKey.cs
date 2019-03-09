@@ -43,10 +43,19 @@ namespace ArgentSea
         /// <param name="context"></param>
         public ShardKey(SerializationInfo info, StreamingContext context)
         {
-            var tmp = FromExternalString(info.GetString("ShardKey"));
-            _origin = tmp.Origin;
-            _shardId = tmp.ShardId;
-            _recordId = tmp.RecordId;
+            if (info.MemberCount == 3)
+            {
+                _origin = info.GetChar("origin");
+                _shardId = (TShard)info.GetValue("shardId", typeof(TShard));
+                _recordId = (TRecord)info.GetValue("recordId", typeof(TRecord));
+            }
+            else
+            {
+                var tmp = FromExternalString(info.GetString("shardKey"));
+                _origin = tmp.Origin;
+                _shardId = tmp.ShardId;
+                _recordId = tmp.RecordId;
+            }
         }
 		#endregion
 		#region Public Properties and Method
@@ -407,9 +416,9 @@ namespace ArgentSea
         /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
         /// Useful for querying foreign shards after the primary shard has returned results.
         /// </summary>
-        /// <param name="shardId"></param>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of models to evaluate.</param>
-        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, List<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
             => ShardListForeign<TModel>(shardId, (IList<TModel>)records);
 
@@ -417,9 +426,9 @@ namespace ArgentSea
         /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
         /// Useful for querying foreign shards after the primary shard has returned results.
         /// </summary>
-        /// <param name="shardId"></param>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of models to evaluate.</param>
-        /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, IList<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
         {
             var result = new ShardsValues<TShard>();
@@ -432,6 +441,37 @@ namespace ArgentSea
             }
             return result;
         }
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues<TShard> ShardListForeign(TShard shardId, List<ShardKey<TShard, TRecord>> records)
+            => ShardListForeign(shardId, ((IList<ShardKey<TShard, TRecord>>)records));
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues<TShard> ShardListForeign(TShard shardId, IList<ShardKey<TShard, TRecord>> records)
+        {
+            var result = new ShardsValues<TShard>();
+            foreach (var record in records)
+            {
+                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
+                {
+                    result.Add(record.ShardId);
+                }
+            }
+            return result;
+        }
+
         public bool Equals(ShardKey<TShard, TRecord> other)
 		{
 			return (other.Origin == _origin) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
@@ -540,9 +580,17 @@ namespace ArgentSea
 		}
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("ShardKey", ToExternalString());
-            info.AddValue("ShardId", _shardId.ToString());
-            info.AddValue("RecordId", _recordId.ToString());
+            info.AddValue("shardKey", ToExternalString());
+            info.AddValue("origin", _origin);
+            info.AddValue("shardId", _shardId);
+            info.AddValue("recordId", _recordId);
+        }
+        public void ThrowIfInvalidOrigin(char expectedOrigin)
+        {
+            if (_origin != expectedOrigin)
+            {
+                throw new InvalidDataOriginException(expectedOrigin, _origin);
+            }
         }
     }
 }

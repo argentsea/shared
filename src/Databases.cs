@@ -130,7 +130,7 @@ namespace ArgentSea
             /// <summary>
             /// Invokes the query and returns the output parameter or first-row column value matching the “dataName”.
             /// </summary>
-            /// <typeparam name="TValue">The type of the value to return.</typeparam>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the value.</param>
             /// <param name="parameters">A parameters collction. Input parameters may be used to find the parameter; output parameter should match dataName arguement.</param>
             /// <param name="dataName">If this values matches the name of a output parameter, then this returns that value; otherwise, this should match the name of a column.</param>
@@ -149,6 +149,27 @@ namespace ArgentSea
 			/// <returns>A list containing an object for each data row.</returns>
 			public Task<IList<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
 				=> _manager.ListAsync<TModel>(query, parameters, -1, null, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="columnName">This should match the name of a column containing the values.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, CancellationToken cancellationToken)
+            {
+                var data = await _manager.ListAsync<TValue, object, object>(query, columnName, null, null, parameters, -1, null, cancellationToken);
+                var result = new List<TValue>();
+                foreach (var itm in data)
+                {
+                    result.Add(itm.Item1);
+                }
+                return result;
+            }
+
 
             #region GetOut overloads
             /// <summary>

@@ -252,7 +252,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">The type of object to be listed.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
             public Task<IList<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
@@ -269,6 +269,237 @@ namespace ArgentSea
             public Task<IList<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
                 => _manager.ListAsync<TModel>(query, parameters, -1, null, cancellationToken);
 
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="columnName">This should match the name of a column containing the values.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, string shardParameterName, CancellationToken cancellationToken)
+            {
+                var data = await _manager.ListAsync<TValue, object, object>(query, columnName, null, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                var result = new List<TValue>();
+                foreach (var itm in data)
+                {
+                    result.Add(itm.Item1);
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="columnName">This should match the name of a column containing the values.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, CancellationToken cancellationToken)
+            {
+                var data = await _manager.ListAsync<TValue, object, object>(query, columnName, null, null, parameters, -1, null, cancellationToken);
+                var result = new List<TValue>();
+                foreach (var itm in data)
+                {
+                    result.Add(itm.Item1);
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var data = await _manager.ListAsync<TRecord, object, object>(query, recordColumnName, null, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                var result = new List<ShardKey<TShard, TRecord>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardKey<TShard, TRecord>(origin, _shardId, itm.Item1));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="columnName">This should match the name of a column containing the values.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var data = await _manager.ListAsync<TRecord, object, object>(query, recordColumnName, null, null, parameters, -1, null, cancellationToken);
+                var result = new List<ShardKey<TShard, TRecord>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardKey<TShard, TRecord>(origin, _shardId, itm.Item1));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var data = await _manager.ListAsync<TShard, TRecord, object>(query, shardColumnName, recordColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                var result = new List<ShardKey<TShard, TRecord>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardKey<TShard, TRecord>(origin, itm.Item1, itm.Item2));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var data = await _manager.ListAsync<TShard, TRecord, object>(query, shardColumnName, recordColumnName, null, parameters, -1, null, cancellationToken);
+                var result = new List<ShardKey<TShard, TRecord>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardKey<TShard, TRecord>(origin, itm.Item1, itm.Item2));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var data = await _manager.ListAsync<TRecord, TChild, object>(query, recordColumnName, childColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                var result = new List<ShardChild<TShard, TRecord, TChild>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardChild<TShard, TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="columnName">This should match the name of a column containing the values.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var data = await _manager.ListAsync<TRecord, TChild, object>(query, recordColumnName, childColumnName, null, parameters, -1, null, cancellationToken);
+                var result = new List<ShardChild<TShard, TRecord, TChild>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardChild<TShard, TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var data = await _manager.ListAsync<TShard, TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                var result = new List<ShardChild<TShard, TRecord, TChild>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardChild<TShard, TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Connect to the database and return a list of column values.
+            /// </summary>
+            /// <typeparam name="TValue">The type of the return value, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+            /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
+            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>A list containing an object for each data row.</returns>
+            public async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var data = await _manager.ListAsync<TShard, TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, -1, null, cancellationToken);
+                var result = new List<ShardChild<TShard, TRecord, TChild>>();
+                foreach (var itm in data)
+                {
+                    result.Add(new ShardChild<TShard, TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                }
+                return result;
+            }
+
 
             /// <summary>
             /// Connect to the database and return the TModel object returned by the delegate.
@@ -276,7 +507,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -304,7 +535,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
             /// <param name="optionalArgument">An object of type TArg which can be used to pass non-datatabase data to the result-generating delegate.</param>
@@ -334,7 +565,7 @@ namespace ArgentSea
             /// </summary>
             /// <param name="sprocName">The stored procedure or function to call.</param>
             /// <param name="parameters">The query parameters with values set.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>Throws an error if not successful.</returns>
             public Task RunAsync(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
@@ -557,7 +788,7 @@ namespace ArgentSea
             /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
@@ -571,7 +802,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult>
@@ -588,7 +819,7 @@ namespace ArgentSea
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
             /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+            /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>

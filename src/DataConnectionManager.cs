@@ -79,7 +79,7 @@ namespace ArgentSea
 					exceptionsAllowedBeforeBreaking: cbFailureCount,
 					durationOfBreak: TimeSpan.FromMilliseconds(cbTestInterval)
 					);
-				result = circuitBreakerPolicy.Wrap(retryPolicy);
+				result = circuitBreakerPolicy.WrapAsync(retryPolicy);
 			}
 			return result;
 		}
@@ -100,7 +100,7 @@ namespace ArgentSea
 
         #endregion
 
-        #region Public-ish data fetch methods
+        #region Return data methods
 
         // returns up to three values. name must match paramter or it will revert to column name. ignored if null or empty.
         internal async Task<(TValue1, TValue2, TValue3)> ReturnAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, IDictionary<string, object> parameterValues, int shardParameterOrdinal, CancellationToken cancellationToken)
@@ -132,15 +132,10 @@ namespace ArgentSea
             return result;
         }
 
+        #endregion
 
-        /// <summary>
-        /// Connect to the database and return the values as a list of objects.
-        /// </summary>
-        /// <typeparam name="TModel">The type of object to be listed.</typeparam>
-        /// <param name="sprocName">The stored procedure to call to fetch the data.</param>
-        /// <param name="parameters">The query parameters.</param>
-        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>A list containing an object for each data row.</returns>
+        #region List methods
+
         internal async Task<IList<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) where TModel : class, new()
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -148,13 +143,30 @@ namespace ArgentSea
 
             parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
             var result = await this._resiliencePolicy.ExecuteAsync(newToken =>
-				ExecuteQueryToListAsync<TModel>(_shardId, query, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
+				ExecuteQueryToModelListAsync<TModel>(_shardId, query, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
 			var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
 			_logger?.TraceDbCmdExecuted(query.Name, this._connectionName, elapsedMS);
 			return result;
 		}
 
+        internal async Task<IList<(TValue1, TValue2, TValue3)>> ListAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var startTimestamp = Stopwatch.GetTimestamp();
+
+            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            var result = await this._resiliencePolicy.ExecuteAsync(newToken =>
+                ExecuteQueryToValueListAsync<TValue1, TValue2, TValue3>(query, data1Name, data2Name, data3Name, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
+
+            var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
+            _logger?.TraceDbCmdExecuted(query.Name, this._connectionName, elapsedMS);
+            return result;
+        }
+
+        #endregion
+
+        #region Query methods
 
         internal async Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
 		{
@@ -171,6 +183,9 @@ namespace ArgentSea
 		}
 
 
+        #endregion
+
+        #region Run methods
 
         internal async Task RunAsync(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
 		{
@@ -202,7 +217,7 @@ namespace ArgentSea
         #endregion
         #region Private Handlers
 
-        private async Task<IList<TModel>> ExecuteQueryToListAsync<TModel>(TShard shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
+        private async Task<IList<TModel>> ExecuteQueryToModelListAsync<TModel>(TShard shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
             where TModel : class, new()
 		{
 			IList<TModel> result = null;
@@ -216,8 +231,7 @@ namespace ArgentSea
 				{
 					cmd.CommandType = query.Type;
 					this._dataProviderServices.SetParameters(cmd, query.ParameterNames, parameters, parameterValues);
-					var cmdType = System.Data.CommandBehavior.Default;
-					using (var dataReader = await cmd.ExecuteReaderAsync(cmdType, cancellationToken).ConfigureAwait(false))
+					using (var dataReader = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.Default, cancellationToken).ConfigureAwait(false))
 					{
 						cancellationToken.ThrowIfCancellationRequested();
 						result = Mapper.ToList<TShard, TModel>(dataReader, shardId, _logger);
@@ -230,6 +244,45 @@ namespace ArgentSea
 			}
 			return result;
 		}
+        private async Task<IList<(TValue1, TValue2, TValue3)>> ExecuteQueryToValueListAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = new List<(TValue1, TValue2, TValue3)>();
+            using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
+            {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                using (var cmd = this._dataProviderServices.NewCommand(query.Sql, connection))
+                {
+                    cmd.CommandType = query.Type;
+                    this._dataProviderServices.SetParameters(cmd, query.ParameterNames, parameters, parameterValues);
+                    using (var rdr = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.Default, cancellationToken).ConfigureAwait(false))
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        while (rdr.Read())
+                        {
+                            TValue1 value1 = default(TValue1);
+                            TValue2 value2 = default(TValue2);
+                            TValue3 value3 = default(TValue3);
+                            if (!string.IsNullOrEmpty(data1Name))
+                            {
+                                value1 = rdr.GetFieldValue<TValue1>(rdr.GetOrdinal(data1Name));
+                            }
+                            if (!string.IsNullOrEmpty(data2Name))
+                            {
+                                value2 = rdr.GetFieldValue<TValue2>(rdr.GetOrdinal(data2Name));
+                            }
+                            if (!string.IsNullOrEmpty(data3Name))
+                            {
+                                value3 = rdr.GetFieldValue<TValue3>(rdr.GetOrdinal(data3Name));
+                            }
+                            result.Add((value1, value2, value3));
+                        }
+                    }
+                }
+            }
+            return result;
+        }
 
         // Adds return value parameter if it doesn't exist
         private async Task<int> ExecuteQueryToValueAsync(Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
@@ -312,6 +365,7 @@ namespace ArgentSea
                     if (prmOutput1 is null || prmOutput2 is null || prmOutput3 is null)
                     {
                         var rdr = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.SingleRow, cancellationToken);
+                        cancellationToken.ThrowIfCancellationRequested();
                         if (rdr.Read())
                         {
                             if (!string.IsNullOrEmpty(data1Name))
@@ -393,55 +447,6 @@ namespace ArgentSea
                 }
             }
 		}
-//        private async Task<ShardKey<TShard, TRecord>> ExecuteQueryToValueAsync<TRecord>(Query query, char origin, TShard shardId, string dataName, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
-//            where TRecord : IComparable
-//            => new ShardKey<TShard, TRecord>(origin, shardId, await ExecuteQueryToValueAsync<TRecord>(query, dataName, parameters, parameterValues, cancellationToken));
-
-
-        //private async Task<ShardChild<TShard, TRecord, TChild>> ExecuteQueryToValueAsync<TRecord, TChild>(Query query, char origin, TShard shardId, string recordName, string childName, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
-        //    where TRecord : IComparable
-        //    where TChild : IComparable
-        //{
-        //    cancellationToken.ThrowIfCancellationRequested();
-        //    using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
-        //    {
-        //        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-        //        cancellationToken.ThrowIfCancellationRequested();
-        //        using (var cmd = this._dataProviderServices.NewCommand(query.Sql, connection))
-        //        {
-        //            cmd.CommandType = query.Type;
-        //            this._dataProviderServices.SetParameters(cmd, query.ParameterNames, parameters, parameterValues);
-        //            DbParameter prmOutput = null;
-        //            foreach (DbParameter prm in cmd.Parameters)
-        //            {
-        //                if ((prm.Direction == System.Data.ParameterDirection.Input || prm.Direction == System.Data.ParameterDirection.InputOutput) && prm.ParameterName == dataName)
-        //                {
-        //                    prmOutput = prm;
-        //                    break;
-        //                }
-        //            }
-        //            if (prmOutput is null)
-        //            {
-        //                var rdr = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.SingleRow, cancellationToken);
-        //                if (rdr.Read())
-        //                {
-        //                    var ord = rdr.GetOrdinal(dataName);
-        //                    return new ShardKey<TShard, TRecord>(origin, shardId, rdr.GetFieldValue<TRecord>(ord));
-        //                }
-        //                throw new UnexpectedSqlResultException($"Database query {query.Name} expected a row with output column { dataName }, but no row or cooresponding column was found.");
-        //            }
-        //            else
-        //            {
-        //                await cmd.ExecuteNonQueryAsync(cancellationToken);
-        //                if (prmOutput.Value is null || prmOutput.Value == System.DBNull.Value)
-        //                {
-        //                    throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { dataName }, but the value was null.");
-        //                }
-        //                return new ShardKey<TShard, TRecord>(origin, shardId, (TRecord)prmOutput.Value);
-        //            }
-        //        }
-        //    }
-        //}
 
         private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, TShard shardId, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
 		{
@@ -495,9 +500,9 @@ namespace ArgentSea
             var result = default(TResult);
             using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
             {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
                 using (var trn = connection.BeginTransaction())
                 {
-                    await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
                     result = await batch.Execute(_shardId, connection, trn, _connectionName, _dataProviderServices, _logger, cancellationToken);
                     trn.Commit();
                 }

@@ -571,6 +571,291 @@ namespace ArgentSea
                 return result;
             }
 
+            internal  async Task<IList<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            {
+                var result = new List<TValue>();
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
+                {
+                    throw new ArgumentNullException(nameof(query));
+                }
+                if (parameters == null)
+                {
+                    throw new ArgumentNullException(nameof(parameters));
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+                var tsks = new List<Task<IList<(TValue, object, object)>>>();
+                var cancelTokenSource = new CancellationTokenSource();
+                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
+                {
+                    if (shardParameterValues is null)
+                    {
+                        foreach (var shardId in dtn.Keys)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
+                            tsks.Add(this.dtn[shardId].Read._manager.ListAsync<TValue, object, object>(query, columnName, null, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken));
+                        }
+                    }
+                    else
+                    {
+                        if (shardParameterValues.Shards.Count == 0)
+                        {
+                            return result;
+                        }
+                        foreach (var shardTuple in shardParameterValues.Shards)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
+                            tsks.Add(this.dtn[shardTuple.Key].Read._manager.ListAsync<TValue, object, object>(query, columnName, null, null, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken));
+                        }
+                    }
+                    await Task.WhenAll(tsks).ConfigureAwait(false);
+                    foreach (var tsk in tsks)
+                    {
+                        var interim = tsk.Result;
+                        if (!(interim is null))
+                        {
+                            foreach (var itm in interim)
+                            {
+                                result.Add(itm.Item1);
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            internal async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var result = new List<ShardKey<TShard, TRecord>>();
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
+                {
+                    throw new ArgumentNullException(nameof(query));
+                }
+                if (parameters == null)
+                {
+                    throw new ArgumentNullException(nameof(parameters));
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+                var tsks = new List<Task<IList<(TRecord, object, object)>>>();
+                var shardIds = new Dictionary<Task<IList<(TRecord, object, object)>>, TShard>();
+                var cancelTokenSource = new CancellationTokenSource();
+                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
+                {
+                    if (shardParameterValues is null)
+                    {
+                        foreach (var shardId in dtn.Keys)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
+                            var tsk = this.dtn[shardId].Read._manager.ListAsync<TRecord, object, object>(query, recordColumnName, null, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                            tsks.Add(tsk);
+                            shardIds.Add(tsk, shardId);
+                        }
+                    }
+                    else
+                    {
+                        if (shardParameterValues.Shards.Count == 0)
+                        {
+                            return result;
+                        }
+                        foreach (var shardTuple in shardParameterValues.Shards)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
+                            var tsk = this.dtn[shardTuple.Key].Read._manager.ListAsync<TRecord, object, object>(query, recordColumnName, null, null, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken);
+                            tsks.Add(tsk);
+                            shardIds.Add(tsk, shardTuple.Key);
+                        }
+                    }
+                    await Task.WhenAll(tsks).ConfigureAwait(false);
+                    foreach (var tsk in tsks)
+                    {
+                        var interim = tsk.Result;
+                        if (!(interim is null))
+                        {
+                            foreach (var itm in interim)
+                            {
+                                result.Add(new ShardKey<TShard, TRecord>(origin, shardIds[tsk], itm.Item1));
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            internal async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+            {
+                var result = new List<ShardKey<TShard, TRecord>>();
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
+                {
+                    throw new ArgumentNullException(nameof(query));
+                }
+                if (parameters == null)
+                {
+                    throw new ArgumentNullException(nameof(parameters));
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+                var tsks = new List<Task<IList<(TShard, TRecord, object)>>>();
+                var cancelTokenSource = new CancellationTokenSource();
+                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
+                {
+                    if (shardParameterValues is null)
+                    {
+                        foreach (var shardId in dtn.Keys)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
+                            var tsk = this.dtn[shardId].Read._manager.ListAsync<TShard, TRecord, object>(query, shardColumnName, recordColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                            tsks.Add(tsk);
+                        }
+                    }
+                    else
+                    {
+                        if (shardParameterValues.Shards.Count == 0)
+                        {
+                            return result;
+                        }
+                        foreach (var shardTuple in shardParameterValues.Shards)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
+                            var tsk = this.dtn[shardTuple.Key].Read._manager.ListAsync<TShard, TRecord, object>(query, shardColumnName, recordColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken);
+                            tsks.Add(tsk);
+                        }
+                    }
+                    await Task.WhenAll(tsks).ConfigureAwait(false);
+                    foreach (var tsk in tsks)
+                    {
+                        var interim = tsk.Result;
+                        if (!(interim is null))
+                        {
+                            foreach (var itm in interim)
+                            {
+                                result.Add(new ShardKey<TShard, TRecord>(origin, itm.Item1, itm.Item2));
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            internal async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var result = new List<ShardChild<TShard, TRecord, TChild>>();
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
+                {
+                    throw new ArgumentNullException(nameof(query));
+                }
+                if (parameters == null)
+                {
+                    throw new ArgumentNullException(nameof(parameters));
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+                var tsks = new List<Task<IList<(TRecord, TChild, object)>>>();
+                var shardIds = new Dictionary<Task<IList<(TRecord, TChild, object)>>, TShard>();
+                var cancelTokenSource = new CancellationTokenSource();
+                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
+                {
+                    if (shardParameterValues is null)
+                    {
+                        foreach (var shardId in dtn.Keys)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
+                            var tsk = this.dtn[shardId].Read._manager.ListAsync<TRecord, TChild, object>(query, recordColumnName, childColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                            tsks.Add(tsk);
+                            shardIds.Add(tsk, shardId);
+                        }
+                    }
+                    else
+                    {
+                        if (shardParameterValues.Shards.Count == 0)
+                        {
+                            return result;
+                        }
+                        foreach (var shardTuple in shardParameterValues.Shards)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
+                            var tsk = this.dtn[shardTuple.Key].Read._manager.ListAsync<TRecord, TChild, object>(query, recordColumnName, childColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken);
+                            tsks.Add(tsk);
+                            shardIds.Add(tsk, shardTuple.Key);
+                        }
+                    }
+                    await Task.WhenAll(tsks).ConfigureAwait(false);
+                    foreach (var tsk in tsks)
+                    {
+                        var interim = tsk.Result;
+                        if (!(interim is null))
+                        {
+                            foreach (var itm in interim)
+                            {
+                                result.Add(new ShardChild<TShard, TRecord, TChild>(origin, shardIds[tsk], itm.Item1, itm.Item2));
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            internal async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TRecord : IComparable
+                where TChild : IComparable
+            {
+                var result = new List<ShardChild<TShard, TRecord, TChild>>();
+                if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
+                {
+                    throw new ArgumentNullException(nameof(query));
+                }
+                if (parameters == null)
+                {
+                    throw new ArgumentNullException(nameof(parameters));
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
+                var tsks = new List<Task<IList<(TShard, TRecord, TChild)>>>();
+                var cancelTokenSource = new CancellationTokenSource();
+                using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
+                {
+                    if (shardParameterValues is null)
+                    {
+                        foreach (var shardId in dtn.Keys)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardId);
+                            var tsk = this.dtn[shardId].Read._manager.ListAsync<TShard, TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
+                            tsks.Add(tsk);
+                        }
+                    }
+                    else
+                    {
+                        if (shardParameterValues.Shards.Count == 0)
+                        {
+                            return result;
+                        }
+                        foreach (var shardTuple in shardParameterValues.Shards)
+                        {
+                            parameters.SetShardId<TShard>(shardParameterOrdinal, shardTuple.Key);
+                            var tsk = this.dtn[shardTuple.Key].Read._manager.ListAsync<TShard, TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, parameters.GetParameterOrdinal(shardParameterName), shardTuple.Value, cancellationToken);
+                            tsks.Add(tsk);
+                        }
+                    }
+                    await Task.WhenAll(tsks).ConfigureAwait(false);
+                    foreach (var tsk in tsks)
+                    {
+                        var interim = tsk.Result;
+                        if (!(interim is null))
+                        {
+                            foreach (var itm in interim)
+                            {
+                                result.Add(new ShardChild<TShard, TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
             internal async Task RunAllAsync(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
             {
                 if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
