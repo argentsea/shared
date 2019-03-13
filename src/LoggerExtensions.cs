@@ -28,7 +28,8 @@ namespace ArgentSea
             CmdExecuted,
             ConnectRetry,
             CommandRetry,
-            CircuitBreaker
+            CircuitBreaker,
+            BatchStep
         }
 
         private static readonly Action<ILogger, string, Exception> _sqlConnectionStringBuilt;
@@ -70,6 +71,9 @@ namespace ArgentSea
         private static readonly Action<ILogger, string, string, Exception> _sqlReaderExpressionTreeDataRowCreation;
         private static readonly Action<ILogger, string, string, Exception> _sqlReaderExpressionTreeOrdinalsCreation;
         private static readonly Action<ILogger, string, string, string, Exception> _sqlObjectExpressionTreeCreation;
+        private static readonly Action<ILogger, string, Exception> _emptyResult;
+        private static readonly Action<ILogger, int, string, Exception> _batchStepStart;
+        private static readonly Action<ILogger, int, string, Exception> _batchStepEnd;
 
         static LoggingExtensions()
         {
@@ -84,7 +88,7 @@ namespace ArgentSea
             _sqlReadOutParameterCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlSetOutParametersCacheHit)), "The cached delegate for creating output parameters was already initialized for type {TModel}.");
             _sqlReaderCacheMiss = LoggerMessage.Define<Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlReaderCacheMiss)), "No cached delegate for mapping a data reader was initialized for type {TModel}; this is normal for the first execution.");
             _sqlReaderCacheHit = LoggerMessage.Define<Type>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperCacheStatus, nameof(SqlReaderCacheHit)), "The cached delegate for mapping a data reader was already initialized for type {TModel}.");
-            _sqlParameterNotFound = LoggerMessage.Define<string, Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlParameterNotFound, nameof(SqlParameterNotFound)), "Sql Parameter {parameterName} was defined on {Type} but was not found among the provided output parameters.");
+            _sqlParameterNotFound = LoggerMessage.Define<string, Type>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlParameterNotFound, nameof(SqlParameterNotFound)), "Sql Parameter {parameterName} was defined on {Type} but was not found among the provided parameters.");
             _sqlFieldNotFound = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.MapperSqlColumnNotFound, nameof(SqlFieldNotFound)), "Column {columnName} was defined on {modelName} but was not found in the result set.");
             _sqlMapperInTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperProcessTrace, nameof(TraceInMapperProperty)), "In-parameter mapper is now processing property {name}.");
             _sqlMapperSetOutTrace = LoggerMessage.Define<string>(LogLevel.Trace, new EventId((int)EventIdentifier.MapperProcessTrace, nameof(TraceSetOutMapperProperty)), "Set out-parameter mapper is now processing property {name}.");
@@ -113,6 +117,9 @@ namespace ArgentSea
             _sqlReaderExpressionTreeDataRowCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} to data reader row values as:\r\n{code}.");
             _sqlReaderExpressionTreeOrdinalsCreation = LoggerMessage.Define<string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForReaderRowData)), "Compiled code to map model {model} ordinals to data reader values as:\r\n{code}.");
             _sqlObjectExpressionTreeCreation = LoggerMessage.Define<string, string, string>(LogLevel.Debug, new EventId((int)EventIdentifier.ExpressionTreeCreation, nameof(CreatedExpressionTreeForModel)), "Compiled code to map model {model} to stored procedure {sproc} as:\r\n{code}.");
+            _emptyResult = LoggerMessage.Define<string>(LogLevel.Debug, new EventId((int)EventIdentifier.UnexpectedDbNull, nameof(EmptyResult)), "The base object could not be built because the query returned an empty result. The query was: “{ queryName }” ");
+            _batchStepStart = LoggerMessage.Define<int, string>(LogLevel.Debug, new EventId((int)EventIdentifier.BatchStep, nameof(BatchStepStart)), "Starting batch step { stepNumber.ToString() } on connection “{ connection }” ");
+            _batchStepEnd = LoggerMessage.Define<int, string>(LogLevel.Debug, new EventId((int)EventIdentifier.BatchStep, nameof(BatchStepEnd)), "Completed batch step { stepNumber.ToString() } on connection “{ connection }” ");
         }
 
         public static void SqlConnectionStringBuilt(this ILogger logger, string connectionString)
@@ -297,5 +304,11 @@ namespace ArgentSea
                 }
             }
         }
+        public static void EmptyResult(this ILogger logger, string queryName)
+            => _emptyResult(logger, queryName, null);
+        internal static void BatchStepStart(this ILogger logger, int stepIndex, string connectionName)
+            => _batchStepStart(logger, stepIndex, connectionName, null);
+        internal static void BatchStepEnd(this ILogger logger, int stepIndex, string connectionName)
+            => _batchStepStart(logger, stepIndex, connectionName, null);
     }
 }

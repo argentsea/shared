@@ -401,7 +401,7 @@ namespace ArgentSea
             public IEnumerator GetEnumerator() => this.dtn.GetEnumerator();
 
             #region internal ShardSet query methods
-            internal async Task<IList<TModel>> ReadQueryAllAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            internal async Task<List<TModel>> ReadQueryAllAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
             {
                 var result = new List<TModel>();
                 if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
@@ -520,7 +520,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<IList<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            internal async Task<List<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
             {
                 var result = new List<TModel>();
                 if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
@@ -534,7 +534,7 @@ namespace ArgentSea
 
                 cancellationToken.ThrowIfCancellationRequested();
                 var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
-                var tsks = new List<Task<IList<TModel>>>();
+                var tsks = new List<Task<List<TModel>>>();
                 var cancelTokenSource = new CancellationTokenSource();
                 using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
                 {
@@ -571,7 +571,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal  async Task<IList<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal  async Task<List<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
             {
                 var result = new List<TValue>();
                 if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))
@@ -584,7 +584,7 @@ namespace ArgentSea
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
-                var tsks = new List<Task<IList<(TValue, object, object)>>>();
+                var tsks = new List<Task<List<(TValue, object, object)>>>();
                 var cancelTokenSource = new CancellationTokenSource();
                 using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
                 {
@@ -624,7 +624,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
             {
                 var result = new List<ShardKey<TShard, TRecord>>();
@@ -638,8 +638,8 @@ namespace ArgentSea
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
-                var tsks = new List<Task<IList<(TRecord, object, object)>>>();
-                var shardIds = new Dictionary<Task<IList<(TRecord, object, object)>>, TShard>();
+                var tsks = new List<Task<List<(TRecord, object, object)>>>();
+                var shardIds = new Dictionary<Task<List<(TRecord, object, object)>>, TShard>();
                 var cancelTokenSource = new CancellationTokenSource();
                 using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
                 {
@@ -683,7 +683,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<IList<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardKey<TShard, TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
             {
                 var result = new List<ShardKey<TShard, TRecord>>();
@@ -697,7 +697,7 @@ namespace ArgentSea
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
-                var tsks = new List<Task<IList<(TShard, TRecord, object)>>>();
+                var tsks = new List<Task<List<(TShard, TRecord, object)>>>();
                 var cancelTokenSource = new CancellationTokenSource();
                 using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
                 {
@@ -739,7 +739,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
             {
@@ -754,8 +754,8 @@ namespace ArgentSea
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
-                var tsks = new List<Task<IList<(TRecord, TChild, object)>>>();
-                var shardIds = new Dictionary<Task<IList<(TRecord, TChild, object)>>, TShard>();
+                var tsks = new List<Task<List<(TRecord, TChild, object)>>>();
+                var shardIds = new Dictionary<Task<List<(TRecord, TChild, object)>>, TShard>();
                 var cancelTokenSource = new CancellationTokenSource();
                 using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
                 {
@@ -799,7 +799,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<IList<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardChild<TShard, TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
             {
@@ -814,7 +814,7 @@ namespace ArgentSea
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 var shardParameterOrdinal = parameters.GetParameterOrdinal(shardParameterName);
-                var tsks = new List<Task<IList<(TShard, TRecord, TChild)>>>();
+                var tsks = new List<Task<List<(TShard, TRecord, TChild)>>>();
                 var cancelTokenSource = new CancellationTokenSource();
                 using (var queryCancelationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelTokenSource.Token))
                 {
@@ -931,7 +931,7 @@ namespace ArgentSea
                 }
             }
 
-            internal async Task<IList<TModel>> WriteQueryAllAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            internal async Task<List<TModel>> WriteQueryAllAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues<TShard> shardParameterValues, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
             {
                 var result = new List<TModel>();
                 if (query is null || string.IsNullOrEmpty(query.Sql) || string.IsNullOrEmpty(query.Name))

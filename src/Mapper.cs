@@ -278,7 +278,7 @@ namespace ArgentSea
         /// <param name="logger">The logger instance to write any processing or debug information to.</param>
         /// <returns>A list of objects of the specified type, one for each result.</returns>
         /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
-        public static IList<TModel> ToList<TModel>(this DbDataReader rdr, ILogger logger) 
+        public static List<TModel> ToList<TModel>(this DbDataReader rdr, ILogger logger) 
             where TModel : class, new()
 			=> ToList<BadShardType, TModel>(rdr, null, logger);
 
@@ -292,7 +292,7 @@ namespace ArgentSea
         /// <param name="logger">The logger instance to write any processing or debug information to.</param>
         /// <returns>A list of objects of the specified type, one for each result.</returns>
         /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
-        public static IList<TModel> ToList<TShard, TModel>(this DbDataReader rdr, TShard shardId, ILogger logger)
+        public static List<TModel> ToList<TShard, TModel>(this DbDataReader rdr, TShard shardId, ILogger logger)
             where TModel : class, new() 
             where TShard : IComparable
 		{
@@ -1313,7 +1313,7 @@ namespace ArgentSea
         /// <param name="connectionDescription">The connection description is used in logging.</param>
         /// <param name="logger">A logging instance.</param>
         /// <returns>A list of TModel objects, one for each record returned by the DataReader.</returns>
-        public static IList<TModel> ListFromReaderResultsHandler<TShard, TModel>
+        public static List<TModel> ListFromReaderResultsHandler<TShard, TModel>
             (
             TShard shardId,
             string sprocName,
@@ -1404,6 +1404,11 @@ namespace ArgentSea
             var resultList = (List<TReaderResult>)Mapper.ToList<TShard, TReaderResult>(rdr, shardId, logger);
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 3, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1454,6 +1459,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 7, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1515,6 +1525,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 15, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1587,6 +1602,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 31, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1670,6 +1690,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, Mapper.DummyType, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 63, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1764,6 +1789,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, Mapper.DummyType, Mapper.DummyType, TModel>(shardId, sprocName, 127, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1869,6 +1899,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, Mapper.DummyType, TModel>(shardId, sprocName, 255, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -1985,6 +2020,11 @@ namespace ArgentSea
             }
             MoveRdrToEnd(rdr);
             var resultOutPrms = Mapper.ToModel<TShard, TModel>(parameters, shardId, logger);
+            if (resultOutPrms is null)
+            {
+                logger?.EmptyResult(sprocName);
+                return null;
+            }
             var queryKey = typeof(TModel).ToString() + sprocName;
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TShard, TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(shardId, sprocName, 511, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TShard, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, TModel, ILogger, TModel>)lazySqlObjectDelegate.Value;
@@ -2611,7 +2651,7 @@ namespace ArgentSea
 			}
 			else if (resultList.Count == 0)
 			{
-				logger?.LogDebug($"Procedure {procedureName} returned an empty base result.");
+                logger?.EmptyResult(procedureName);
 				return null;
 			}
 			else if (resultList.Count > 1)

@@ -16,9 +16,12 @@ namespace ArgentSea
         internal protected override async Task<TResult> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
         {
             var result = default(TResult);
-            foreach (var process in _processes)
+            for (var i = 0; i < _processes.Count; i++)
             {
+                var process = _processes[i];
+                logger.BatchStepStart(i, connectionName);
                 var callResult = await process.Execute(shardId, connection, transaction, connectionName, services, logger, cancellationToken);
+                logger.BatchStepEnd(i, connectionName);
                 if (!EqualityComparer<TResult>.Default.Equals(callResult, default(TResult)))
                 {
                     result = callResult;

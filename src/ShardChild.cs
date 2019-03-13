@@ -122,7 +122,27 @@ namespace ArgentSea
         /// <param name="records">The list of models to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public static List<TModel> Merge<TModel>(List<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
-            => (List<TModel>)Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
+            => Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
+
+        /// <summary>
+        /// Given a list of Models with ShardKChild keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static List<TModel> Merge<TModel>(List<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+            => Merge<TModel>((IList<TModel>)master, replacements, appendUnmatchedReplacements);
+
+        /// <summary>
+        /// Given a list of Models with ShardKChild keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static List<TModel> Merge<TModel>(IList<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+            => (List<TModel>)Merge<TModel>(master, (IList<TModel>)replacements, appendUnmatchedReplacements);
 
 
         /// <summary>
@@ -162,7 +182,7 @@ namespace ArgentSea
         /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
         /// <param name="replacements">A list of more complete records.</param>
         /// <returns>Merged list.</returns>
-        public static IList<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+        public static List<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
         {
             if (master is null)
             {

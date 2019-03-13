@@ -147,7 +147,7 @@ namespace ArgentSea
 			/// <param name="parameters">The query parameters.</param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
 			/// <returns>A list containing an object for each data row.</returns>
-			public Task<IList<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+			public Task<List<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
 				=> _manager.ListAsync<TModel>(query, parameters, -1, null, cancellationToken);
 
             /// <summary>
@@ -159,7 +159,7 @@ namespace ArgentSea
             /// <param name="columnName">This should match the name of a column containing the values.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
-            public async Task<IList<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, CancellationToken cancellationToken)
+            public async Task<List<TValue>> ListAsync<TValue>(Query query, DbParameterCollection parameters, string columnName, CancellationToken cancellationToken)
             {
                 var data = await _manager.ListAsync<TValue, object, object>(query, columnName, null, null, parameters, -1, null, cancellationToken);
                 var result = new List<TValue>();

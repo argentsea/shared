@@ -365,7 +365,7 @@ namespace ArgentSea
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
         /// <returns>Merged list.</returns>
         public static List<TModel> Merge<TModel>(List<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
-            => (List<TModel>)Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
+            => Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
 
         /// <summary>
         /// Merge two lists by iterating master list and using replacement entry where keys match.
@@ -375,7 +375,30 @@ namespace ArgentSea
         /// <param name="replacements">A list of more complete records.</param>
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
         /// <returns>Merged list.</returns>
-        public static IList<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+        public static List<TModel> Merge<TModel>(IList<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+            => Merge<TModel>(master, (IList<TModel>)replacements, appendUnmatchedReplacements);
+
+        /// <summary>
+        /// Merge two lists by iterating master list and using replacement entry where keys match.
+        /// </summary>
+        /// <typeparam name="TModel">The of the list values.</typeparam>
+        /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
+        /// <param name="replacements">A list of more complete records.</param>
+        /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
+        /// <returns>Merged list.</returns>
+        public static List<TModel> Merge<TModel>(List<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+            => Merge<TModel>((IList<TModel>)master, replacements, appendUnmatchedReplacements);
+
+
+        /// <summary>
+        /// Merge two lists by iterating master list and using replacement entry where keys match.
+        /// </summary>
+        /// <typeparam name="TModel">The of the list values.</typeparam>
+        /// <param name="master">The list to be returned, possibly with some entries replaced.</param>
+        /// <param name="replacements">A list of more complete records.</param>
+        /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
+        /// <returns>Merged list.</returns>
+        public static List<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
         {
             if (master is null)
             {

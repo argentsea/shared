@@ -136,7 +136,7 @@ namespace ArgentSea
 
         #region List methods
 
-        internal async Task<IList<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) where TModel : class, new()
+        internal async Task<List<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) where TModel : class, new()
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
@@ -150,7 +150,7 @@ namespace ArgentSea
 			return result;
 		}
 
-        internal async Task<IList<(TValue1, TValue2, TValue3)>> ListAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
+        internal async Task<List<(TValue1, TValue2, TValue3)>> ListAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var startTimestamp = Stopwatch.GetTimestamp();
@@ -217,10 +217,10 @@ namespace ArgentSea
         #endregion
         #region Private Handlers
 
-        private async Task<IList<TModel>> ExecuteQueryToModelListAsync<TModel>(TShard shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
+        private async Task<List<TModel>> ExecuteQueryToModelListAsync<TModel>(TShard shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
             where TModel : class, new()
 		{
-			IList<TModel> result = null;
+			List<TModel> result = null;
 			cancellationToken.ThrowIfCancellationRequested();
 			using (var connection = this._dataProviderServices.NewConnection(this._connectionConfig.GetConnectionString(_logger)))
 			{
@@ -244,7 +244,7 @@ namespace ArgentSea
 			}
 			return result;
 		}
-        private async Task<IList<(TValue1, TValue2, TValue3)>> ExecuteQueryToValueListAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
+        private async Task<List<(TValue1, TValue2, TValue3)>> ExecuteQueryToValueListAsync<TValue1, TValue2, TValue3>(Query query, string data1Name, string data2Name, string data3Name, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var result = new List<(TValue1, TValue2, TValue3)>();
@@ -334,7 +334,9 @@ namespace ArgentSea
                     DbParameter prmOutput3 = null;
                     foreach (DbParameter prm in cmd.Parameters)
                     {
-                        if (!string.IsNullOrEmpty(data1Name) && (prm.Direction == System.Data.ParameterDirection.Input || prm.Direction == System.Data.ParameterDirection.InputOutput) && prm.ParameterName == data1Name)
+                        if (!string.IsNullOrEmpty(data1Name) 
+                            && (prm.Direction == System.Data.ParameterDirection.Output || prm.Direction == System.Data.ParameterDirection.InputOutput) 
+                            && prm.ParameterName == data1Name)
                         {
                             prmOutput1 = prm;
                             if (!(prmOutput2 is null) && !(prmOutput3 is null))
@@ -342,7 +344,9 @@ namespace ArgentSea
                                 break;
                             }
                         }
-                        if (!string.IsNullOrEmpty(data2Name) && (prm.Direction == System.Data.ParameterDirection.Input || prm.Direction == System.Data.ParameterDirection.InputOutput) && prm.ParameterName == data2Name)
+                        if (!string.IsNullOrEmpty(data2Name) 
+                            && (prm.Direction == System.Data.ParameterDirection.Output || prm.Direction == System.Data.ParameterDirection.InputOutput) 
+                            && prm.ParameterName == data2Name)
                         {
                             prmOutput2 = prm;
                             if (!(prmOutput1 is null) && !(prmOutput3 is null))
@@ -350,7 +354,9 @@ namespace ArgentSea
                                 break;
                             }
                         }
-                        if (!string.IsNullOrEmpty(data3Name) && (prm.Direction == System.Data.ParameterDirection.Input || prm.Direction == System.Data.ParameterDirection.InputOutput) && prm.ParameterName == data3Name)
+                        if (!string.IsNullOrEmpty(data3Name) 
+                            && (prm.Direction == System.Data.ParameterDirection.Output || prm.Direction == System.Data.ParameterDirection.InputOutput) 
+                            && prm.ParameterName == data3Name)
                         {
                             prmOutput3 = prm;
                             if (!(prmOutput1 is null) && !(prmOutput2 is null))
@@ -362,86 +368,53 @@ namespace ArgentSea
                     TValue1 value1 = default(TValue1);
                     TValue2 value2 = default(TValue2);
                     TValue3 value3 = default(TValue3);
-                    if (prmOutput1 is null || prmOutput2 is null || prmOutput3 is null)
+                    if ((prmOutput1 is null && !string.IsNullOrEmpty(data1Name)) || (prmOutput2 is null && !string.IsNullOrEmpty(data2Name)) || (prmOutput3 is null && !string.IsNullOrEmpty(data3Name)))
                     {
                         var rdr = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.SingleRow, cancellationToken);
                         cancellationToken.ThrowIfCancellationRequested();
                         if (rdr.Read())
                         {
-                            if (!string.IsNullOrEmpty(data1Name))
+                            if ((prmOutput1 is null) && !string.IsNullOrEmpty(data1Name))
                             {
-                                if (prmOutput1 is null)
-                                {
-                                    value1 = rdr.GetFieldValue<TValue1>(rdr.GetOrdinal(data1Name));
-                                }
-                                else
-                                {
-                                    if (prmOutput1.Value is null || prmOutput1.Value == System.DBNull.Value)
-                                    {
-                                        throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data1Name }, but the value was null.");
-                                    }
-                                    value1 = (TValue1)prmOutput1.Value;
-                                }
+                                value1 = rdr.GetFieldValue<TValue1>(rdr.GetOrdinal(data1Name));
                             }
-                            if (!string.IsNullOrEmpty(data2Name))
+                            if ((prmOutput2 is null) && !string.IsNullOrEmpty(data2Name))
                             {
-                                if (prmOutput2 is null)
-                                {
-                                    value2 = rdr.GetFieldValue<TValue2>(rdr.GetOrdinal(data1Name));
-                                }
-                                else
-                                {
-                                    if (prmOutput2.Value is null || prmOutput2.Value == System.DBNull.Value)
-                                    {
-                                        throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data2Name }, but the value was null.");
-                                    }
-                                    value2 = (TValue2)prmOutput2.Value;
-                                }
+                                value2 = rdr.GetFieldValue<TValue2>(rdr.GetOrdinal(data2Name));
                             }
-                            if (!string.IsNullOrEmpty(data3Name))
+                            if ((prmOutput3 is null) && !string.IsNullOrEmpty(data3Name))
                             {
-                                if (prmOutput3 is null)
-                                {
-                                    value3 = rdr.GetFieldValue<TValue3>(rdr.GetOrdinal(data3Name));
-                                }
-                                else
-                                {
-                                    if (prmOutput3.Value is null || prmOutput3.Value == System.DBNull.Value)
-                                    {
-                                        throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data3Name }, but the value was null.");
-                                    }
-                                    value3 = (TValue3)prmOutput3.Value;
-                                }
+                                value3 = rdr.GetFieldValue<TValue3>(rdr.GetOrdinal(data3Name));
                             }
                         }
                     }
                     else
                     {
                         await cmd.ExecuteNonQueryAsync(cancellationToken);
-                        if (!string.IsNullOrEmpty(data1Name))
+                    }
+                    if (!(prmOutput1 is null))
+                    {
+                        if (prmOutput1.Value is null || prmOutput1.Value == System.DBNull.Value)
                         {
-                            if (prmOutput1.Value is null || prmOutput1.Value == System.DBNull.Value)
-                            {
-                                throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data1Name }, but the value was null.");
-                            }
-                            value1 = (TValue1)prmOutput1.Value;
+                            throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data1Name }, but the database value was null.");
                         }
-                        if (!string.IsNullOrEmpty(data2Name))
+                        value1 = (TValue1)prmOutput1.Value;
+                    }
+                    if (!(prmOutput2 is null))
+                    {
+                        if (prmOutput2.Value is null || prmOutput2.Value == System.DBNull.Value)
                         {
-                            if (prmOutput2.Value is null || prmOutput2.Value == System.DBNull.Value)
-                            {
-                                throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data2Name }, but the value was null.");
-                            }
-                            value2 = (TValue2)prmOutput2.Value;
+                            throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data2Name }, but the database value was null.");
                         }
-                        if (!string.IsNullOrEmpty(data3Name))
+                        value2 = (TValue2)prmOutput2.Value;
+                    }
+                    if (!(prmOutput3 is null))
+                    {
+                        if (prmOutput3.Value is null || prmOutput3.Value == System.DBNull.Value)
                         {
-                            if (prmOutput3.Value is null || prmOutput3.Value == System.DBNull.Value)
-                            {
-                                throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data3Name }, but the value was null.");
-                            }
-                            value3 = (TValue3)prmOutput3.Value;
+                            throw new UnexpectedSqlResultException($"Database query {query.Name} expected to output the value of { data3Name }, but the database value was null.");
                         }
+                        value3 = (TValue3)prmOutput3.Value;
                     }
                     return (value1, value2, value3);
                 }
