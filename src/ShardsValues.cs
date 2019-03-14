@@ -8,7 +8,6 @@ namespace ArgentSea
     public class ShardsValues<TShard> : ICollection, IEnumerable<ShardParameterValue<TShard>> where TShard : IComparable
     {
         private readonly object syncRoot = new object();
-        private int _parameterCount = 0;
 
         public ShardsValues()
         {
@@ -21,26 +20,20 @@ namespace ArgentSea
                 throw new ArgumentNullException(nameof(shards));
             }
             this.Shards = shards;
-            foreach(var shd in shards)
+        }
+        public ShardsValues(IList<TShard> list)
+        {
+            foreach (var shd in list)
             {
-                if (shd.Value is null)
-                {
-                    _parameterCount++;
-                }
-                else
-                {
-                    _parameterCount = _parameterCount + shd.Value.Count;
-                }
+                this.Shards.Add(shd, new Dictionary<string, object>());
             }
         }
-
 
         public ShardsValues<TShard> Add(TShard shardId)
         {
             if (!Shards.ContainsKey(shardId))
             {
                 Shards.Add(shardId, new Dictionary<string, object>());
-                _parameterCount++;
             }
             return this;
         }
@@ -48,22 +41,41 @@ namespace ArgentSea
         {
             if (Shards.TryGetValue(shardId, out var prms))
             {
-                if (prms.Count != 0)
+                if (prms is null)
                 {
-                    _parameterCount++;
+                    Shards[shardId] = new Dictionary<string, object>() { { parameterName, parameterValue } };
                 }
-                prms.Add(parameterName, parameterValue);
+                else
+                {
+                    prms.Add(parameterName, parameterValue);
+                }
             }
             else
             {
                 Shards.Add(shardId, new Dictionary<string, object>() { { parameterName, parameterValue } });
-                _parameterCount++;
 
             }
             return this;
         }
 
-        public int Count => _parameterCount;
+        public int Count
+        {
+            get {
+                var parameterCount = 0;
+                foreach (var shd in Shards)
+                {
+                    if (shd.Value is null || shd.Value.Count == 0)
+                    {
+                        parameterCount++;
+                    }
+                    else
+                    {
+                        parameterCount += shd.Value.Count;
+                    }
+                }
+                return parameterCount;
+            }
+        }
 
         public bool IsSynchronized => throw new NotImplementedException();
 
@@ -71,7 +83,7 @@ namespace ArgentSea
 
         public void CopyTo(Array array, int index)
         {
-            var result = new ShardParameterValue<TShard>[_parameterCount];
+            var result = new ShardParameterValue<TShard>[this.Count];
             var i = 0;
             foreach (var itm in ((IEnumerable<ShardParameterValue<TShard>>)this))
             {
@@ -86,7 +98,7 @@ namespace ArgentSea
         {
             foreach (var shd in Shards)
             {
-                if (shd.Value.Count == 0)
+                if (shd.Value is null || shd.Value.Count == 0)
                 {
                     yield return new ShardParameterValue<TShard>(shd.Key, null, null);
                 }
@@ -108,7 +120,6 @@ namespace ArgentSea
                 if (!Shards.Keys.Contains(shardId))
                 {
                     Shards.Add(shardId, new Dictionary<string, object>());
-                    _parameterCount++;
                 }
             }
         }
@@ -124,15 +135,20 @@ namespace ArgentSea
                         foreach (var kv in dtn)
                         {
                             Shards[shd.Key].Add(kv);
-                            _parameterCount++;
                         }
                     }
                 }
                 else
                 {
                     Shards.Add(shd.Key, new Dictionary<string, object>());
-                    _parameterCount++;
                 }
+            }
+        }
+        public void Remove(TShard shardId)
+        {
+            if (Shards.ContainsKey(shardId))
+            {
+                Shards.Remove(shardId);
             }
         }
     }

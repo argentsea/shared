@@ -101,7 +101,7 @@ namespace ArgentSea
         /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of models to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public static ShardsValues<TShard> ShardList<TModel>(IList<IKeyedChildModel<TShard, TRecord, TChild>> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+        public static ShardsValues<TShard> ToShardsValues<TModel>(IList<IKeyedChildModel<TShard, TRecord, TChild>> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
         {
             var result = new ShardsValues<TShard>();
             foreach (var record in records)
