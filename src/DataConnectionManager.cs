@@ -20,7 +20,7 @@ namespace ArgentSea
 	{
 		#region Private variables and constructors
 		private readonly ILogger _logger;
-        private readonly Policy _resiliencePolicy;
+        private readonly AsyncPolicy _resiliencePolicy;
 		private readonly IDataProviderServiceFactory _dataProviderServices;
         private readonly IDataConnection _connectionConfig;
 		private readonly string _connectionName;
@@ -41,9 +41,9 @@ namespace ArgentSea
         }
 		#endregion
 		#region Private helper methods
-		private Policy GetConnectionResiliencePolicy()
+		private AsyncPolicy GetConnectionResiliencePolicy()
 		{
-			Policy result;
+            AsyncPolicy result;
             int retryCnt = DefaultRetryCount;
             int cbTestInterval = DefaultCircuitBreakerTestInterval;
             int cbFailureCount = DefaultCircuitBreakerFailureCount;

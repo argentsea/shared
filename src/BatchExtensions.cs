@@ -163,6 +163,29 @@ namespace ArgentSea
             return batch;
         }
 
+
+
+        public static ShardBatch<TShard, TRecord> Add<TShard, TRecord>(this ShardBatch<TShard, TRecord> batch, Query query, DbParameterCollection parameters, string dataColumnName) where TShard : IComparable where TRecord : IComparable
+        {
+            batch.Add(new RecordStep<TShard, TRecord>(query, parameters, dataColumnName));
+            return batch;
+        }
+        public static ShardBatch<TShard, TRecord> Add<TShard, TRecord>(this ShardBatch<TShard, TRecord> batch, Query query, string dataColumnName) where TShard : IComparable where TRecord : IComparable
+        {
+            batch.Add(new RecordStep<TShard, TRecord>(query, new ParameterCollection(), dataColumnName));
+            return batch;
+        }
+
+        public static ShardBatch<TShard, IList<TRecord>> Add<TShard, TRecord>(this ShardBatch<TShard, IList<TRecord>> batch, Query query, DbParameterCollection parameters, string dataColumnName) where TShard : IComparable
+        {
+            batch.Add(new ListStep<TShard, TRecord>(query, parameters, dataColumnName));
+            return batch;
+        }
+        public static ShardBatch<TShard, List<TRecord>> Add<TShard, TRecord>(this ShardBatch<TShard, List<TRecord>> batch, Query query, DbParameterCollection parameters, string dataColumnName) where TShard : IComparable
+        {
+            ((IList)batch).Add(new ListStep<TShard, TRecord>(query, parameters, dataColumnName));
+            return batch;
+        }
         #endregion
         #region Database Extension Methods
         public static DatabaseBatch<TModel> Add<TArg, TModel>(this DatabaseBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<int, TArg, TModel> resultHandler, TArg optionalArgument) where TModel : class, new()
@@ -187,14 +210,25 @@ namespace ArgentSea
         }
 
 
-        public static DatabaseBatch<TRecord> Add<TRecord>(this DatabaseBatch<TRecord> batch, Query query, DbParameterCollection parameters, string recordIdColumnName) where TRecord : IComparable
+        public static DatabaseBatch<TRecord> Add<TRecord>(this DatabaseBatch<TRecord> batch, Query query, DbParameterCollection parameters, string dataColumnName) where TRecord : IComparable
         {
-            batch.Add(new RecordStep<TRecord>(query, parameters, recordIdColumnName));
+            batch.Add(new RecordStep<int, TRecord>(query, parameters, dataColumnName));
             return batch;
         }
-        public static DatabaseBatch<TRecord> Add<TRecord>(this DatabaseBatch<TRecord> batch, Query query, string recordIdColumnName) where TRecord : IComparable
+        public static DatabaseBatch<TRecord> Add<TRecord>(this DatabaseBatch<TRecord> batch, Query query, string dataColumnName) where TRecord : IComparable
         {
-            batch.Add(new RecordStep<TRecord>(query, new ParameterCollection(), recordIdColumnName));
+            batch.Add(new RecordStep<int, TRecord>(query, new ParameterCollection(), dataColumnName));
+            return batch;
+        }
+
+        public static DatabaseBatch<IList<TRecord>> Add<TShard, TRecord>(this DatabaseBatch<IList<TRecord>> batch, Query query, DbParameterCollection parameters, string dataColumnName)
+        {
+            batch.Add(new ListStep<int, TRecord>(query, parameters, dataColumnName));
+            return batch;
+        }
+        public static DatabaseBatch<List<TRecord>> Add<TShard, TRecord>(this DatabaseBatch<List<TRecord>> batch, Query query, DbParameterCollection parameters, string dataColumnName)
+        {
+            ((IList)batch).Add(new ListStep<int, TRecord>(query, parameters, dataColumnName));
             return batch;
         }
         #endregion
@@ -472,7 +506,7 @@ namespace ArgentSea
             }
         }
 
-        private class RecordStep<TRecord> : BatchStep<int, TRecord> where TRecord : IComparable
+        private class RecordStep<TShard, TRecord> : BatchStep<TShard, TRecord> where TRecord : IComparable where TShard : IComparable
         {
             private readonly string _recordIdColumnName;
             private readonly Query _query;
@@ -485,7 +519,7 @@ namespace ArgentSea
                 _recordIdColumnName = recordIdColumnName;
             }
 
-            protected internal override async Task<TRecord> Execute(int shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+            protected internal override async Task<TRecord> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
@@ -505,6 +539,42 @@ namespace ArgentSea
                     }
                 }
                 return default(TRecord);
+            }
+        }
+
+        private class ListStep<TShard, TRecord> : BatchStep<TShard, IList<TRecord>> where TShard: IComparable
+        {
+            private readonly string _dataColumnName;
+            private readonly Query _query;
+            private readonly DbParameterCollection _parameters;
+
+            public ListStep(Query query, DbParameterCollection parameters, string dataColumnName)
+            {
+                _query = query;
+                _parameters = parameters;
+                _dataColumnName = dataColumnName;
+            }
+
+            protected internal override async Task<IList<TRecord>> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+            {
+                var result = new List<TRecord>();
+                cancellationToken.ThrowIfCancellationRequested();
+                using (var cmd = services.NewCommand(_query.Sql, connection))
+                {
+                    cmd.CommandType = _query.Type;
+                    cmd.Transaction = transaction;
+                    services.SetParameters(cmd, _query.ParameterNames, _parameters, null);
+                    using (var dataReader = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.Default, cancellationToken).ConfigureAwait(false))
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var recordOrd = dataReader.GetOrdinal(_dataColumnName);
+                        while (dataReader.Read())
+                        {
+                            result.Add(dataReader.GetFieldValue<TRecord>(recordOrd));
+                        }
+                    }
+                }
+                return result;
             }
         }
         #endregion

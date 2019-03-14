@@ -100,5 +100,40 @@ namespace ArgentSea
             }
         }
         public IDictionary<TShard, IDictionary<string, object>> Shards { get; private set; }
+
+        public void Merge(IList<TShard> shardIds)
+        {
+            foreach (var shardId in shardIds)
+            {
+                if (!Shards.Keys.Contains(shardId))
+                {
+                    Shards.Add(shardId, new Dictionary<string, object>());
+                    _parameterCount++;
+                }
+            }
+        }
+        public void Merge(ShardsValues<TShard> values)
+        {
+            foreach (var shd in values.Shards)
+            {
+                if (!Shards.Keys.Contains(shd.Key))
+                {
+                    var dtn = shd.Value;
+                    if (!(dtn is null))
+                    {
+                        foreach (var kv in dtn)
+                        {
+                            Shards[shd.Key].Add(kv);
+                            _parameterCount++;
+                        }
+                    }
+                }
+                else
+                {
+                    Shards.Add(shd.Key, new Dictionary<string, object>());
+                    _parameterCount++;
+                }
+            }
+        }
     }
 }

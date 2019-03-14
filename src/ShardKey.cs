@@ -343,7 +343,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of models to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
-        public static ShardsValues<TShard> ShardList<TModel>(IList<TModel> records) where TModel: IKeyedModel<TShard, TRecord>
+        public static ShardsValues<TShard> ToShardsValues<TModel>(IList<TModel> records) where TModel: IKeyedModel<TShard, TRecord>
         {
             var result = new ShardsValues<TShard>();
             foreach (var record in records)
