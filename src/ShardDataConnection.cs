@@ -512,7 +512,7 @@ namespace ArgentSea
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-            public Task<TModel> QueryAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<TModel> QueryAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken)
                 => _manager.QueryAsync<object, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, isTopOne, null, cancellationToken);
 
             /// <summary>
@@ -525,7 +525,7 @@ namespace ArgentSea
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-			public Task<TModel> QueryAsync<TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) where TModel : class, new()
+			public Task<TModel> QueryAsync<TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TShard, object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken)
                 => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, resultHandler, isTopOne, null, cancellationToken);
 
             /// <summary>
@@ -541,7 +541,7 @@ namespace ArgentSea
             /// <param name="optionalArgument">An object of type TArg which can be used to pass non-datatabase data to the result-generating delegate.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-			public Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+			public Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
                 => _manager.QueryAsync<TArg, TModel>(query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, resultHandler, isTopOne, optionalArgument, cancellationToken);
 
             /// <summary>
@@ -556,7 +556,7 @@ namespace ArgentSea
             /// <param name="optionalArgument">An object of type TArg which can be used to pass non-datatabase data to the result-generating delegate.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-			public Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : class, new()
+			public Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
                 => _manager.QueryAsync<TArg, TModel>(query, parameters, -1, null, resultHandler, isTopOne, optionalArgument, cancellationToken);
 
 

@@ -144,6 +144,23 @@ namespace ArgentSea
         public static List<TModel> Merge<TModel>(IList<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
             => (List<TModel>)Merge<TModel>(master, (IList<TModel>)replacements, appendUnmatchedReplacements);
 
+        /// <summary>
+        /// Given a list of ShardChild values, returns a distinct list of shard Ids, except for the shard Id of the current shard.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public ShardsValues<TShard> ForeignShards(IList<ShardChild<TShard, TRecord, TChild>> records)
+            => ShardChild<TShard, TRecord, TChild>.ShardListForeign(_key.ShardId, records);
+
+        /// <summary>
+        /// Given a list of Models with ShardChld keys, returns a distinct list of shard Ids, except for the shard Id of the current shard.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public ShardsValues<TShard> ForeignShards<TModel>(IList<TModel> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
+            => ShardChild<TShard, TRecord, TChild>.ShardListForeign(_key.ShardId, records);
 
         /// <summary>
         /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
@@ -152,28 +169,6 @@ namespace ArgentSea
         /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public static ShardsValues<TShard> ShardListForeign(TShard shardId, List<ShardChild<TShard, TRecord, TChild>> records)
-            => ShardListForeign(shardId, ((IList<ShardChild<TShard, TRecord, TChild>>)records));
-
-        /// <summary>
-        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
-        /// Useful for querying foreign shards after the primary shard has returned results.
-        /// </summary>
-        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
-        /// <param name="records">The list of ShardKeys to evaluate.</param>
-        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public static ShardsValues<TShard> ShardListForeign(TShard shardId, IList<ShardChild<TShard, TRecord, TChild>> records)
-        {
-            var result = new ShardsValues<TShard>();
-            foreach (var record in records)
-            {
-                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
-                {
-                    result.Add(record.ShardId);
-                }
-            }
-            return result;
-        }
 
         /// <summary>
         /// Merge two lists by iterating master list and using replacement entry where keys match.
@@ -219,10 +214,6 @@ namespace ArgentSea
             return result;
         }
 
-
-        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, List<TModel> records) where TModel : IKeyedChildModel<TShard, TRecord, TChild>
-            => ShardListForeign<TModel>(shardId, (IList<TModel>)records);
-
         /// <summary>
         /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
         /// Useful for querying foreign shards after the primary shard has returned results.
@@ -243,6 +234,19 @@ namespace ArgentSea
             return result;
         }
 
+        public static ShardsValues<TShard> ShardListForeign(TShard shardId, IList<ShardChild<TShard, TRecord, TChild>> records)
+        {
+            var result = new ShardsValues<TShard>();
+            foreach (var record in records)
+            {
+                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
+                {
+                    result.Add(record.ShardId);
+                }
+            }
+            return result;
+        }
+
         public bool Equals(ShardChild<TShard, TRecord, TChild> other)
         {
             return (other.Key == this.Key) && (other.ChildId.CompareTo(this.ChildId) == 0);
@@ -256,6 +260,7 @@ namespace ArgentSea
             var other = (ShardChild<TShard, TRecord, TChild>)obj;
             return (other.Key == this.Key) && (other.ChildId.CompareTo(this.ChildId) == 0);
         }
+
         public override int GetHashCode()
         {
             var aSChd = ShardKey<TShard, TRecord>.GetValueBytes(this._childId);
