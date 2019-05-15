@@ -17,7 +17,7 @@ namespace ArgentSea
         private static readonly Lazy<string> appPath = new Lazy<string>(() => 
             {
                 var assembly = typeof(QueryStatement).GetTypeInfo().Assembly;
-                return Path.GetDirectoryName(assembly.Location);
+                return Path.GetDirectoryName(AppContext.BaseDirectory);
             });
 
         private QueryStatement()
@@ -47,7 +47,14 @@ namespace ArgentSea
         {
             return new Lazy<QueryStatement>(() =>
             {
-                return QueryStatementFactory(name, $"{appPath.Value}\\{QueryStatement.Folder}\\{name}.{QueryStatement.Extension}", null);
+                if (QueryStatement.Folder.Contains(":"))
+                {
+                    return QueryStatementFactory(name, $"{QueryStatement.Folder}\\{name}.{QueryStatement.Extension}", null);
+                }
+                else
+                {
+                    return QueryStatementFactory(name, $"{appPath.Value}\\{QueryStatement.Folder}\\{name}.{QueryStatement.Extension}", null);
+                }
             });
         }
         public static Lazy<QueryStatement> Create(string name, string[] parameterNames)
