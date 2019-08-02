@@ -416,7 +416,7 @@ namespace ArgentSea
                             var tDataShardId = propType.GetGenericArguments()[0];
                             if (!attrPM.IsValidType(tDataShardId))
                             {
-                                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             var expShardProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int, int>.ShardId)));
                             ParameterExpression expNullableShardId;
@@ -443,7 +443,7 @@ namespace ArgentSea
                             var tDataRecordId = propType.GetGenericArguments()[1];
                             if (!attrPM.IsValidType(tDataRecordId))
                             {
-                                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             var expRecordProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int, int>.RecordId)));
                             ParameterExpression expNullableRecordId;
@@ -470,7 +470,7 @@ namespace ArgentSea
                             var tDataChildId = propType.GetGenericArguments()[2];
                             if (!attrPM.IsValidType(tDataChildId))
                             {
-                                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             var expChildProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardChild<int, int, int>.ChildId)));
                             ParameterExpression expNullableChildId;
@@ -519,7 +519,7 @@ namespace ArgentSea
 						expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
 						if (!attrPM.IsValidType(prop.PropertyType))
 						{
-							throw new InvalidMapTypeException(prop, attrPM.SqlType);
+							throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
 						}
 						//MemberExpression expProperty = Expression.Property(expModel, prop);
 						attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expProperty, prop.PropertyType, expLogger, logger);
@@ -609,7 +609,7 @@ namespace ArgentSea
                             }
                             if (!attrPM.IsValidType(propType.GetGenericArguments()[0]))
                             {
-                                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
                             foundPrms = true;
@@ -627,7 +627,7 @@ namespace ArgentSea
                             }
                             if (!attrPM.IsValidType(propType.GetGenericArguments()[1]))
                             {
-                                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
                             foundPrms = true;
@@ -645,7 +645,7 @@ namespace ArgentSea
                             }
                             if (!attrPM.IsValidType(propType.GetGenericArguments()[2]))
                             {
-                                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
                             foundPrms = true;
@@ -686,7 +686,7 @@ namespace ArgentSea
                         }
                         if (!attrPM.IsValidType(propType))
 						{
-							throw new InvalidMapTypeException(prop, attrPM.SqlType);
+							throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
 						}
 						attrPM.AppendSetOutParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
                         foundPrms = true;
@@ -717,7 +717,7 @@ namespace ArgentSea
                 expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
                 if (!attrPM.IsValidType(prop.PropertyType))
                 {
-                    throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                    throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
                 }
                 attrPM.AppendSetOutParameterExpressions(expressions, expSprocParameters, expIgnoreParameters, noDupPrmNameList, expLogger, logger);
             }
@@ -804,7 +804,7 @@ namespace ArgentSea
 
 			if (!attrPM.IsValidType(prop.PropertyType))
 			{
-				throw new InvalidMapTypeException(prop, attrPM.SqlType);
+				throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
 			}
 
 			MemberExpression expProperty = Expression.Property(expModel, prop);
@@ -833,7 +833,7 @@ namespace ArgentSea
 			var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceGetOutMapperProperty));
 			if (!attrPM.IsValidType(var.Type))
 			{
-				throw new InvalidMapTypeException(var.Name, var.Type, attrPM.SqlType);
+				throw new InvalidMapTypeException(var.Name, var.Type, attrPM.SqlType, attrPM.SqlTypeName);
 			}
 
 			var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
@@ -966,7 +966,7 @@ namespace ArgentSea
                             shardIdFound = true;
                             if (!attrPM.IsValidType(tShardId))
                             {
-                                throw new InvalidMapTypeException(expDataShardId.Name, tShardId, attrPM.SqlType);
+                                throw new InvalidMapTypeException(expDataShardId.Name, tShardId, attrPM.SqlType, attrPM.SqlTypeName);
                             }
                             var miGetParameter = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.GetParameter), BindingFlags.Static | BindingFlags.NonPublic);
                             if (isOutPrms)
@@ -1261,7 +1261,7 @@ namespace ArgentSea
 
             if (!attrPM.IsValidType(prop.PropertyType))
             {
-                throw new InvalidMapTypeException(prop, attrPM.SqlType);
+                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
             }
 
             MemberExpression expProperty = Expression.Property(expModel, prop);
@@ -1284,7 +1284,7 @@ namespace ArgentSea
             var miLogTrace = typeof(LoggingExtensions).GetMethod(nameof(LoggingExtensions.TraceRdrMapperProperty));
             if (!attrPM.IsValidType(var.Type))
             {
-                throw new InvalidMapTypeException(var.Name, var.Type, attrPM.SqlType);
+                throw new InvalidMapTypeException(var.Name, var.Type, attrPM.SqlType, attrPM.SqlTypeName);
             }
             if (attrPM.IsRequired)
             {

@@ -36,7 +36,9 @@ namespace ArgentSea
 
         public int SqlType { get; private set; }
 
-		public bool IsRequired { get; private set; }
+        public virtual string SqlTypeName  { get; private set; }
+
+        public bool IsRequired { get; private set; }
 
         //public ShardUsage ShardPosition { get; set; } = ShardUsage.NotApplicable;
 

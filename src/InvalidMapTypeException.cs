@@ -47,19 +47,50 @@ namespace ArgentSea
 		/// <param name="property">The property decorated with the mapping attribute.</param>
 		/// <param name="sqlType">The stored procedure parameter type (int, not enum, due to provider discrepancies).</param>
 		public InvalidMapTypeException(PropertyInfo property, int sqlType)
-			: base($"Sql type mismatch: Class {property.DeclaringType} cannot map property “{property.Name}“ of type “{property.PropertyType.ToString()}” to data type enumeration with numeric value of {sqlType.ToString()}.")
+			: base($"Sql type mismatch: Class {property.DeclaringType} cannot map property “{property.Name}“ of type “{property.PropertyType.ToString()}” to database type enumeration with numeric value of {sqlType.ToString()}.")
 		{
             this.VariableName = property.Name;
             this.VariableType = property.PropertyType;
             this.SqlType = sqlType;
         }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InvalidMapTypeException" /> class.
+        /// </summary>
+        /// <param name="variableName">The variable decorated with the mapping attribute.</param>
+        /// <param name="sqlType">The stored procedure parameter type (int, not enum, due to provider discrepancies).</param>
         public InvalidMapTypeException(string variableName, Type type, int sqlType)
-			: base($"Sql type mismatch: {variableName} cannot be mapped because type {type.ToString()} does not map to data type enumeration with numeric value of {sqlType.ToString()}.")
+			: base($"Sql type mismatch: {variableName} cannot be mapped because type {type.ToString()} does not map to database type enumeration with numeric value of {sqlType.ToString()}.")
 		{
             this.VariableName = variableName;
             this.VariableType = type;
             this.SqlType = sqlType;
 		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InvalidMapTypeException" /> class.
+        /// </summary>
+        /// <param name="variableName">The variable decorated with the mapping attribute.</param>
+        /// <param name="sqlType">The integer stored procedure parameter type.</param>
+        /// <param name="sqlTypeName">The name of the stored procedure parameter type.</param>
+        public InvalidMapTypeException(string variableName, Type type, int sqlType, string sqlTypeName)
+            : base($"Sql type mismatch: {variableName} cannot be mapped because type {type.ToString()} does not map to database type {sqlTypeName} ({sqlType.ToString()}).")
+        {
+            this.VariableName = variableName;
+            this.VariableType = type;
+            this.SqlType = sqlType;
+        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InvalidMapTypeException" /> class.
+        /// </summary>
+        /// <param name="property">The property decorated with the mapping attribute.</param>
+        /// <param name="sqlType">The integer stored procedure parameter type.</param>
+        /// <param name="sqlTypeName">The name of the stored procedure parameter type.</param>
+        public InvalidMapTypeException(PropertyInfo property, int sqlType, string sqlTypeName)
+            : base($"Sql type mismatch: Class {property.DeclaringType} cannot map property “{property.Name}“ of type “{property.PropertyType.ToString()}” to database type {sqlTypeName} ({sqlType.ToString()}).")
+        {
+            this.VariableName = property.Name;
+            this.VariableType = property.PropertyType;
+            this.SqlType = sqlType;
+        }
 
         public string VariableName { get; }
 
