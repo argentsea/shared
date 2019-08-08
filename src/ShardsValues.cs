@@ -5,15 +5,15 @@ using System.Text;
 
 namespace ArgentSea
 {
-    public class ShardsValues<TShard> : ICollection, IEnumerable<ShardParameterValue<TShard>> where TShard : IComparable
+    public class ShardsValues : ICollection, IEnumerable<ShardParameterValue>
     {
         private readonly object syncRoot = new object();
 
         public ShardsValues()
         {
-            this.Shards = new Dictionary<TShard, IDictionary<string, object>>();
+            this.Shards = new Dictionary<short, IDictionary<string, object>>();
         }
-        public ShardsValues(Dictionary<TShard, IDictionary<string, object>> shards)
+        public ShardsValues(Dictionary<short, IDictionary<string, object>> shards)
         {
             if (shards is null)
             {
@@ -21,7 +21,7 @@ namespace ArgentSea
             }
             this.Shards = shards;
         }
-        public ShardsValues(IList<TShard> list)
+        public ShardsValues(IList<short> list)
         {
             foreach (var shd in list)
             {
@@ -29,7 +29,7 @@ namespace ArgentSea
             }
         }
 
-        public ShardsValues<TShard> Add(TShard shardId)
+        public ShardsValues Add(short shardId)
         {
             if (!Shards.ContainsKey(shardId))
             {
@@ -37,7 +37,7 @@ namespace ArgentSea
             }
             return this;
         }
-        public ShardsValues<TShard> Add(TShard shardId, string parameterName, object parameterValue)
+        public ShardsValues Add(short shardId, string parameterName, object parameterValue)
         {
             if (Shards.TryGetValue(shardId, out var prms))
             {
@@ -83,37 +83,37 @@ namespace ArgentSea
 
         public void CopyTo(Array array, int index)
         {
-            var result = new ShardParameterValue<TShard>[this.Count];
+            var result = new ShardParameterValue[this.Count];
             var i = 0;
-            foreach (var itm in ((IEnumerable<ShardParameterValue<TShard>>)this))
+            foreach (var itm in ((IEnumerable<ShardParameterValue>)this))
             {
                 result[i] = itm;
                 i++;
             }
         }
 
-        public IEnumerator GetEnumerator() => ((IEnumerable<ShardParameterValue<TShard>>)this).GetEnumerator();
+        public IEnumerator GetEnumerator() => ((IEnumerable<ShardParameterValue>)this).GetEnumerator();
 
-        IEnumerator<ShardParameterValue<TShard>> IEnumerable<ShardParameterValue<TShard>>.GetEnumerator()
+        IEnumerator<ShardParameterValue> IEnumerable<ShardParameterValue>.GetEnumerator()
         {
             foreach (var shd in Shards)
             {
                 if (shd.Value is null || shd.Value.Count == 0)
                 {
-                    yield return new ShardParameterValue<TShard>(shd.Key, null, null);
+                    yield return new ShardParameterValue(shd.Key, null, null);
                 }
                 else
                 {
                     foreach (var prm in shd.Value)
                     {
-                        yield return new ShardParameterValue<TShard>(shd.Key, prm.Key, prm.Value);
+                        yield return new ShardParameterValue(shd.Key, prm.Key, prm.Value);
                     }
                 }
             }
         }
-        public IDictionary<TShard, IDictionary<string, object>> Shards { get; private set; }
+        public IDictionary<short, IDictionary<string, object>> Shards { get; private set; }
 
-        public void Merge(IList<TShard> shardIds)
+        public void Merge(IList<short> shardIds)
         {
             foreach (var shardId in shardIds)
             {
@@ -123,7 +123,7 @@ namespace ArgentSea
                 }
             }
         }
-        public void Merge(ShardsValues<TShard> values)
+        public void Merge(ShardsValues values)
         {
             foreach (var shd in values.Shards)
             {
@@ -144,7 +144,7 @@ namespace ArgentSea
                 }
             }
         }
-        public void Remove(TShard shardId)
+        public void Remove(short shardId)
         {
             if (Shards.ContainsKey(shardId))
             {

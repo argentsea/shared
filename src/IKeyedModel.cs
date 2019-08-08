@@ -7,8 +7,8 @@ using System.Text;
 
 namespace ArgentSea
 {
-    public interface IKeyedModel<TShard, TRecord> where TShard : IComparable where TRecord : IComparable
+    public interface IKeyedModel<TRecord> where TRecord : IComparable
     {
-        ShardKey<TShard, TRecord> Key { get; }
+        ShardKey<TRecord> Key { get; }
     }
 }

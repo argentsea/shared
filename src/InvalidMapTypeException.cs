@@ -47,7 +47,7 @@ namespace ArgentSea
 		/// <param name="property">The property decorated with the mapping attribute.</param>
 		/// <param name="sqlType">The stored procedure parameter type (int, not enum, due to provider discrepancies).</param>
 		public InvalidMapTypeException(PropertyInfo property, int sqlType)
-			: base($"Sql type mismatch: Class {property.DeclaringType} cannot map property “{property.Name}“ of type “{property.PropertyType.ToString()}” to database type enumeration with numeric value of {sqlType.ToString()}.")
+			: base($"Sql type mismatch: Class {property.DeclaringType} cannot map property “{property.Name}” of type “{property.PropertyType.ToString()}” to database type enumeration with numeric value of {sqlType.ToString()}.")
 		{
             this.VariableName = property.Name;
             this.VariableType = property.PropertyType;

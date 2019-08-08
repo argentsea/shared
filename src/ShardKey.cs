@@ -12,9 +12,9 @@ namespace ArgentSea
     /// Immutable class representing a sharded record with a “compound” key: the (virtual) shardId and the (database) recordId.
     /// </summary>
     [Serializable]
-    public struct ShardKey<TShard, TRecord> : IEquatable<ShardKey<TShard, TRecord>>, ISerializable where TShard : IComparable where TRecord : IComparable
+    public struct ShardKey<TRecord> : IEquatable<ShardKey<TRecord>>, ISerializable where TRecord : IComparable
 	{
-		private TShard _shardId;
+		private short _shardId;
 		private TRecord _recordId;
 		private readonly char _origin;
 
@@ -26,9 +26,9 @@ namespace ArgentSea
         /// <param name="recordId"></param>
         /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
         #region Constructors
-        public ShardKey(char origin, TShard shardId, TRecord recordId)
+        public ShardKey(char origin, short shardId, TRecord recordId)
 		{
-			if (origin == '0' && (shardId.CompareTo(default(TShard)) != 0 || recordId.CompareTo(default(TRecord)) != 0))
+			if (origin == '0' && (shardId != 0 || recordId.CompareTo(default(TRecord)) != 0))
 			{
 				throw new InvalidShardArgumentsException();
 			}
@@ -46,7 +46,7 @@ namespace ArgentSea
             if (info.MemberCount == 3)
             {
                 _origin = info.GetChar("origin");
-                _shardId = (TShard)info.GetValue("shardId", typeof(TShard));
+                _shardId = (short)info.GetValue("shardId", typeof(short));
                 _recordId = (TRecord)info.GetValue("recordId", typeof(TRecord));
             }
             else
@@ -60,7 +60,7 @@ namespace ArgentSea
 		#endregion
 		#region Public Properties and Method
 
-		public TShard ShardId
+		public short ShardId
 		{
 			get { return _shardId; }
 		}
@@ -79,7 +79,7 @@ namespace ArgentSea
 		{
 			get
 			{
-				return this._origin == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId.CompareTo(default(TShard)) == 0;
+				return this._origin == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId == 0;
 			}
 		}
 		public override string ToString()
@@ -146,7 +146,7 @@ namespace ArgentSea
 				case Enum e:
 					var type = Enum.GetUnderlyingType(value.GetType());
 					var newValue = Convert.ChangeType(value, type);
-					return ShardKey<TShard, TRecord>.GetValueBytes(newValue as IComparable);
+					return ShardKey<TRecord>.GetValueBytes(newValue as IComparable);
 				case DateTimeOffset dto:
 					var adt = BitConverter.GetBytes(dto.Ticks);
 					var tsp = BitConverter.GetBytes(dto.Offset.Ticks);
@@ -287,7 +287,7 @@ namespace ArgentSea
 			if (valueType == typeof(Enum))
 			{
 				var baseType = Enum.GetUnderlyingType(valueType);
-				return ShardKey<TShard, TRecord>.ConvertFromBytes(data, ref position, baseType);
+				return ShardKey<TRecord>.ConvertFromBytes(data, ref position, baseType);
 			}
 			if (valueType == typeof(Nullable))
 			{
@@ -320,22 +320,22 @@ namespace ArgentSea
 		{
             return StringExtensions.SerializeToExternalString(ToArray());
 		}
-		public static ShardKey<TShard, TRecord> FromExternalString(string value)
+		public static ShardKey<TRecord> FromExternalString(string value)
 		{
 
             var aValues = StringExtensions.SerializeFromExternalString(value);
-			TShard shardId = default(TShard);
+			short shardId = 0;
 			TRecord recordId = default(TRecord);
 
 			int orgnLen = aValues[0] & 3;
 			var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
 			var pos = orgnLen + 1;
 
-			var typeShard = typeof(TShard);
+			var typeShard = typeof(short);
 			shardId = ConvertFromBytes(aValues, ref pos, typeShard);
 			var typeRecord = typeof(TRecord);
 			recordId = ConvertFromBytes(aValues, ref pos, typeRecord);
-			return new ShardKey<TShard, TRecord>(orgn, shardId, recordId);
+			return new ShardKey<TRecord>(orgn, shardId, recordId);
 		}
 
         /// <summary>
@@ -343,9 +343,9 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of models to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed and values not set.</returns>
-        public static ShardsValues<TShard> ToShardsValues<TModel>(IList<TModel> records) where TModel: IKeyedModel<TShard, TRecord>
+        public static ShardsValues ToShardsValues<TModel>(IList<TModel> records) where TModel: IKeyedModel<TRecord>
         {
-            var result = new ShardsValues<TShard>();
+            var result = new ShardsValues();
             foreach (var record in records)
             {
                 if (!result.Shards.ContainsKey(record.Key.ShardId))
@@ -364,7 +364,7 @@ namespace ArgentSea
         /// <param name="replacements">A list of more complete records.</param>
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
         /// <returns>Merged list.</returns>
-        public static List<TModel> Merge<TModel>(List<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+        public static List<TModel> Merge<TModel>(List<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TRecord>
             => Merge<TModel>((IList<TModel>)master, (IList<TModel>)replacements, appendUnmatchedReplacements);
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace ArgentSea
         /// <param name="replacements">A list of more complete records.</param>
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
         /// <returns>Merged list.</returns>
-        public static List<TModel> Merge<TModel>(IList<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+        public static List<TModel> Merge<TModel>(IList<TModel> master, List<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TRecord>
             => Merge<TModel>(master, (IList<TModel>)replacements, appendUnmatchedReplacements);
 
         /// <summary>
@@ -386,7 +386,7 @@ namespace ArgentSea
         /// <param name="replacements">A list of more complete records.</param>
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
         /// <returns>Merged list.</returns>
-        public static List<TModel> Merge<TModel>(List<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+        public static List<TModel> Merge<TModel>(List<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TRecord>
             => Merge<TModel>((IList<TModel>)master, replacements, appendUnmatchedReplacements);
 
 
@@ -398,7 +398,7 @@ namespace ArgentSea
         /// <param name="replacements">A list of more complete records.</param>
         /// <param name="appendUnmatchedReplacements">If true, any records in the replacement list that are were not found in the master list are appended to the collection result.</param>
         /// <returns>Merged list.</returns>
-        public static List<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TShard, TRecord>
+        public static List<TModel> Merge<TModel>(IList<TModel> master, IList<TModel> replacements, bool appendUnmatchedReplacements = false) where TModel : IKeyedModel<TRecord>
         {
             if (master is null)
             {
@@ -442,7 +442,7 @@ namespace ArgentSea
         /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of models to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, List<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
+        public static ShardsValues ShardListForeign<TModel>(short shardId, List<TModel> records) where TModel : IKeyedModel<TRecord>
             => ShardListForeign<TModel>(shardId, (IList<TModel>)records);
 
         /// <summary>
@@ -452,9 +452,9 @@ namespace ArgentSea
         /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of models to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public static ShardsValues<TShard> ShardListForeign<TModel>(TShard shardId, IList<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
+        public static ShardsValues ShardListForeign<TModel>(short shardId, IList<TModel> records) where TModel : IKeyedModel<TRecord>
         {
-            var result = new ShardsValues<TShard>();
+            var result = new ShardsValues();
             foreach (var record in records)
             {
                 if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
@@ -472,9 +472,9 @@ namespace ArgentSea
         /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public static ShardsValues<TShard> ShardListForeign(TShard shardId, IList<ShardKey<TShard, TRecord>> records)
+        public static ShardsValues ShardListForeign(short shardId, IList<ShardKey<TRecord>> records)
         {
-            var result = new ShardsValues<TShard>();
+            var result = new ShardsValues();
             foreach (var record in records)
             {
                 if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
@@ -491,8 +491,8 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public ShardsValues<TShard> ForeignShards(IList<ShardKey<TShard, TRecord>> records)
-            => ShardKey<TShard, TRecord>.ShardListForeign(_shardId, records);
+        public ShardsValues ForeignShards(IList<ShardKey<TRecord>> records)
+            => ShardKey<TRecord>.ShardListForeign(_shardId, records);
 
         /// <summary>
         /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id of the current shard.
@@ -500,10 +500,10 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public ShardsValues<TShard> ForeignShards<TModel>(IList<TModel> records) where TModel : IKeyedModel<TShard, TRecord>
-            => ShardKey<TShard, TRecord>.ShardListForeign(_shardId, records);
+        public ShardsValues ForeignShards<TModel>(IList<TModel> records) where TModel : IKeyedModel<TRecord>
+            => ShardKey<TRecord>.ShardListForeign(_shardId, records);
 
-        public bool Equals(ShardKey<TShard, TRecord> other)
+        public bool Equals(ShardKey<TRecord> other)
 		{
 			return (other.Origin == _origin) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
 		}
@@ -514,7 +514,7 @@ namespace ArgentSea
 				return false;
 			}
 
-			var other = (ShardKey<TShard, TRecord>)obj;
+			var other = (ShardKey<TRecord>)obj;
 			return (other.Origin == _origin) && (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
 		}
 		public override int GetHashCode()
@@ -594,19 +594,19 @@ namespace ArgentSea
 		}
 
 
-        public static bool operator ==(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
+        public static bool operator ==(ShardKey<TRecord> sk1, ShardKey<TRecord> sk2)
 		{
 			return sk1.Equals(sk2);
 		}
-		public static bool operator !=(ShardKey<TShard, TRecord> sk1, ShardKey<TShard, TRecord> sk2)
+		public static bool operator !=(ShardKey<TRecord> sk1, ShardKey<TRecord> sk2)
 		{
 			return !sk1.Equals(sk2);
 		}
-		public static ShardKey<TShard, TRecord> Empty
+		public static ShardKey<TRecord> Empty
 		{
 			get
 			{
-				return new ShardKey<TShard, TRecord>('0', default(TShard), default(TRecord));
+				return new ShardKey<TRecord>('0', 0, default(TRecord));
 			}
 		}
         public void GetObjectData(SerializationInfo info, StreamingContext context)

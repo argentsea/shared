@@ -11,10 +11,10 @@ using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
-    public class ShardSetBatch<TShard> : BatchBase<TShard, object> where TShard : IComparable
+    public class ShardSetBatch : BatchBase<object>
     {
 
-        internal protected override async Task<object> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+        internal protected override async Task<object> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
         {
             for (var i = 0; i < _processes.Count; i++)
             {
@@ -32,7 +32,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="step">A BatchStep object.</param>
         /// <returns>A reference to the collection, for a fluent API.</returns>
-        public ShardSetBatch<TShard> Add(BatchStep<TShard, object> step)
+        public ShardSetBatch Add(BatchStep<object> step)
         {
             _processes.Add(step);
             return this;
@@ -43,7 +43,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="query">The query to execute at this step.</param>
         /// <returns>A reference to the collection, for a fluent API.</returns>
-        public ShardSetBatch<TShard> Add(Query query)
+        public ShardSetBatch Add(Query query)
         {
             _processes.Add(new ShardSetBatchQuery(query));
             return this;
@@ -56,13 +56,13 @@ namespace ArgentSea
         /// <param name="query">The query to add.</param>
         /// <param name="parameters">The parameters for the query.</param>
         /// <returns></returns>
-        public ShardSetBatch<TShard> Add(Query query, DbParameterCollection parameters)
+        public ShardSetBatch Add(Query query, DbParameterCollection parameters)
         {
             _processes.Add(new ShardSetBatchQuery(query, parameters));
             return this;
         }
 
-        private class ShardSetBatchQuery : BatchStep<TShard, object>
+        private class ShardSetBatchQuery : BatchStep<object>
         {
             private readonly DbParameterCollection _parameters;
             private readonly Query _query;
@@ -77,7 +77,7 @@ namespace ArgentSea
                 _parameters = new ParameterCollection();
             }
 
-            protected internal override async Task<object> Execute(TShard shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+            protected internal override async Task<object> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))

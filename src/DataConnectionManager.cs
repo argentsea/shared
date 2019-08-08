@@ -16,7 +16,7 @@ using Polly;
 
 namespace ArgentSea
 {
-    internal class DataConnectionManager<TShard> where TShard: IComparable
+    internal class DataConnectionManager
 	{
 		#region Private variables and constructors
 		private readonly ILogger _logger;
@@ -24,13 +24,13 @@ namespace ArgentSea
 		private readonly IDataProviderServiceFactory _dataProviderServices;
         private readonly IDataConnection _connectionConfig;
 		private readonly string _connectionName;
-        private readonly TShard _shardId;
+        private readonly short _shardId;
 
         private const int DefaultRetryCount = 6;
         private const int DefaultCircuitBreakerTestInterval = 5000; // 5 seconds
         private const int DefaultCircuitBreakerFailureCount = 20;
 
-        internal DataConnectionManager(TShard shardId, IDataProviderServiceFactory dataProviderServices, IDataConnection connectionConfig, string connectionName, ILogger logger)
+        internal DataConnectionManager(short shardId, IDataProviderServiceFactory dataProviderServices, IDataConnection connectionConfig, string connectionName, ILogger logger)
 		{
 			this._logger = logger;
             this._dataProviderServices = dataProviderServices;
@@ -108,7 +108,7 @@ namespace ArgentSea
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
 
-            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            parameters.SetShardId(shardParameterOrdinal, this._shardId);
 			var result = await _resiliencePolicy.ExecuteAsync(newToken =>
 				ExecuteQueryToValueAsync<TValue1, TValue2, TValue3>(query, data1Name, data2Name, data3Name, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
@@ -123,7 +123,7 @@ namespace ArgentSea
             cancellationToken.ThrowIfCancellationRequested();
             var startTimestamp = Stopwatch.GetTimestamp();
 
-            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            parameters.SetShardId(shardParameterOrdinal, this._shardId);
             var result = await _resiliencePolicy.ExecuteAsync(newToken =>
                 ExecuteQueryToValueAsync(query, parameters, null, newToken), cancellationToken).ConfigureAwait(false);
 
@@ -141,7 +141,7 @@ namespace ArgentSea
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
 
-            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            parameters.SetShardId(shardParameterOrdinal, this._shardId);
             var result = await this._resiliencePolicy.ExecuteAsync(newToken =>
 				ExecuteQueryToModelListAsync<TModel>(_shardId, query, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
@@ -155,7 +155,7 @@ namespace ArgentSea
             cancellationToken.ThrowIfCancellationRequested();
             var startTimestamp = Stopwatch.GetTimestamp();
 
-            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            parameters.SetShardId(shardParameterOrdinal, this._shardId);
             var result = await this._resiliencePolicy.ExecuteAsync(newToken =>
                 ExecuteQueryToValueListAsync<TValue1, TValue2, TValue3>(query, data1Name, data2Name, data3Name, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
@@ -168,12 +168,12 @@ namespace ArgentSea
 
         #region Query methods
 
-        internal async Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
+        internal async Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
 
-            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            parameters.SetShardId(shardParameterOrdinal, this._shardId);
             var result = await _resiliencePolicy.ExecuteAsync(newToken =>
 				this.ExecuteQueryWithDelegateAsync<TModel, TArg>(query, parameters, parameterValues, this._shardId, resultHandler, isTopOne, optionalArgument, newToken), cancellationToken).ConfigureAwait(false);
 
@@ -192,14 +192,14 @@ namespace ArgentSea
 
 			cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
-            parameters.SetShardId<TShard>(shardParameterOrdinal, this._shardId);
+            parameters.SetShardId(shardParameterOrdinal, this._shardId);
 
             await _resiliencePolicy.ExecuteAsync(newToken => this.ExecuteRunAsync(query, parameters, parameterValues, newToken), cancellationToken).ConfigureAwait(false);
 
             var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
 			_logger?.TraceDbCmdExecuted(query.Name, this._connectionName, elapsedMS);
 		}
-        internal async Task<TResult> RunBatchAsync<TResult>(BatchBase<TShard, TResult> batch, CancellationToken cancellationToken)
+        internal async Task<TResult> RunBatchAsync<TResult>(BatchBase<TResult> batch, CancellationToken cancellationToken)
         {
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -217,7 +217,7 @@ namespace ArgentSea
         #endregion
         #region Private Handlers
 
-        private async Task<List<TModel>> ExecuteQueryToModelListAsync<TModel>(TShard shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
+        private async Task<List<TModel>> ExecuteQueryToModelListAsync<TModel>(short shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
             where TModel : class, new()
 		{
 			List<TModel> result = null;
@@ -234,7 +234,7 @@ namespace ArgentSea
 					using (var dataReader = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.Default, cancellationToken).ConfigureAwait(false))
 					{
 						cancellationToken.ThrowIfCancellationRequested();
-						result = Mapper.ToList<TShard, TModel>(dataReader, shardId, _logger);
+						result = Mapper.ToList<TModel>(dataReader, shardId, _logger);
 					}
 				}
 			}
@@ -421,7 +421,7 @@ namespace ArgentSea
             }
 		}
 
-        private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, TShard shardId, QueryResultModelHandler<TShard, TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
+        private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, short shardId, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
 		{
 			var result = default(TModel);
 			cancellationToken.ThrowIfCancellationRequested();
@@ -467,7 +467,7 @@ namespace ArgentSea
 			}
 		}
 
-        private async Task<TResult> ExecuteBatchAsync<TResult>(BatchBase<TShard, TResult> batch, CancellationToken cancellationToken)
+        private async Task<TResult> ExecuteBatchAsync<TResult>(BatchBase<TResult> batch, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var result = default(TResult);

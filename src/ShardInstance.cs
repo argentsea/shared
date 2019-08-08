@@ -17,14 +17,14 @@ using Polly;
 namespace ArgentSea
 {
     // This file contains the nested ShardInstance class. It is nested because it needs to inherit the generic definitions of its parent.
-    public abstract partial class ShardSetsBase<TShard, TConfiguration> : ICollection where TShard : IComparable where TConfiguration : class, IShardSetsConfigurationOptions<TShard>, new()
+    public abstract partial class ShardSetsBase<TConfiguration> : ICollection where TConfiguration : class, IShardSetsConfigurationOptions, new()
     {
         /// <summary>
         /// This class represents a distinct shard, or database instance, within the shardset.
         /// </summary>
         public class ShardInstance
         {
-            public ShardInstance(ShardSetsBase<TShard, TConfiguration> parent, TShard shardId, IShardConnectionConfiguration<TShard> shardConnection)
+            public ShardInstance(ShardSetsBase<TConfiguration> parent, short shardId, IShardConnectionConfiguration shardConnection)
             {
                 this.ShardId = shardId;
                 var readConnection = shardConnection.ReadConnectionInternal;
@@ -40,7 +40,7 @@ namespace ArgentSea
                 this.Read = new ShardDataConnection(parent, shardId, readConnection);
                 this.Write = new ShardDataConnection(parent, shardId, writeConnection);
             }
-            public TShard ShardId { get; }
+            public short ShardId { get; }
             public ShardDataConnection Read { get; }
             public ShardDataConnection Write { get; }
 

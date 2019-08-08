@@ -22,9 +22,8 @@ namespace ArgentSea
     /// This class is used by provider specific implementations. It is unlikely that you would reference this in consumer code.
     /// Classes that inherit from this class manage sharded database connections.
     /// </summary>
-    /// <typeparam name="TShard">The type of the ShardId.</typeparam>
     /// <typeparam name="TConfiguration">A provider-specific implementation of IShardSetConfigurationOptions.</typeparam>
-    public abstract partial class ShardSetsBase<TShard, TConfiguration> : ICollection where TShard : IComparable where TConfiguration : class, IShardSetsConfigurationOptions<TShard>, new()
+    public abstract partial class ShardSetsBase<TConfiguration> : ICollection where TConfiguration : class, IShardSetsConfigurationOptions, new()
     {
         private readonly object syncRoot = new Lazy<object>();
         private readonly ImmutableDictionary<string, ShardSet> dtn;
@@ -36,7 +35,7 @@ namespace ArgentSea
                 IOptions<TConfiguration> configOptions,
                 IDataProviderServiceFactory dataProviderServices, 
                 DataConnectionConfigurationBase globalConfiguration,
-                ILogger<ShardSetsBase<TShard, TConfiguration>> logger)
+                ILogger<ShardSetsBase<TConfiguration>> logger)
         {
             this._logger = logger;
             if (configOptions?.Value?.ShardSetsConfigInternal is null)

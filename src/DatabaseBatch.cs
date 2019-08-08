@@ -11,9 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
-    public class DatabaseBatch<TResult> : BatchBase<int, TResult>
+    public class DatabaseBatch<TResult> : BatchBase<TResult>
     {
-        internal protected override async Task<TResult> Execute(int shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+        internal protected override async Task<TResult> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
         {
             var result = default(TResult);
             for (var i = 0; i < _processes.Count; i++)
@@ -35,7 +35,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="step">A BatchStep object.</param>
         /// <returns>A reference to the collection, for a fluent API.</returns>
-        public DatabaseBatch<TResult> Add(BatchStep<int, TResult> step)
+        public DatabaseBatch<TResult> Add(BatchStep<TResult> step)
         {
             _processes.Add(step);
             return this;
@@ -64,7 +64,7 @@ namespace ArgentSea
             _processes.Add(new DatabaseBatchQuery(query, parameters));
             return this;
         }
-        private class DatabaseBatchQuery : BatchStep<int, TResult>
+        private class DatabaseBatchQuery : BatchStep<TResult>
         {
             private readonly DbParameterCollection _parameters;
             private readonly Query _query;
@@ -79,7 +79,7 @@ namespace ArgentSea
                 _parameters = new ParameterCollection();
             }
 
-            protected internal override async Task<TResult> Execute(int shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+            protected internal override async Task<TResult> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))

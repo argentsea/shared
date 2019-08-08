@@ -11,23 +11,22 @@ namespace ArgentSea
     /// <summary>
     /// The class enables passing different parameters to specific shards. Only distinct members of the shard Id list are queried.
     /// </summary>
-    /// <typeparam name="TShard"></typeparam>
-    public class ShardParameterValue<TShard> where TShard : IComparable
+    public class ShardParameterValue
     {
         public ShardParameterValue()
         {
-            ShardId = default(TShard);
+            ShardId = 0;
             ParameterName = null;
             ParameterValue = null;
         }
-        public ShardParameterValue(TShard shardId, string parameterName, object parameterValue)
+        public ShardParameterValue(short shardId, string parameterName, object parameterValue)
         {
             ShardId = shardId;
             ParameterName = parameterName;
             ParameterValue = parameterValue;
         }
 
-        public TShard ShardId { get; set; }
+        public short ShardId { get; set; }
 
         public string ParameterName { get; set; }
 

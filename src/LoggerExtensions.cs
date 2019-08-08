@@ -178,14 +178,7 @@ namespace ArgentSea
         public static void TraceRdrMapperProperty(this ILogger logger, string propertyName)
             => _sqlMapperRdrTrace(logger, propertyName, null);
 
-        public static void NullShardKeyArguments<TShard, TRecord>(this ILogger logger, string propertyName, ShardKey<TShard, TRecord> shardKey) where TShard : IComparable where TRecord : IComparable
-        {
-            if (shardKey.ShardId.Equals(null) || shardKey.RecordId.Equals(null))
-            {
-                _sqlShardKeyNull(logger, propertyName, shardKey.ToString(), null);
-            }
-        }
-        public static void NullShardChildArguments<TShard, TRecord, TChild>(this ILogger logger, string propertyName, ShardChild<TShard, TRecord, TChild> shardChild) where TShard : IComparable where TRecord : IComparable where TChild : IComparable
+        public static void NullShardChildArguments<TRecord, TChild>(this ILogger logger, string propertyName, ShardChild<TRecord, TChild> shardChild) where TRecord : IComparable where TChild : IComparable
         {
             if (shardChild.Key.ShardId.Equals(null) || shardChild.Key.RecordId.Equals(null) || shardChild.ChildId.Equals(null))
             {
@@ -198,7 +191,7 @@ namespace ArgentSea
         public static void TraceDbCmdExecuted(this ILogger logger, string commandName, string connectionName, long milliseconds)
             => _sqlDbCmdExecutedTrace(logger, commandName, connectionName, milliseconds, null);
 
-        public static void TraceShardCmdExecuted<TShard>(this ILogger logger, string commandName, string shardSetKey, TShard shardId, long milliseconds) where TShard : IComparable
+        public static void TraceShardCmdExecuted(this ILogger logger, string commandName, string shardSetKey, short shardId, long milliseconds)
         {
             if (logger.IsEnabled(LogLevel.Trace))
             {
