@@ -322,20 +322,17 @@ namespace ArgentSea
         public static ShardChild<TRecord, TChild> FromExternalString(string value)
         {
             var aValues = StringExtensions.SerializeFromExternalString(value);
-            short shardId = 0;
-            TRecord recordId = default(TRecord);
-            TChild childId = default(TChild);
 
             int orgnLen = aValues[0] & 3;
             var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
             var pos = orgnLen + 1;
 
             var typeShard = typeof(short);
-            shardId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeShard);
+            short shardId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeShard);
             var typeRecord = typeof(TRecord);
-            recordId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeRecord);
+            TRecord recordId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeRecord);
             var typeChild = typeof(TChild);
-            childId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeChild);
+            TChild childId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeChild);
            
             return new ShardChild<TRecord, TChild>(orgn, shardId, recordId, childId);
 

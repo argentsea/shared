@@ -242,7 +242,7 @@ namespace ArgentSea
             private readonly string _shardIdColumnName;
             private readonly string _recordIdColumnName;
             private readonly Query _query;
-            private char _dataOrigin;
+            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
             public KeyStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName)
@@ -291,7 +291,7 @@ namespace ArgentSea
             private readonly string _recordIdColumnName;
             private readonly string _childIdColumnName;
             private readonly Query _query;
-            private char _dataOrigin;
+            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
             public ChildStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName)
@@ -340,7 +340,7 @@ namespace ArgentSea
         }
         private class ModelStep<TArg, TModel> : BatchStep<TModel>
         {
-            private bool _isTopOne;
+            private readonly bool _isTopOne;
             private readonly Query _query;
             private readonly QueryResultModelHandler<TArg, TModel> _resultHandler;
             private readonly DbParameterCollection _parameters;
@@ -408,7 +408,7 @@ namespace ArgentSea
             private readonly string _shardIdColumnName;
             private readonly string _recordIdColumnName;
             private readonly Query _query;
-            private char _dataOrigin;
+            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
             public KeyListStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName)
@@ -459,7 +459,7 @@ namespace ArgentSea
             private readonly string _recordIdColumnName;
             private readonly string _childIdColumnName;
             private readonly Query _query;
-            private char _dataOrigin;
+            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
             public ChildListStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName)

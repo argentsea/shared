@@ -16,34 +16,30 @@ using Polly;
 
 namespace ArgentSea
 {
-    // This file contains the nested ShardInstance class. It is nested because it needs to inherit the generic definitions of its parent.
-    public abstract partial class ShardSetsBase<TConfiguration> : ICollection where TConfiguration : class, IShardSetsConfigurationOptions, new()
+    /// <summary>
+    /// This class represents a distinct shard, or database instance, within the shardset.
+    /// </summary>
+    public class ShardInstance<TConfiguration> where TConfiguration : class, IShardSetsConfigurationOptions, new()
     {
-        /// <summary>
-        /// This class represents a distinct shard, or database instance, within the shardset.
-        /// </summary>
-        public class ShardInstance
+        public ShardInstance(ShardSetsBase<TConfiguration> parent, short shardId, IShardConnectionConfiguration shardConnection)
         {
-            public ShardInstance(ShardSetsBase<TConfiguration> parent, short shardId, IShardConnectionConfiguration shardConnection)
+            this.ShardId = shardId;
+            var readConnection = shardConnection.ReadConnectionInternal;
+            var writeConnection = shardConnection.WriteConnectionInternal;
+            if (shardConnection.ReadConnectionInternal is null && !(shardConnection.WriteConnectionInternal is null))
             {
-                this.ShardId = shardId;
-                var readConnection = shardConnection.ReadConnectionInternal;
-                var writeConnection = shardConnection.WriteConnectionInternal;
-                if (shardConnection.ReadConnectionInternal is null && !(shardConnection.WriteConnectionInternal is null))
-                {
-                    readConnection = writeConnection;
-                }
-                else if (writeConnection is null && !(readConnection is null))
-                {
-                    writeConnection = readConnection;
-                }
-                this.Read = new ShardDataConnection(parent, shardId, readConnection);
-                this.Write = new ShardDataConnection(parent, shardId, writeConnection);
+                readConnection = writeConnection;
             }
-            public short ShardId { get; }
-            public ShardDataConnection Read { get; }
-            public ShardDataConnection Write { get; }
-
+            else if (writeConnection is null && !(readConnection is null))
+            {
+                writeConnection = readConnection;
+            }
+            this.Read = new ShardDataConnection<TConfiguration>(parent, shardId, readConnection);
+            this.Write = new ShardDataConnection<TConfiguration>(parent, shardId, writeConnection);
         }
+        public short ShardId { get; }
+        public ShardDataConnection<TConfiguration> Read { get; }
+        public ShardDataConnection<TConfiguration> Write { get; }
+
     }
 }
