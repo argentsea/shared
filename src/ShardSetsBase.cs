@@ -23,10 +23,10 @@ namespace ArgentSea
     /// Classes that inherit from this class manage sharded database connections.
     /// </summary>
     /// <typeparam name="TConfiguration">A provider-specific implementation of IShardSetConfigurationOptions.</typeparam>
-    public abstract class ShardSetsBase<TConfiguration> : ICollection where TConfiguration : class, IShardSetsConfigurationOptions, new()
+    public abstract partial class ShardSetsBase<TConfiguration> : ICollection where TConfiguration : class, IShardSetsConfigurationOptions, new()
     {
         private readonly object syncRoot = new Lazy<object>();
-        internal readonly ImmutableDictionary<string, ShardSet<TConfiguration>> dtn;
+        internal readonly ImmutableDictionary<string, ShardSetsBase<TConfiguration>.ShardSet> dtn;
         internal readonly IDataProviderServiceFactory _dataProviderServices;
         internal readonly DataConnectionConfigurationBase _globalConfiguration;
         internal readonly ILogger _logger;
@@ -44,7 +44,7 @@ namespace ArgentSea
             }
             this._dataProviderServices = dataProviderServices;
             this._globalConfiguration = globalConfiguration;
-            var bdr = ImmutableDictionary.CreateBuilder<string, ShardSet<TConfiguration>>();
+            var bdr = ImmutableDictionary.CreateBuilder<string, ShardSet>();
             if (!(configOptions?.Value?.ShardSetsConfigInternal is null))
             {
                 foreach (var set in configOptions.Value.ShardSetsConfigInternal)
@@ -53,16 +53,16 @@ namespace ArgentSea
                     {
                         throw new Exception($"A shard set configuration is not valid; the configuration provider returned null.");
                     }
-                    bdr.Add(set.ShardSetName, new ShardSet<TConfiguration>(this, set));
+                    bdr.Add(set.ShardSetName, new ShardSet(this, set));
                 }
                 this.dtn = bdr.ToImmutable();
             }
             else
             {
-                this.dtn = ImmutableDictionary<string, ShardSet<TConfiguration>>.Empty;
+                this.dtn = ImmutableDictionary<string, ShardSet>.Empty;
             }
         }
-        public ShardSet<TConfiguration> this[string key]
+        public ShardSet this[string key]
         {
             get => dtn[key];
         }
@@ -77,7 +77,7 @@ namespace ArgentSea
         public object SyncRoot => syncRoot;
 
         public void CopyTo(Array array, int index)
-            => this.dtn.Values.ToImmutableList().CopyTo((ShardSet<TConfiguration>[])array, index);
+            => this.dtn.Values.ToImmutableList().CopyTo((ShardSet[])array, index);
 
         public IEnumerator GetEnumerator() => this.dtn.GetEnumerator();
 

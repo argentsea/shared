@@ -10,6 +10,18 @@ using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
+    /// <summary>
+    /// This property attribute is used to map multiple paramters to a ShardKey object.
+    /// This recordIdName attribute name must exactly match the names of the corresponding MapTo attributes which are also on the same property.
+    /// </summary>
+    /// <example>
+    /// For example, you could implement the mapping for a ShardKey property like this:
+    /// <code>
+    /// [MapShardKey('U', "RecordId")]
+    /// [MapToSqlInt("RecordId")]
+    /// public ShardKey&lt;int&gt;? Id { get; set; } = null;
+    /// </code>
+    /// </example>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class MapShardKeyAttribute : Attribute
     {
