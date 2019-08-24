@@ -25,12 +25,12 @@ namespace ArgentSea
             batch.Add(new KeyStep<TRecord>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardChild<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardChild<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildStep<TRecord, TChild>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardChild<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardChild<TRecord, TChild>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
@@ -45,12 +45,12 @@ namespace ArgentSea
             batch.Add(new KeyStep<TRecord>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardChild<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardChild<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildStep<TRecord, TChild>(query, parameters, dataOrigin, null, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardChild<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardChild<TRecord, TChild>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName, childIdColumnName));
             return batch;
@@ -88,12 +88,12 @@ namespace ArgentSea
             batch.Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardChild<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardChild<TRecord, TChild>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
@@ -109,12 +109,12 @@ namespace ArgentSea
             ((IList)batch).Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardChild<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardChild<TRecord, TChild>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
@@ -131,12 +131,12 @@ namespace ArgentSea
             batch.Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardChild<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, null, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardChild<TRecord, TChild>>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             batch.Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName, childIdColumnName));
             return batch;
@@ -152,12 +152,12 @@ namespace ArgentSea
             ((IList)batch).Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardChild<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, null, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardChild<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardChild<TRecord, TChild>>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
             ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName, childIdColumnName));
             return batch;
@@ -285,7 +285,7 @@ namespace ArgentSea
                 return ShardKey<TRecord>.Empty;
             }
         }
-        private class ChildStep<TRecord, TChildId> : BatchStep<ShardChild<TRecord, TChildId>> where TRecord : IComparable where TChildId : IComparable
+        private class ChildStep<TRecord, TChildId> : BatchStep<ShardKey<TRecord, TChildId>> where TRecord : IComparable where TChildId : IComparable
         {
             private readonly string _shardIdColumnName;
             private readonly string _recordIdColumnName;
@@ -304,7 +304,7 @@ namespace ArgentSea
                 _childIdColumnName = childIdColumnName;
             }
 
-            protected internal override async Task<ShardChild<TRecord, TChildId>> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+            protected internal override async Task<ShardKey<TRecord, TChildId>> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
@@ -331,11 +331,11 @@ namespace ArgentSea
                             }
                             var recordid = dataReader.GetFieldValue<TRecord>(recordOrd);
                             var childid = dataReader.GetFieldValue<TChildId>(childOrd);
-                            return new ShardChild<TRecord, TChildId>(_dataOrigin, shardIdData, recordid, childid);
+                            return new ShardKey<TRecord, TChildId>(_dataOrigin, shardIdData, recordid, childid);
                         }
                     }
                 }
-                return ShardChild<TRecord, TChildId>.Empty;
+                return ShardKey<TRecord, TChildId>.Empty;
             }
         }
         private class ModelStep<TArg, TModel> : BatchStep<TModel>
@@ -453,7 +453,7 @@ namespace ArgentSea
             }
         }
 
-        private class ChildListStep<TRecord, TChild> : BatchStep<IList<ShardChild<TRecord, TChild>>> where TRecord : IComparable where TChild : IComparable
+        private class ChildListStep<TRecord, TChild> : BatchStep<IList<ShardKey<TRecord, TChild>>> where TRecord : IComparable where TChild : IComparable
         {
             private readonly string _shardIdColumnName;
             private readonly string _recordIdColumnName;
@@ -472,9 +472,9 @@ namespace ArgentSea
                 _childIdColumnName = childIdColumnName;
             }
 
-            protected internal override async Task<IList<ShardChild<TRecord, TChild>>> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
+            protected internal override async Task<IList<ShardKey<TRecord, TChild>>> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken)
             {
-                var result = new List<ShardChild<TRecord, TChild>>();
+                var result = new List<ShardKey<TRecord, TChild>>();
                 cancellationToken.ThrowIfCancellationRequested();
                 using (var cmd = services.NewCommand(_query.Sql, connection))
                 {
@@ -500,7 +500,7 @@ namespace ArgentSea
                             }
                             var recordid = dataReader.GetFieldValue<TRecord>(recordOrd);
                             var childid = dataReader.GetFieldValue<TChild>(childOrd);
-                            result.Add(new ShardChild<TRecord, TChild>(_dataOrigin, shardIdData, recordid, childid));
+                            result.Add(new ShardKey<TRecord, TChild>(_dataOrigin, shardIdData, recordid, childid));
                         }
                     }
                 }

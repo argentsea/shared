@@ -603,5 +603,59 @@ namespace ArgentSea
             var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expRdr, expOrdinal, Expression.Constant(tModel.ToString(), typeof(string)), expLogger });
             return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, tModel)));
         }
+
+        public static void GetShardKeyType(PropertyInfo prop, Type propType, ParameterMapAttributeBase attrPM, MemberExpression childProperty)
+        {
+            var tDataId = propType.GetGenericArguments()[1];
+            if (!attrPM.IsValidType(tDataId))
+            {
+                throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
+            }
+
+        }
+        public static MapShardKeyAttribute GetMapShardKeyAttribute(PropertyInfo prop, Type propType, out bool isNullable, out bool isShardKey, out bool isShardChild, out bool isShardGrandChild, out bool isShardGreatGrandChild)
+        {
+            if (!propType.IsGenericType)
+            {
+                isNullable = false;
+                isShardKey = false;
+                isShardChild = false;
+                isShardGrandChild = false;
+                isShardGreatGrandChild = false;
+                return null;
+            }
+            isNullable = propType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            if (isNullable)
+            {
+                propType = Nullable.GetUnderlyingType(propType);
+                if (!propType.IsGenericType)
+                {
+                    isShardKey = false;
+                    isShardChild = false;
+                    isShardGrandChild = false;
+                    isShardGreatGrandChild = false;
+                    return null;
+                }
+            }
+            var typeName = propType.Name;
+            if (Attribute.IsDefined(prop, typeof(MapShardKeyAttribute)))
+            {
+                isShardKey = typeName == "ShardKey`1";
+                isShardChild = typeName == "ShardKey`2";
+                isShardGrandChild = typeName == "ShardKey`3";
+                isShardGreatGrandChild = typeName == "ShardKey`4";
+                return prop.GetCustomAttribute<MapShardKeyAttribute>(true);
+            }
+            else
+            {
+                isShardKey = false;
+                isShardChild = false;
+                isShardGrandChild = false;
+                isShardGreatGrandChild = false;
+                return null;
+            }
+
+        }
+
     }
 }

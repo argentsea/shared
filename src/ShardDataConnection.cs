@@ -141,12 +141,12 @@ namespace ArgentSea
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardChild<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var result = await _manager.ReturnAsync<TRecord, TChild, object>(query, recordDataName, childDataName, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
-            return new ShardChild<TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
+            return new ShardKey<TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
         }
 
         /// <summary>
@@ -163,12 +163,12 @@ namespace ArgentSea
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardChild<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var result = await _manager.ReturnAsync<short, TRecord, TChild>(query, shardDataName, recordDataName, childDataName, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
-            return new ShardChild<TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
+            return new ShardKey<TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
         }
 
         /// <summary>
@@ -214,12 +214,12 @@ namespace ArgentSea
         /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardChild.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardChild<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var result = await _manager.ReturnAsync<TRecord, TChild, object>(query, recordDataName, childDataName, null, parameters, null, -1, cancellationToken);
-            return new ShardChild<TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
+            return new ShardKey<TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
         }
 
         /// <summary>
@@ -235,12 +235,12 @@ namespace ArgentSea
         /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardChild.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardChild<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var result = await _manager.ReturnAsync<short, TRecord, TChild>(query, shardDataName, recordDataName, childDataName, parameters, null, -1, cancellationToken);
-            return new ShardChild<TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
+            return new ShardKey<TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
         }
 
 
@@ -413,15 +413,15 @@ namespace ArgentSea
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardChild<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var data = await _manager.ListAsync<TRecord, TChild, object>(query, recordColumnName, childColumnName, null, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
-            var result = new List<ShardChild<TRecord, TChild>>();
+            var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardChild<TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
+                result.Add(new ShardKey<TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
             }
             return result;
         }
@@ -438,15 +438,15 @@ namespace ArgentSea
         /// <param name="columnName">This should match the name of a column containing the values.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardChild<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var data = await _manager.ListAsync<TRecord, TChild, object>(query, recordColumnName, childColumnName, null, parameters, -1, null, cancellationToken);
-            var result = new List<ShardChild<TRecord, TChild>>();
+            var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardChild<TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
+                result.Add(new ShardKey<TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
             }
             return result;
         }
@@ -464,15 +464,15 @@ namespace ArgentSea
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardChild<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var data = await _manager.ListAsync<short, TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, parameters.GetParameterOrdinal(shardParameterName), null, cancellationToken);
-            var result = new List<ShardChild<TRecord, TChild>>();
+            var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardChild<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                result.Add(new ShardKey<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
             }
             return result;
         }
@@ -489,15 +489,15 @@ namespace ArgentSea
         /// <param name="parameters">The query parameters.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardChild<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
             var data = await _manager.ListAsync<short, TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, -1, null, cancellationToken);
-            var result = new List<ShardChild<TRecord, TChild>>();
+            var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardChild<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                result.Add(new ShardKey<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
             }
             return result;
         }

@@ -76,9 +76,9 @@ namespace ArgentSea.Test
         [Fact]
         public void TestShardChildSerializationInts()
         {
-            var sc1 = new ShardChild<int, short>('a', 5, 6, 7);
+            var sc1 = new ShardKey<int, short>('a', 5, 6, 7);
             var str = sc1.ToExternalString();
-            var sc2 = ShardChild<int, short>.FromExternalString(str);
+            var sc2 = ShardKey<int, short>.FromExternalString(str);
             sc2.Should().Be(sc1, "because the serialized string creates an equivalent shardChild");
         }
     }

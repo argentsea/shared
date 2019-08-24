@@ -23,26 +23,109 @@ namespace ArgentSea
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class MapShardKeyAttribute : Attribute
+    public abstract class MapShardKeyAttribute : Attribute
     {
-        public MapShardKeyAttribute(char origin, string shardIdName, string recordIdName)
+        ParameterMapAttributeBase _shardId;
+        //public MapShardKeyAttribute(char origin, string recordIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = null;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = null;
+        //    this.GrandChildIdName = null;
+        //    this.GreatGrandChildIdName = null;
+        //}
+
+        //public MapShardKeyAttribute(string shardIdName, char origin, string recordIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = shardIdName;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = null;
+        //    this.GrandChildIdName = null;
+        //    this.GreatGrandChildIdName = null;
+        //}
+
+        //public MapShardKeyAttribute(char origin, string recordIdName, string childIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = null;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = childIdName;
+        //    this.GrandChildIdName = null;
+        //    this.GreatGrandChildIdName = null;
+        //}
+
+        //public MapShardKeyAttribute(string shardIdName, char origin, string recordIdName, string childIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = shardIdName;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = childIdName;
+        //    this.GrandChildIdName = null;
+        //    this.GreatGrandChildIdName = null;
+        //}
+
+        //public MapShardKeyAttribute(char origin, string recordIdName, string childIdName, string grandChildIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = null;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = childIdName;
+        //    this.GrandChildIdName = null;
+        //    this.GreatGrandChildIdName = null;
+        //}
+
+        //public MapShardKeyAttribute(string shardIdName, char origin, string recordIdName, string childIdName, string grandChildIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = shardIdName;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = childIdName;
+        //    this.GrandChildIdName = grandChildIdName;
+        //    this.GreatGrandChildIdName = grandChildIdName;
+        //}
+
+        //public MapShardKeyAttribute(char origin, string recordIdName, string childIdName, string grandChildIdName, string greatGrandChildIdName)
+        //{
+        //    this.Origin = origin;
+        //    this.ShardIdName = null;
+        //    this.RecordIdName = recordIdName;
+        //    this.ChildIdName = childIdName;
+        //    this.GrandChildIdName = grandChildIdName;
+        //    this.GreatGrandChildIdName = greatGrandChildIdName;
+        //}
+
+        public MapShardKeyAttribute(ParameterMapAttributeBase shardId, char origin, string recordIdName, string childIdName, string grandChildIdName, string greatGrandChildIdName)
         {
             this.Origin = origin;
-            this.ShardIdName = shardIdName;
+
+            _shardId = shardId;
             this.RecordIdName = recordIdName;
-        }
-        public MapShardKeyAttribute(char origin, string recordIdName)
-        {
-            this.Origin = origin;
-            this.ShardIdName = null;
-            this.RecordIdName = recordIdName;
+            this.ChildIdName = childIdName;
+            this.GrandChildIdName = grandChildIdName;
+            this.GreatGrandChildIdName = greatGrandChildIdName;
         }
 
         public char Origin { get; set; }
 
-		public virtual string ShardIdName { get; set; }
+		public virtual string ShardIdName {
+            get {
+                return this._shardId?.ColumnName;
+            }
+        }
 
-		public virtual string RecordIdName { get; set; }
+		public virtual string RecordIdName { get; }
 
-	}
+        public virtual string ChildIdName { get; }
+
+        public virtual string GrandChildIdName { get; }
+
+        public virtual string GreatGrandChildIdName { get; }
+
+        public ParameterMapAttributeBase ShardParameter
+        {
+            get { return _shardId;  }
+        }
+    }
 }

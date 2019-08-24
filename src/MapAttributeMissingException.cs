@@ -9,7 +9,9 @@ namespace ArgentSea
         public enum ShardElement {
             ShardId,
             RecordId,
-            ChildId
+            ChildId,
+            GrandChildId,
+            GreatGrandChildId
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="MapAttributeMissingException" /> class with no error message.

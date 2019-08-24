@@ -178,7 +178,7 @@ namespace ArgentSea
         public static void TraceRdrMapperProperty(this ILogger logger, string propertyName)
             => _sqlMapperRdrTrace(logger, propertyName, null);
 
-        public static void NullShardChildArguments<TRecord, TChild>(this ILogger logger, string propertyName, ShardChild<TRecord, TChild> shardChild) where TRecord : IComparable where TChild : IComparable
+        public static void NullShardChildArguments<TRecord, TChild>(this ILogger logger, string propertyName, ShardKey<TRecord, TChild> shardChild) where TRecord : IComparable where TChild : IComparable
         {
             if (shardChild.Key.ShardId.Equals(null) || shardChild.Key.RecordId.Equals(null) || shardChild.ChildId.Equals(null))
             {

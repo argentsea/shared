@@ -151,5 +151,283 @@ namespace ArgentSea
                 Shards.Remove(shardId);
             }
         }
+
+
+        #region Foreign ShardKey
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TModel>(short shardId, List<TModel> records) where TModel : IKeyedModel<TRecord> where TRecord : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TModel>(shardId, (IList<TModel>)records);
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TModel>(short shardId, IList<TModel> records) where TModel : IKeyedModel<TRecord> where TRecord : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord>(short shardId, List<ShardKey<TRecord>> records) where TRecord : IComparable
+            => ShardsValues.ShardListForeign<TRecord>(shardId, (IList<ShardKey<TRecord>>) records);
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord>(short shardId, IList<ShardKey<TRecord>> records) where TRecord : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
+                {
+                    result.Add(record.ShardId);
+                }
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TModel>(short shardId, List<TModel> records) where TModel : IKeyedModel<TRecord, TChild> where TRecord : IComparable where TChild : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TChild, TModel>(shardId, (IList<TModel>)records);
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TModel>(short shardId, IList<TModel> records) where TModel : IKeyedModel<TRecord, TChild> where TRecord : IComparable where TChild : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild>(short shardId, List<ShardKey<TRecord>> records) where TRecord : IComparable where TChild : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TChild>(shardId, (IList<ShardKey<TRecord, TChild>>)records);
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild>(short shardId, IList<ShardKey<TRecord, TChild>> records) where TRecord : IComparable where TChild : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
+                {
+                    result.Add(record.ShardId);
+                }
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild, TModel>(short shardId, List<TModel> records) 
+            where TModel : IKeyedModel<TRecord, TChild, TGrandChild> 
+            where TRecord : IComparable 
+            where TChild : IComparable
+            where TGrandChild : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TChild, TGrandChild, TModel>(shardId, (IList<TModel>)records);
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild, TModel>(short shardId, IList<TModel> records) 
+            where TModel : IKeyedModel<TRecord, TChild, TGrandChild> 
+            where TRecord : IComparable 
+            where TChild : IComparable
+            where TGrandChild : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild>(short shardId, List<ShardKey<TRecord>> records) 
+            where TRecord : IComparable 
+            where TChild : IComparable
+            where TGrandChild : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TChild, TGrandChild>(shardId, (IList<ShardKey<TRecord, TChild, TGrandChild>>)records);
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild>(short shardId, IList<ShardKey<TRecord, TChild, TGrandChild>> records)
+            where TRecord : IComparable
+            where TChild : IComparable
+            where TGrandChild : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
+                {
+                    result.Add(record.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild, TGreatGrandChild, TModel>(short shardId, List<TModel> records)
+            where TModel : IKeyedModel<TRecord, TChild, TGrandChild, TGreatGrandChild>
+            where TRecord : IComparable
+            where TChild : IComparable
+            where TGrandChild : IComparable
+            where TGreatGrandChild : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TChild, TGrandChild, TGreatGrandChild, TModel>(shardId, (IList<TModel>)records);
+
+        /// <summary>
+        /// Given a list of Models with ShardKey keys, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of models to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild, TGreatGrandChild, TModel>(short shardId, IList<TModel> records)
+            where TModel : IKeyedModel<TRecord, TChild, TGrandChild, TGreatGrandChild>
+            where TRecord : IComparable
+            where TChild : IComparable
+            where TGrandChild : IComparable
+            where TGreatGrandChild : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.Key.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.Key.ShardId))
+                {
+                    result.Add(record.Key.ShardId);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild, TGreatGrandChild>(short shardId, List<ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>> records)
+            where TRecord : IComparable
+            where TChild : IComparable
+            where TGrandChild : IComparable
+            where TGreatGrandChild : IComparable
+            => ShardsValues.ShardListForeign<TRecord, TChild, TGrandChild, TGreatGrandChild>(shardId, (IList<ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>>)records);
+
+        /// <summary>
+        /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id specified.
+        /// Useful for querying foreign shards after the primary shard has returned results.
+        /// </summary>
+        /// <param name="shardId">The shard id of the shard to exclude. This is typically the current shard and this function is used to determine if any records are foreign to it.</param>
+        /// <param name="records">The list of ShardKeys to evaluate.</param>
+        /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
+        public static ShardsValues ShardListForeign<TRecord, TChild, TGrandChild, TGreatGrandChild>(short shardId, IList<ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>> records)
+            where TRecord : IComparable
+            where TChild : IComparable
+            where TGrandChild : IComparable
+            where TGreatGrandChild : IComparable
+        {
+            var result = new ShardsValues();
+            foreach (var record in records)
+            {
+                if (!record.ShardId.Equals(shardId) && !result.Shards.ContainsKey(record.ShardId))
+                {
+                    result.Add(record.ShardId);
+                }
+            }
+            return result;
+        }
+        #endregion
+
     }
 }
