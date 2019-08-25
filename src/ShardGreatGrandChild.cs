@@ -13,7 +13,7 @@ namespace ArgentSea
     /// <typeparam name="TRecord"></typeparam>
     /// <typeparam name="TChild"></typeparam>
     [Serializable]
-    public struct ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild> : IEquatable<ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>>, ISerializable
+    public struct ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild> : IEquatable<ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>>, IShardKey, ISerializable
         where TRecord : IComparable
         where TChild : IComparable
         where TGrandChild : IComparable
@@ -354,7 +354,7 @@ namespace ArgentSea
         }
         public override string ToString()
         {
-            return $"{{ \"origin\": \"{_key.Origin}\", \"shardId\": \"{_key.ShardId.ToString()}\", \"recordId\": \"{_key.RecordId.ToString()}\", \"childId\": \"{_key.ChildId.ToString()}\", \", \"grandChildId\": \"{_key.GrandChildId.ToString()}\", \"greatGrandChildId\": \"{_greatGrandChildId.ToString()}\"}}";
+            return $"{{ \"origin\": \"{_key.Origin}\", \"shard\": {_key.ShardId.ToString()}, \"ids\": [\"{_key.RecordId.ToString()}\", \"{_key.ChildId.ToString()}\", \"{_key.GrandChildId.ToString()}\", \"{_greatGrandChildId.ToString()}\"]}}";
         }
         public static ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild> FromExternalString(string value)
         {
@@ -390,13 +390,8 @@ namespace ArgentSea
         }
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("shardChild", ToExternalString());
-            info.AddValue("origin", _key.Origin);
-            info.AddValue("shardId", _key.ShardId);
-            info.AddValue("recordId", _key.RecordId);
-            info.AddValue("childId", _key.ChildId);
-            info.AddValue("grandChildId", _key.GrandChildId);
-            info.AddValue("greateGrandChildId", _greatGrandChildId);
+            info.AddValue("shardKey", ToExternalString());
+            //info.AddValue("Ids", $"{_key.ShardId.ToString()}, {_key.RecordId.ToString()},{_key.ChildId.ToString()}, {_key.GrandChildId.ToString()}, {_greatGrandChildId.ToString()}");
         }
         public void ThrowIfInvalidOrigin(char expectedOrigin)
         {

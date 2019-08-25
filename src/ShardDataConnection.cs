@@ -130,14 +130,14 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// Invokes the query and returns a ShardChild whose ShardId is the current shard and RecordId and ChildId is obtained from the output parameter or first-row column value whose name matches the “recordDataName” and “childDataName”.
+        /// Invokes the query and returns a ShardKey whose ShardId is the current shard and RecordId and ChildId is obtained from the output parameter or first-row column value whose name matches the “recordDataName” and “childDataName”.
         /// </summary>
-        /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+        /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
-        /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+        /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
@@ -150,16 +150,16 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// Invokes the query and returns a ShardChild whose ShardId, RecordId, and ChildId are obtained from the output parameters or first-row column values whose name matches “shardDataName”, “recordDataName”, and “childDataName” respectively.
+        /// Invokes the query and returns a ShardKey whose ShardId, RecordId, and ChildId are obtained from the output parameters or first-row column values whose name matches “shardDataName”, “recordDataName”, and “childDataName” respectively.
         /// </summary>
-        /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+        /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardChild.</param>
-        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
-        /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardChild.</param>
-        /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
+        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+        /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardKey.</param>
+        /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
@@ -204,14 +204,14 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// Invokes the query and returns a ShardChild whose ShardId is the current shard and RecordId and ChildId is obtained from the output parameter or first-row column value whose name matches the “recordDataName” and “childDataName”.
+        /// Invokes the query and returns a ShardKey whose ShardId is the current shard and RecordId and ChildId is obtained from the output parameter or first-row column value whose name matches the “recordDataName” and “childDataName”.
         /// </summary>
-        /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+        /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
-        /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+        /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
         public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
@@ -223,16 +223,16 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// Invokes the query and returns a ShardChild whose ShardId, RecordId, and ChildId are obtained from the output parameters or first-row column values whose name matches “shardDataName”, “recordDataName”, and “childDataName” respectively.
+        /// Invokes the query and returns a ShardKey whose ShardId, RecordId, and ChildId are obtained from the output parameters or first-row column values whose name matches “shardDataName”, “recordDataName”, and “childDataName” respectively.
         /// </summary>
-        /// <typeparam name="TRecord">The type of the recordId in the ShardChild.</typeparam>
+        /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardChild.</param>
-        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardChild.</param>
-        /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardChild.</param>
-        /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
+        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
+        /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardKey.</param>
+        /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
         public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
@@ -313,7 +313,7 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
@@ -336,7 +336,7 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="columnName">This should match the name of a column containing the values.</param>
@@ -359,7 +359,7 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
@@ -383,7 +383,7 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
@@ -407,9 +407,9 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="parameters">The query parameters.</param>
-        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
@@ -432,8 +432,8 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="columnName">This should match the name of a column containing the values.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -457,9 +457,9 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
-        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
+        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -483,9 +483,9 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardChild type.</param>
-        /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
-        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
+        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
+        /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
+        /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>

@@ -12,7 +12,7 @@ namespace ArgentSea
     /// Immutable class representing a sharded record with a “compound” key: the (virtual) shardId and the (database) recordId.
     /// </summary>
     [Serializable]
-    public struct ShardKey<TRecord> : IEquatable<ShardKey<TRecord>>, ISerializable where TRecord : IComparable
+    public struct ShardKey<TRecord> : IEquatable<ShardKey<TRecord>>, IShardKey, ISerializable where TRecord : IComparable
 	{
 		private short _shardId;
 		private TRecord _recordId;
@@ -84,7 +84,7 @@ namespace ArgentSea
 		}
 		public override string ToString()
 		{
-			return $"{{ \"origin\": \"{_origin}\", \"shardId\": \"{_shardId.ToString()}\", \"recordId\": \"{_recordId.ToString()}\"}}";
+			return $"{{ \"origin\": \"{_origin}\", \"shard\": {_shardId.ToString()}, \"id\": \"{_recordId.ToString()}\"}}";
 		}
 
 		#endregion
@@ -439,7 +439,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public ShardsValues ForeignShards<TRecord>(IList<ShardKey<TRecord>> records) where TRecord : IComparable
+        public ShardsValues ForeignShards(IList<ShardKey<TRecord>> records)
             => ShardsValues.ShardListForeign<TRecord>(_shardId, records);
 
         /// <summary>
@@ -448,7 +448,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public ShardsValues ForeignShards<TRecord>(List<ShardKey<TRecord>> records) where TRecord : IComparable
+        public ShardsValues ForeignShards(List<ShardKey<TRecord>> records)
             => ShardsValues.ShardListForeign<TRecord>(_shardId, (IList<ShardKey<TRecord>>) records);
 
         /// <summary>
@@ -457,7 +457,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public ShardsValues ForeignShards<TRecord, TModel>(IList<TModel> records) where TModel : IKeyedModel<TRecord> where TRecord : IComparable
+        public ShardsValues ForeignShards<TModel>(IList<TModel> records) where TModel : IKeyedModel<TRecord>
             => ShardsValues.ShardListForeign<TRecord, TModel>(_shardId, records);
 
         /// <summary>
@@ -466,7 +466,7 @@ namespace ArgentSea
         /// </summary>
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
-        public ShardsValues ForeignShards<TRecord, TModel>(List<TModel> records) where TModel : IKeyedModel<TRecord> where TRecord : IComparable
+        public ShardsValues ForeignShards<TModel>(List<TModel> records) where TModel : IKeyedModel<TRecord>
             => ShardsValues.ShardListForeign<TRecord, TModel>(_shardId, (IList<TModel>) records);
 
         public bool Equals(ShardKey<TRecord> other)
@@ -578,9 +578,7 @@ namespace ArgentSea
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("shardKey", ToExternalString());
-            info.AddValue("origin", _origin);
-            info.AddValue("shardId", _shardId);
-            info.AddValue("recordId", _recordId);
+            //info.AddValue("Ids", $"{_shardId.ToString()}, {_recordId.ToString()}");
         }
         public void ThrowIfInvalidOrigin(char expectedOrigin)
         {

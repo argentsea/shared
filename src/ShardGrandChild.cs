@@ -13,7 +13,7 @@ namespace ArgentSea
     /// <typeparam name="TRecord"></typeparam>
     /// <typeparam name="TChild"></typeparam>
     [Serializable]
-    public struct ShardKey<TRecord, TChild, TGrandChild> : IEquatable<ShardKey<TRecord, TChild, TGrandChild>>, ISerializable
+    public struct ShardKey<TRecord, TChild, TGrandChild> : IEquatable<ShardKey<TRecord, TChild, TGrandChild>>, IShardKey, ISerializable
         where TRecord : IComparable
         where TChild : IComparable
         where TGrandChild : IComparable
@@ -338,7 +338,7 @@ namespace ArgentSea
         }
         public override string ToString()
         {
-            return $"{{ \"origin\": \"{_key.Origin}\", \"shardId\": \"{_key.ShardId.ToString()}\", \"recordId\": \"{_key.RecordId.ToString()}\", \"childId\": \"{_key.ChildId.ToString()}\", \", \"grandChildId\": \"{this._grandChildId.ToString()}\"}}";
+            return $"{{ \"origin\": \"{_key.Origin}\", \"shard\": {_key.ShardId.ToString()}, \"ids\": [\"{_key.RecordId.ToString()}\", \"{_key.ChildId.ToString()}\", \"{this._grandChildId.ToString()}\"]}}";
         }
         public static ShardKey<TRecord, TChild, TGrandChild> FromExternalString(string value)
         {
@@ -373,12 +373,8 @@ namespace ArgentSea
         }
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("shardChild", ToExternalString());
-            info.AddValue("origin", _key.Origin);
-            info.AddValue("shardId", _key.ShardId);
-            info.AddValue("recordId", _key.RecordId);
-            info.AddValue("childId", _key.ChildId);
-            info.AddValue("grandChildId", _grandChildId);
+            info.AddValue("shardKey", ToExternalString());
+            //info.AddValue("Ids", $"{_key.ShardId.ToString()}, {_key.RecordId.ToString()},{_key.ChildId.ToString()}, {_grandChildId.ToString()}");
         }
         public void ThrowIfInvalidOrigin(char expectedOrigin)
         {
