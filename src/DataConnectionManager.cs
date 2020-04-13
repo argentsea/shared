@@ -118,8 +118,12 @@ namespace ArgentSea
 		}
 
         // returns the integer return value of a procedure. Will add parameter if not provided.
-        internal async Task<int> ReturnAsync(Query query, DbParameterCollection parameters, int shardParameterOrdinal, CancellationToken cancellationToken)
+        internal async Task<int> ReturnAsync(Query query, DbParameterCollection parameters, int shardParameterOrdinal, Dictionary<string, object> mockResults, CancellationToken cancellationToken)
         {
+            if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(query.Name))
+            {
+                return (int)mockResults[query.Name];
+            }
             cancellationToken.ThrowIfCancellationRequested();
             var startTimestamp = Stopwatch.GetTimestamp();
 
@@ -136,9 +140,13 @@ namespace ArgentSea
 
         #region List methods
 
-        internal async Task<List<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) where TModel : class, new()
+        internal async Task<List<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, Dictionary<string, object> mockResults, CancellationToken cancellationToken) where TModel : class, new()
 		{
-			cancellationToken.ThrowIfCancellationRequested();
+            if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(query.Name))
+            {
+                return (List<TModel>)mockResults[query.Name];
+            }
+            cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
 
             parameters.SetShardId(shardParameterOrdinal, this._shardId);
@@ -168,9 +176,13 @@ namespace ArgentSea
 
         #region Query methods
 
-        internal async Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
+        internal async Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, Dictionary<string, object> mockResults, CancellationToken cancellationToken) 
 		{
-			cancellationToken.ThrowIfCancellationRequested();
+            if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(query.Name))
+            {
+                return (TModel)mockResults[query.Name];
+            }
+            cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
 
             parameters.SetShardId(shardParameterOrdinal, this._shardId);
@@ -187,10 +199,14 @@ namespace ArgentSea
 
         #region Run methods
 
-        internal async Task RunAsync(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, CancellationToken cancellationToken)
+        internal async Task RunAsync(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, Dictionary<string, object> mockResults, CancellationToken cancellationToken)
 		{
+            if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(query.Name))
+            {
+                return;
+            }
 
-			cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 			var startTimestamp = Stopwatch.GetTimestamp();
             parameters.SetShardId(shardParameterOrdinal, this._shardId);
 
@@ -199,8 +215,13 @@ namespace ArgentSea
             var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
 			_logger?.TraceDbCmdExecuted(query.Name, this._connectionName, elapsedMS);
 		}
-        internal async Task<TResult> RunBatchAsync<TResult>(BatchBase<TResult> batch, CancellationToken cancellationToken)
+
+        internal async Task<TResult> RunBatchAsync<TResult>(BatchBase<TResult> batch, Dictionary<string, object> mockResults, CancellationToken cancellationToken)
         {
+            if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(string.Empty))
+            {
+                return (TResult)mockResults[string.Empty];
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
             var startTimestamp = Stopwatch.GetTimestamp();
