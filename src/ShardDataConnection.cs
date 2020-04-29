@@ -24,6 +24,7 @@ namespace ArgentSea
     {
         internal readonly DataConnectionManager _manager;
         private readonly short _shardId;
+        private Dictionary<string, object> _mockResult = null;
 
         internal ShardDataConnection(ShardSetsBase<TConfiguration> parent, short shardId, IDataConnection config)
         {
@@ -42,7 +43,17 @@ namespace ArgentSea
         /// Methods returning a result will return he corresponding result instead of the datbase result. Note that the return types must match or an error will be thrown.
         /// A Shard batch can specify a empty string as the key “query” name to provide a mock batch result and avoid the batch database execution.
         /// </summary>
-        public Dictionary<string, object> MockResults { get; } = null;
+        public Dictionary<string, object> MockResults
+        {
+            get
+            {
+                if (this._mockResult is null)
+                {
+                    this._mockResult = new Dictionary<string, object>();
+                }
+                return this._mockResult;
+            }
+        }
 
         #region Public data fetch methods
 

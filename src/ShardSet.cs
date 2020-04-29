@@ -26,6 +26,8 @@ namespace ArgentSea
             private readonly object syncRoot = new object();
             private readonly ImmutableDictionary<short, ShardInstance<TConfiguration>> dtn;
             private readonly short _defaultShardId;
+            private Dictionary<string, object> _mockResult = null;
+
             public ShardSet(ShardSetsBase<TConfiguration> parent, IShardSetConnectionsConfiguration config)
             {
                 var bdr = ImmutableDictionary.CreateBuilder<short, ShardInstance<TConfiguration>>();
@@ -58,7 +60,16 @@ namespace ArgentSea
             /// Methods returning a result will return this result instead (Note that the return types must match or an error will be thrown).
             /// A ShardSet batch need only have a non-null dictionary (i.e. can be empty) to avoid the batch database execution.
             /// </summary>
-            public Dictionary<string, object> MockResults { get; } = null;
+            public Dictionary<string, object> MockResults {
+                get 
+                {
+                    if (this._mockResult is null)
+                    {
+                        this._mockResult = new Dictionary<string, object>();
+                    }
+                    return this._mockResult;
+                }
+            }
 
             public ShardInstance<TConfiguration> this[short shardId]
             {
