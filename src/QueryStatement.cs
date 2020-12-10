@@ -47,28 +47,21 @@ namespace ArgentSea
         {
             return new Lazy<QueryStatement>(() =>
             {
-                if (QueryStatement.Folder.Contains(":"))
-                {
-                    return QueryStatementFactory(name, $"{QueryStatement.Folder}\\{name}.{QueryStatement.Extension}", null);
-                }
-                else
-                {
-                    return QueryStatementFactory(name, $"{appPath.Value}\\{QueryStatement.Folder}\\{name}.{QueryStatement.Extension}", null);
-                }
+                return QueryStatementFactory(name, GetSqlFullPath(name, QueryStatement.Folder, QueryStatement.Extension), null);
             });
         }
         public static Lazy<QueryStatement> Create(string name, string[] parameterNames)
         {
             return new Lazy<QueryStatement>(() =>
             {
-                return QueryStatementFactory(name, $"{appPath.Value}\\{QueryStatement.Folder}\\{name}.{QueryStatement.Extension}", parameterNames);
+                return QueryStatementFactory(name, GetSqlFullPath(name, QueryStatement.Folder, QueryStatement.Extension), parameterNames);
             });
         }
         public static Lazy<QueryStatement> Create(string name, string[] parameterNames, string folderName, string extension)
         {
             return new Lazy<QueryStatement>(() =>
             {
-                return QueryStatementFactory(name, $"{appPath.Value}\\{folderName}\\{name}.{extension}", parameterNames);
+                return QueryStatementFactory(name, GetSqlFullPath(name, folderName, extension), parameterNames);
             });
         }
         public static Lazy<QueryStatement> Create(string name, string[] parameterNames, string fullFilePath)
@@ -77,6 +70,43 @@ namespace ArgentSea
             {
                 return QueryStatementFactory(name, fullFilePath, parameterNames);
             });
+        }
+        private static string GetSqlFullPath(string name, string folderName, string extension)
+        {
+            if (Path.IsPathRooted(name))
+            {
+                if (extension?.Length >= 0)
+                {
+                    return Path.GetFullPath($"{name}.{extension}");
+                }
+                else
+                {
+                    return Path.GetFullPath($"{name}");
+                }
+            }
+            else if (Path.IsPathRooted(folderName))
+            {
+                if (extension?.Length >= 0)
+                {
+                    return Path.GetFullPath($"{folderName}{Path.DirectorySeparatorChar}{name}.{extension}");
+
+                }
+                else
+                {
+                    return Path.GetFullPath($"{folderName}{Path.DirectorySeparatorChar}{name}");
+                }
+            }
+            else
+            {
+                if (extension?.Length >= 0)
+                {
+                    return Path.GetFullPath($"{appPath.Value}{Path.DirectorySeparatorChar}{folderName}{Path.DirectorySeparatorChar}{name}.{extension}");
+                }
+                else
+                {
+                    return Path.GetFullPath($"{appPath.Value}{Path.DirectorySeparatorChar}{folderName}{Path.DirectorySeparatorChar}{name}");
+                }
+            }
         }
     }
 }
