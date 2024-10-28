@@ -5,6 +5,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace ArgentSea
 {
@@ -14,18 +15,18 @@ namespace ArgentSea
     [Serializable]
     public struct ShardKey<TRecord> : IEquatable<ShardKey<TRecord>>, IShardKey, ISerializable where TRecord : IComparable
 	{
-		private short _shardId;
-		private TRecord _recordId;
+		private readonly short _shardId;
+		private readonly TRecord _recordId;
 		private readonly char _origin;
 
+        #region Constructors
         /// <summary>
-        /// 
+        /// Initializes a new instance of sharded record identifier using constituent parts.
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="shardId"></param>
         /// <param name="recordId"></param>
         /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
-        #region Constructors
         public ShardKey(char origin, short shardId, TRecord recordId)
 		{
 			if (origin == '0' && (shardId != 0 || recordId.CompareTo(default(TRecord)) != 0))
@@ -57,10 +58,25 @@ namespace ArgentSea
                 _recordId = tmp.RecordId;
             }
         }
-		#endregion
-		#region Public Properties and Method
 
-		public short ShardId
+		/// <summary>
+		/// Initiaizes a new instance from a readonly data array.
+		/// </summary>
+		/// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method.</param>
+		public ShardKey(ReadOnlySpan<byte> data)
+		{
+            int orgnLen = data[0] & 3;
+            _origin = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
+            var pos = orgnLen + 1;
+            _shardId = BitConverter.ToInt16(data.Slice(pos));
+			pos += 2;
+			_recordId = ConvertFromBytes(data, ref pos, typeof(TRecord));
+        }
+
+        #endregion
+        #region Public Properties and Method
+
+        public short ShardId
 		{
 			get { return _shardId; }
 		}
@@ -179,13 +195,13 @@ namespace ArgentSea
 			}
 		}
 
-		internal byte[] ToArray()
+		public byte[] ToArray()
 		{
 			var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin });
 			var shardData = GetValueBytes(this._shardId);
 			var recordData = GetValueBytes(this._recordId);
-			var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + 1];
-			aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
+			var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + 1]; //TODO: var aResult = stackalloc byte[aOrigin.Length + shardData.Length + recordData.Length + 1];
+            aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
 			var resultIndex = 1;
 			aOrigin.CopyTo(aResult, resultIndex);
 			resultIndex += aOrigin.Length;
@@ -196,18 +212,18 @@ namespace ArgentSea
 			return aResult;
 		}
 
-
-		internal static dynamic ConvertFromBytes(byte[] data, ref int position, Type valueType)
+        
+		internal static dynamic ConvertFromBytes(ReadOnlySpan<byte> data, ref int position, Type valueType)
 		{
 			if (valueType == typeof(int))
 			{
 				position += 4;
-				return BitConverter.ToInt32(data, position - 4);
+				return BitConverter.ToInt32(data.Slice(position - 4));
 			}
 			if (valueType == typeof(long))
 			{
 				position += 8;
-				return BitConverter.ToInt64(data, position - 8);
+				return BitConverter.ToInt64(data.Slice(position - 8));
 			}
 			if (valueType == typeof(byte))
 			{
@@ -217,46 +233,46 @@ namespace ArgentSea
 			if (valueType == typeof(short))
 			{
 				position += 2;
-				return BitConverter.ToInt16(data, position - 2);
+				return BitConverter.ToInt16(data.Slice(position - 2));
 			}
 			if (valueType == typeof(char))
 			{
 				position += 2;
-				return BitConverter.ToChar(data, position - 2);
+				return BitConverter.ToChar(data.Slice(position - 2));
 			}
 			if (valueType == typeof(decimal))
 			{
-				var i0 = BitConverter.ToInt32(data, position);
-				var i1 = BitConverter.ToInt32(data, position + 4);
-				var i2 = BitConverter.ToInt32(data, position + 8);
-				var i3 = BitConverter.ToInt32(data, position + 12);
+				var i0 = BitConverter.ToInt32(data.Slice(position));
+				var i1 = BitConverter.ToInt32(data.Slice(position + 4));
+				var i2 = BitConverter.ToInt32(data.Slice(position + 8));
+				var i3 = BitConverter.ToInt32(data.Slice(position + 12));
 				position += 16;
 				return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
 			}
 			if (valueType == typeof(double))
 			{
 				position += 8;
-				return BitConverter.ToDouble(data, position - 8);
+				return BitConverter.ToDouble(data.Slice(position - 8));
 			}
 			if (valueType == typeof(float))
 			{
 				position += 4;
-				return BitConverter.ToSingle(data, position - 4);
+				return BitConverter.ToSingle(data.Slice(position - 4));
 			}
 			if (valueType == typeof(uint))
 			{
 				position += 4;
-				return BitConverter.ToUInt32(data, position - 4);
+				return BitConverter.ToUInt32(data.Slice(position - 4));
 			}
 			if (valueType == typeof(ulong))
 			{
 				position += 8;
-				return BitConverter.ToUInt64(data, position - 8);
+				return BitConverter.ToUInt64(data.Slice(position - 8));
 			}
 			if (valueType == typeof(ushort))
 			{
 				position += 2;
-				return BitConverter.ToUInt16(data, position - 2);
+				return BitConverter.ToUInt16(data.Slice(position - 2));
 			}
 			if (valueType == typeof(sbyte))
 			{
@@ -266,12 +282,12 @@ namespace ArgentSea
 			if (valueType == typeof(bool))
 			{
 				position += 1;
-				return BitConverter.ToBoolean(data, position - 1);
+				return BitConverter.ToBoolean(data.Slice(position - 1));
 			}
 			if (valueType == typeof(DateTime))
 			{
 				position += 8;
-				return new DateTime(BitConverter.ToInt64(data, position - 8));
+				return new DateTime(BitConverter.ToInt64(data.Slice(position - 8)));
 			}
 			if (valueType == typeof(string))
 			{
@@ -282,7 +298,7 @@ namespace ArgentSea
 				}
 				var len = (int)data[position] >> 1;
 				position += len + 1;
-				return System.Text.Encoding.UTF8.GetString(data, position - len, len);
+				return System.Text.Encoding.UTF8.GetString(data.Slice(position - len, len));
 			}
 			if (valueType == typeof(Enum))
 			{
@@ -291,7 +307,7 @@ namespace ArgentSea
 			}
 			if (valueType == typeof(Nullable))
 			{
-				var isNull = BitConverter.ToBoolean(data, position);
+				var isNull = BitConverter.ToBoolean(data.Slice(position));
 				position += 1;
 				if (isNull)
 				{
@@ -302,7 +318,8 @@ namespace ArgentSea
 			}
             if (valueType == typeof(Guid))
             {
-                var result = new Guid(new byte[] { data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4], data[position + 5], data[position + 6], data[position + 7], data[position + 8], data[position + 9], data[position + 10], data[position + 11], data[position + 12], data[position + 13], data[position + 14], data[position + 15] });
+                //var result = new Guid(   new byte[] { data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4], data[position + 5], data[position + 6], data[position + 7], data[position + 8], data[position + 9], data[position + 10], data[position + 11], data[position + 12], data[position + 13], data[position + 14], data[position + 15] });
+				var result = new Guid(data.Slice(position));
                 position += 16;
                 return result;
             }
@@ -312,11 +329,11 @@ namespace ArgentSea
 			}
 		}
 
-		/// <summary>
-		/// Serializes ShardKey data into a URL-safe string with a checksum
-		/// </summary>
-		/// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
-		public string ToExternalString()
+        /// <summary>
+        /// Serializes ShardKey data into a URL-safe string with a checksum
+        /// </summary>
+        /// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
+        public string ToExternalString()
 		{
             return StringExtensions.SerializeToExternalString(ToArray());
 		}
@@ -324,16 +341,17 @@ namespace ArgentSea
 		{
 
             var aValues = StringExtensions.SerializeFromExternalString(value);
-			short shardId = 0;
-			TRecord recordId = default(TRecord);
+			return new ShardKey<TRecord>(new ReadOnlySpan<byte>(aValues));
+			//short shardId = 0;
+			//TRecord recordId = default(TRecord);
 
-			int orgnLen = aValues[0] & 3;
-			var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
-			var pos = orgnLen + 1;
+			//int orgnLen = aValues[0] & 3;
+			//var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
+			//var pos = orgnLen + 1;
 
-			shardId = ConvertFromBytes(aValues, ref pos, typeof(short));
-			recordId = ConvertFromBytes(aValues, ref pos, typeof(TRecord));
-			return new ShardKey<TRecord>(orgn, shardId, recordId);
+			//shardId = ConvertFromBytes(aValues, ref pos, typeof(short));
+			//recordId = ConvertFromBytes(aValues, ref pos, typeof(TRecord));
+			//return new ShardKey<TRecord>(orgn, shardId, recordId);
 		}
 
         /// <summary>

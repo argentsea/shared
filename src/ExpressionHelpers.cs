@@ -594,14 +594,14 @@ namespace ArgentSea
 			//Add quick exit if this parameter is dbNull
 			var miGetIsDbNull = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.IsRequiredParameterDbNull), BindingFlags.Static | BindingFlags.NonPublic);
 			var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expPrm, Expression.Constant(tModel.ToString(), typeof(string)), Expression.Constant(parameterName, typeof(string)), expLogger });
-			return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, tModel)));
+			return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Default(tModel))); //Expression.Constant(null, tModel)));0
 		}
         internal static Expression ReturnNullIfColNull(ParameterExpression expRdr, ParameterExpression expOrdinal, Type tModel, LabelTarget exitLabel, Expression expLogger)
         {
             //Add quick exit if this parameter is dbNull
             var miGetIsDbNull = typeof(ExpressionHelpers).GetMethod(nameof(ExpressionHelpers.IsRequiredColumnDbNull), BindingFlags.Static | BindingFlags.NonPublic);
             var expIsDbNull = Expression.Call(miGetIsDbNull, new Expression[] { expRdr, expOrdinal, Expression.Constant(tModel.ToString(), typeof(string)), expLogger });
-            return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Constant(null, tModel)));
+            return Expression.IfThen(expIsDbNull, Expression.Return(exitLabel, Expression.Default(tModel))); //Expression.Constant(null, tModel)));
         }
 
         public static void GetShardKeyType(PropertyInfo prop, Type propType, ParameterMapAttributeBase attrPM, MemberExpression childProperty)

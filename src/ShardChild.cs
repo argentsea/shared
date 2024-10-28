@@ -57,6 +57,22 @@ namespace ArgentSea
             }
         }
 
+        /// <summary>
+        /// Initiaizes a new instance from a readonly data array.
+        /// </summary>
+        /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method.</param>
+        public ShardKey(ReadOnlySpan<byte> data)
+        {
+            int orgnLen = data[0] & 3;
+            var origin = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
+            var pos = orgnLen + 1;
+            var shardId = BitConverter.ToInt16(data.Slice(pos));
+            pos += 2;
+            var recordId = ShardKey<TRecord>.ConvertFromBytes(data, ref pos, typeof(TRecord));
+            this._key = new ShardKey<TRecord>(origin, shardId, recordId);
+            this._childId = ShardKey<TRecord>.ConvertFromBytes(data, ref pos, typeof(TChild));
+        }
+
         public TChild ChildId
 		{
 			get { return _childId; }
@@ -296,7 +312,7 @@ namespace ArgentSea
             return this.Key.GetHashCode() | BitConverter.ToInt32(aResult, 0);
         }
 
-        internal byte[] ToArray()
+        public byte[] ToArray()
         {
             var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this._key.Origin });
             var shardData = ShardKey<TRecord>.GetValueBytes(this._key.ShardId);
@@ -332,16 +348,16 @@ namespace ArgentSea
         public static ShardKey<TRecord, TChild> FromExternalString(string value)
         {
             var aValues = StringExtensions.SerializeFromExternalString(value);
+            return new ShardKey<TRecord, TChild> (aValues);
+            //int orgnLen = aValues[0] & 3;
+            //var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
+            //var pos = orgnLen + 1;
 
-            int orgnLen = aValues[0] & 3;
-            var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
-            var pos = orgnLen + 1;
-
-            short shardId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeof(short));
-            TRecord recordId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeof(TRecord));
-            TChild childId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeof(TChild));
+            //short shardId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeof(short));
+            //TRecord recordId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeof(TRecord));
+            //TChild childId = ShardKey<TRecord>.ConvertFromBytes(aValues, ref pos, typeof(TChild));
            
-            return new ShardKey<TRecord, TChild>(orgn, shardId, recordId, childId);
+            //return new ShardKey<TRecord, TChild>(orgn, shardId, recordId, childId);
 
         }
         public static bool operator ==(ShardKey<TRecord, TChild> sc1, ShardKey<TRecord, TChild> sc2)
