@@ -35,12 +35,4 @@
     <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Batch\" />
-    <Folder Include="Configuration\" />
-    <Folder Include="Mapping\" />
-    <Folder Include="Query\" />
-    <Folder Include="ShardKeys\" />
-  </ItemGroup>
-
 </Project>
