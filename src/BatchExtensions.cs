@@ -57,22 +57,22 @@ namespace ArgentSea
         }
 
 
-        public static ShardBatch<TModel> Add<TArg, TModel>(this ShardBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : class, new()
+        public static ShardBatch<TModel> Add<TArg, TModel>(this ShardBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : new()
         {
             batch.Add(new ModelStep<TArg, TModel>(query, parameters, resultHandler, optionalArgument));
             return batch;
         }
-        public static ShardBatch<TModel> Add<TModel>(this ShardBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler) where TModel : class, new()
+        public static ShardBatch<TModel> Add<TModel>(this ShardBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler) where TModel : new()
         {
             batch.Add(new ModelStep<object, TModel>(query, parameters, resultHandler, null));
             return batch;
         }
-        public static ShardBatch<TModel> Add<TArg, TModel>(this ShardBatch<TModel> batch, Query query, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : class, new()
+        public static ShardBatch<TModel> Add<TArg, TModel>(this ShardBatch<TModel> batch, Query query, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : new()
         {
             batch.Add(new ModelStep<TArg, TModel>(query, new ParameterCollection(), resultHandler, optionalArgument));
             return batch;
         }
-        public static ShardBatch<TModel> Add<TModel>(this ShardBatch<TModel> batch, Query query, QueryResultModelHandler<object, TModel> resultHandler) where TModel : class, new()
+        public static ShardBatch<TModel> Add<TModel>(this ShardBatch<TModel> batch, Query query, QueryResultModelHandler<object, TModel> resultHandler) where TModel : new()
         {
             batch.Add(new ModelStep<object, TModel>(query, new ParameterCollection(), resultHandler, null));
             return batch;
@@ -188,22 +188,22 @@ namespace ArgentSea
         }
         #endregion
         #region Database Extension Methods
-        public static DatabaseBatch<TModel> Add<TArg, TModel>(this DatabaseBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : class, new()
+        public static DatabaseBatch<TModel> Add<TArg, TModel>(this DatabaseBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : new()
         {
             batch.Add(new ModelStep<TArg, TModel>(query, parameters, resultHandler, optionalArgument));
             return batch;
         }
-        public static DatabaseBatch<TModel> Add<TModel>(this DatabaseBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler) where TModel : class, new()
+        public static DatabaseBatch<TModel> Add<TModel>(this DatabaseBatch<TModel> batch, Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler) where TModel : new()
         {
             batch.Add(new ModelStep<object, TModel>(query, parameters, resultHandler, null));
             return batch;
         }
-        public static DatabaseBatch<TModel> Add<TArg, TModel>(this DatabaseBatch<TModel> batch, Query query, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : class, new()
+        public static DatabaseBatch<TModel> Add<TArg, TModel>(this DatabaseBatch<TModel> batch, Query query, QueryResultModelHandler<TArg, TModel> resultHandler, TArg optionalArgument) where TModel : new()
         {
             batch.Add(new ModelStep<TArg, TModel>(query, new ParameterCollection(), resultHandler, optionalArgument));
             return batch;
         }
-        public static DatabaseBatch<TModel> Add<TModel>(this DatabaseBatch<TModel> batch, Query query, QueryResultModelHandler<object, TModel> resultHandler) where TModel : class, new()
+        public static DatabaseBatch<TModel> Add<TModel>(this DatabaseBatch<TModel> batch, Query query, QueryResultModelHandler<object, TModel> resultHandler) where TModel : new()
         {
             batch.Add(new ModelStep<object, TModel>(query, new ParameterCollection(), resultHandler, null));
             return batch;
@@ -396,7 +396,7 @@ namespace ArgentSea
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        result = _resultHandler(shardId, _query.Sql, _optionalArgument, dataReader, cmd.Parameters, connectionName, logger);
+                        result = _resultHandler(result, shardId, _query.Sql, _optionalArgument, dataReader, cmd.Parameters, connectionName, logger);
                     }
                 }
                 return result;

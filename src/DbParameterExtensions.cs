@@ -245,12 +245,41 @@ namespace ArgentSea
         public static TimeSpan GetTimeSpan(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(TimeSpan), prm.ParameterName) : (TimeSpan)prm.Value;
 
         /// <summary>
-		/// Gets a Nullable&lt;TimeSpan&gt; value from the output parameter, or null if the parameter value is DbNull.
+        /// Gets a Nullable&lt;TimeSpan&gt; value from the output parameter, or null if the parameter value is DbNull.
         /// </summary>
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
         /// <returns>The parameter value as a Nullable&lt;TimeSpan&gt;.</returns>
         public static TimeSpan? GetNullableTimeSpan(this DbParameter prm) => prm.Value as TimeSpan?;
-		#endregion
+
+        /// <summary>
+        /// Gets a DateOnly value from the output parameter.
+        /// </summary>
+        /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
+        /// <returns>The parameter value as a TimeSpan.</returns>
+        /// <exception cref="ArgentSea.UnexpectedNullException">Thrown when a database null value is encountered.</exception>
+        public static DateOnly GetDateOnly(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(DateOnly), prm.ParameterName) : (DateOnly)prm.Value;
+
+        /// <summary>
+        /// Gets a Nullable&lt;DateOnly&gt; value from the output parameter, or null if the parameter value is DbNull.
+        /// </summary>
+        /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
+        /// <returns>The parameter value as a Nullable&lt;TimeSpan&gt;.</returns>
+        public static DateOnly? GetNullableDateOnly(this DbParameter prm) => prm.Value as DateOnly?;
+        /// <summary>
+        /// Gets a TimeSpan value from the output parameter.
+        /// </summary>
+        /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
+        /// <returns>The parameter value as a TimeSpan.</returns>
+        /// <exception cref="ArgentSea.UnexpectedNullException">Thrown when a database null value is encountered.</exception>
+        public static TimeOnly GetTimeOnly(this DbParameter prm) => DBNull.Value.Equals(prm.Value) ? throw new UnexpectedNullException(typeof(TimeOnly), prm.ParameterName) : (TimeOnly)prm.Value;
+
+        /// <summary>
+        /// Gets a Nullable&lt;TimeSpan&gt; value from the output parameter, or null if the parameter value is DbNull.
+        /// </summary>
+        /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
+        /// <returns>The parameter value as a Nullable&lt;TimeSpan&gt;.</returns>
+        public static TimeOnly? GetNullableTimeOnly(this DbParameter prm) => prm.Value as TimeOnly?;
+        #endregion
 
         internal static int GetParameterOrdinal(this DbParameterCollection parameters, string name)
         {

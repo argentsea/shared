@@ -103,7 +103,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<object, TModel> resultHandler, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<object, TModel> resultHandler, CancellationToken cancellationToken) where TModel: new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -116,7 +116,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, QueryResultModelHandler<object, TModel> resultHandler, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, QueryResultModelHandler<object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -128,7 +128,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler, object dataObject, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler, object dataObject, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, resultHandler, null, cancellationToken);
 
             /// <summary>
@@ -142,7 +142,7 @@ namespace ArgentSea
             /// <param name="resultHandler">The thread-safe delegate that converts the data results into the return object type.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, QueryResultModelHandler<object, TModel> resultHandler, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, QueryResultModelHandler<object, TModel> resultHandler, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, resultHandler, null, cancellationToken);
 
 
@@ -158,7 +158,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, string shardParameterName, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<TArg, TModel>(query, parameters, null, shardParameterName, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -173,7 +173,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<TArg, TModel>(query, parameters, shardParameterValues, null, resultHandler, dataObject, cancellationToken);
 
             /// <summary>
@@ -187,7 +187,7 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<TArg, TModel>(query, parameters, null, null, resultHandler, dataObject, cancellationToken);
 
 
@@ -204,9 +204,10 @@ namespace ArgentSea
             /// <param name="dataObject">An object of type TArg to be passed to the resultHandler, which may contain additional data.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken)
+            public Task<List<TModel>> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, QueryResultModelHandler<TArg, TModel> resultHandler, TArg dataObject, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<TArg, TModel>(query, parameters, shardParameterValues, shardParameterName, resultHandler, dataObject, cancellationToken);
             #endregion
+
             #region MapReaderAsync
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -216,7 +217,7 @@ namespace ArgentSea
             /// <param name="parameters">The parameters to be passed to the procedure or statement.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel>, null, cancellationToken);
 
             /// <summary>
@@ -228,7 +229,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel>, null, cancellationToken);
 
             /// <summary>
@@ -240,7 +241,7 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel>, null, cancellationToken);
 
 
@@ -254,7 +255,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel>, null, cancellationToken);
 
             /// <summary>
@@ -268,9 +269,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -284,9 +285,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
             /// <summary>
@@ -301,9 +302,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
 
@@ -320,9 +321,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
             /// <summary>
@@ -337,10 +338,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -355,10 +356,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
             /// <summary>
@@ -374,10 +375,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
 
@@ -395,10 +396,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
             /// <summary>
@@ -414,11 +415,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -434,11 +435,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
             /// <summary>
@@ -455,11 +456,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
 
@@ -478,11 +479,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
             /// <summary>
@@ -499,12 +500,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -521,12 +522,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -544,12 +545,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -568,12 +569,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -591,13 +592,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -615,13 +616,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -640,13 +641,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -666,13 +667,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -691,14 +692,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -717,14 +718,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
             /// <summary>
@@ -744,14 +745,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
 
@@ -773,14 +774,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
             /// <summary>
@@ -800,15 +801,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
@@ -828,15 +829,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             /// <summary>
@@ -857,15 +858,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
 
@@ -888,15 +889,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             #endregion
@@ -909,7 +910,7 @@ namespace ArgentSea
             /// <param name="parameters">The parameters to be passed to the procedure or statement.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel>, null, cancellationToken);
 
             /// <summary>
@@ -921,7 +922,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel>, null, cancellationToken);
 
             /// <summary>
@@ -933,7 +934,7 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel>, null, cancellationToken);
 
             /// <summary>
@@ -946,7 +947,7 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
-            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken) where TModel : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel>, null, cancellationToken);
 
 
@@ -962,8 +963,8 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult : class, new()
+                where TModel : new()
+                where TReaderResult : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, null, cancellationToken);
 
             /// <summary>
@@ -977,8 +978,8 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult : class, new()
+                where TModel : new()
+                where TReaderResult : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, null, cancellationToken);
 
             /// <summary>
@@ -992,8 +993,8 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult : class, new()
+                where TModel : new()
+                where TReaderResult : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, null, cancellationToken);
 
             /// <summary>
@@ -1008,8 +1009,8 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult : class, new()
+                where TModel : new()
+                where TReaderResult : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, null, cancellationToken);
 
             /// <summary>
@@ -1023,9 +1024,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
             /// <summary>
@@ -1040,9 +1041,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
             /// <summary>
@@ -1057,9 +1058,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
             /// <summary>
@@ -1075,9 +1076,9 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
 
             /// <summary>
@@ -1092,10 +1093,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
             /// <summary>
@@ -1111,10 +1112,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
             /// <summary>
@@ -1130,10 +1131,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
             /// <summary>
@@ -1150,10 +1151,10 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, null, cancellationToken);
 
 
@@ -1170,11 +1171,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
             /// <summary>
@@ -1191,11 +1192,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
             /// <summary>
@@ -1212,11 +1213,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
             /// <summary>
@@ -1234,11 +1235,11 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, null, cancellationToken);
 
             /// <summary>
@@ -1255,12 +1256,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -1278,12 +1279,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -1301,12 +1302,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -1325,12 +1326,12 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, null, cancellationToken);
 
             /// <summary>
@@ -1348,13 +1349,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -1373,13 +1374,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -1398,13 +1399,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -1424,13 +1425,13 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, null, cancellationToken);
 
             /// <summary>
@@ -1449,14 +1450,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
             /// <summary>
@@ -1476,14 +1477,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
             /// <summary>
@@ -1503,14 +1504,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
             /// <summary>
@@ -1531,14 +1532,14 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, null, cancellationToken);
 
             /// <summary>
@@ -1558,15 +1559,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             /// <summary>
@@ -1587,15 +1588,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             /// <summary>
@@ -1616,15 +1617,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             /// <summary>
@@ -1646,15 +1647,15 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of the non-null object results returned from any shard.</returns>
             public Task<List<TModel>> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
                 => _shardSet.WriteQueryAllAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, null, cancellationToken);
 
             #endregion

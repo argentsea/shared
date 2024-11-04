@@ -140,7 +140,8 @@ namespace ArgentSea
 
         #region List methods
 
-        internal async Task<List<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, Dictionary<string, object> mockResults, CancellationToken cancellationToken) where TModel : class, new()
+
+        internal async Task<List<TModel>> ListAsync<TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, Dictionary<string, object> mockResults, CancellationToken cancellationToken) where TModel : new()
 		{
             if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(query.Name))
             {
@@ -176,7 +177,7 @@ namespace ArgentSea
 
         #region Query methods
 
-        internal async Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, Dictionary<string, object> mockResults, CancellationToken cancellationToken) 
+        internal async Task<TModel> QueryAsync<TArg, TModel>(TModel instance, Query query, DbParameterCollection parameters, int shardParameterOrdinal, IDictionary<string, object> parameterValues, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, Dictionary<string, object> mockResults, CancellationToken cancellationToken) 
 		{
             if (!(mockResults is null) && mockResults.Count > 0 && mockResults.ContainsKey(query.Name))
             {
@@ -187,7 +188,7 @@ namespace ArgentSea
 
             parameters.SetShardId(shardParameterOrdinal, this._shardId);
             var result = await _resiliencePolicy.ExecuteAsync(newToken =>
-				this.ExecuteQueryWithDelegateAsync<TModel, TArg>(query, parameters, parameterValues, this._shardId, resultHandler, isTopOne, optionalArgument, newToken), cancellationToken).ConfigureAwait(false);
+				this.ExecuteQueryWithDelegateAsync<TModel, TArg>(instance, query, parameters, parameterValues, this._shardId, resultHandler, isTopOne, optionalArgument, newToken), cancellationToken).ConfigureAwait(false);
 
 			var elapsedMS = (long)((Stopwatch.GetTimestamp() - startTimestamp) * TimestampToMilliseconds);
 			_logger?.TraceDbCmdExecuted(query.Name, this._connectionName, elapsedMS);
@@ -239,7 +240,7 @@ namespace ArgentSea
         #region Private Handlers
 
         private async Task<List<TModel>> ExecuteQueryToModelListAsync<TModel>(short shardId, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, CancellationToken cancellationToken) 
-            where TModel : class, new()
+            where TModel : new()
 		{
 			List<TModel> result = null;
 			cancellationToken.ThrowIfCancellationRequested();
@@ -442,7 +443,7 @@ namespace ArgentSea
             }
 		}
 
-        private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, short shardId, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
+        private async Task<TModel> ExecuteQueryWithDelegateAsync<TModel, TArg>(TModel instance, Query query, DbParameterCollection parameters, IDictionary<string, object> parameterValues, short shardId, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken)
 		{
 			var result = default(TModel);
 			cancellationToken.ThrowIfCancellationRequested();
@@ -464,7 +465,7 @@ namespace ArgentSea
 					{
 						cancellationToken.ThrowIfCancellationRequested();
 
-						result = resultHandler(shardId, query.Sql, optionalArgument, dataReader, cmd.Parameters, _connectionName, this._logger);
+						result = resultHandler(instance, shardId, query.Sql, optionalArgument, dataReader, cmd.Parameters, _connectionName, this._logger);
 					}
 				}
 			}

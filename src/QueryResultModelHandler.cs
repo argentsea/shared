@@ -20,6 +20,6 @@ namespace ArgentSea
     /// <param name="connectionDescription">Provides any logging writes with connection information to help troubleshoot any errors.</param>
     /// <param name="logger">A logger instance for writing logs.</param>
     /// <returns>An object of the defined type.</returns>
-    public delegate TModel QueryResultModelHandler<TArg, TModel>(short shardId, string sprocName, TArg optionalArgument, DbDataReader rdr, DbParameterCollection parameters, string connectionDescription, ILogger logger);
+    public delegate TModel QueryResultModelHandler<TArg, TModel>(TModel instance, short shardId, string sprocName, TArg optionalArgument, DbDataReader rdr, DbParameterCollection parameters, string connectionDescription, ILogger logger);
 
 }

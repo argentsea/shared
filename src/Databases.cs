@@ -173,7 +173,7 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>A list containing an object for each data row.</returns>
-            public Task<List<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : class, new()
+            public Task<List<TModel>> MapListAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken) where TModel : new()
 				=> _manager.ListAsync<TModel>(query, parameters, -1, null, this.MockResults, cancellationToken);
 
             /// <summary>
@@ -211,8 +211,20 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, Mapper.DummyType, TModel>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, Mapper.DummyType>, false, null, this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel>(TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, Mapper.DummyType>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -225,9 +237,24 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -241,10 +268,27 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -259,11 +303,30 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -279,12 +342,33 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -301,13 +385,36 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -325,14 +432,39 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
@@ -351,16 +483,43 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, null, this.MockResults, cancellationToken);
-            
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, instance, this.MockResults, cancellationToken);
+
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
             /// </summary>
@@ -379,16 +538,45 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results and output parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query and should map to the output parameters.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. This it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapOutputAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromOutResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, instance, this.MockResults, cancellationToken);
 
             #endregion
 
@@ -402,8 +590,20 @@ namespace ArgentSea
             /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results parameters.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel>(TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -417,10 +617,27 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -435,11 +652,30 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -455,12 +691,33 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -477,13 +734,36 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -501,14 +781,39 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -527,15 +832,42 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6>, false, instance, this.MockResults, cancellationToken);
 
             /// <summary>
             /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -555,21 +887,50 @@ namespace ArgentSea
             /// <returns></returns>
             public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
                 (Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TModel : class, new()
-                where TReaderResult0 : class, new()
-                where TReaderResult1 : class, new()
-                where TReaderResult2 : class, new()
-                where TReaderResult3 : class, new()
-                where TReaderResult4 : class, new()
-                where TReaderResult5 : class, new()
-                where TReaderResult6 : class, new()
-                where TReaderResult7 : class, new()
-                => _manager.QueryAsync<object, TModel>(query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, null, this.MockResults, cancellationToken);
+                where TModel : new()
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, new TModel(), this.MockResults, cancellationToken);
+
+            /// <summary>
+            /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
+            /// </summary>
+            /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
+            /// <typeparam name="TReaderResult0">The first result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult1">The second result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult2">The third result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult3">The forth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult4">The fifth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult5">The sixth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult6">The seventh result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <typeparam name="TReaderResult7">The eighth result set from data reader. If the same type as TModel, it must return exactly one record. Otherwise, it will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+            /// <param name="parameters">The query parameters.</param>
+            /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns></returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>
+                (TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TReaderResult0 : new()
+                where TReaderResult1 : new()
+                where TReaderResult2 : new()
+                where TReaderResult3 : new()
+                where TReaderResult4 : new()
+                where TReaderResult5 : new()
+                where TReaderResult6 : new()
+                where TReaderResult7 : new()
+                => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7>, false, instance, this.MockResults, cancellationToken);
 
             #endregion
 
             /// <summary>
-			/// Connect to the database and return the TModel object returned by the delegate.
+			/// Connect to the database and populate the provided TModel object with data as set by the delegate.
             /// </summary>
             /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
 			/// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
@@ -578,8 +939,38 @@ namespace ArgentSea
             /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-            public Task<TModel> QueryAsync<TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) 
-				=> _manager.QueryAsync<object, TModel>(query, parameters, -1, null, resultHandler, isTopOne, null, this.MockResults, cancellationToken);
+            public Task<TModel> QueryAsync<TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) where TModel : new()
+                => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, resultHandler, isTopOne, null, this.MockResults, cancellationToken);
+
+            /// <summary>
+			/// Connect to the database and return the TModel object returned by the delegate.
+            /// </summary>
+            /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+			/// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+			/// <param name="parameters">The query parameters.</param>
+            /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
+            /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
+			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
+            public Task<TModel> QueryAsync<TModel>(TModel instance, Query query, DbParameterCollection parameters, QueryResultModelHandler<object, TModel> resultHandler, bool isTopOne, CancellationToken cancellationToken) 
+				=> _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, resultHandler, isTopOne, null, this.MockResults, cancellationToken);
+
+            /// <summary>
+			/// Connect to the database and populate the provided TModel object with data as set by the delegate.
+            /// </summary>
+            /// <typeparam name="TArg"></typeparam>
+            /// <typeparam name="TModel">The type of the object to be returned.</typeparam>
+            /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+			/// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+			/// <param name="parameters">The query parameters.</param>
+            /// <param name="resultHandler">A method with a signature that corresponds to the QueryResultModelHandler delegate, which converts the provided DataReader and output parameters and returns an object of type TModel.</param>
+            /// <param name="isTopOne">If the procedure or function is expected to return only one record, setting this to True provides a minor optimization.</param>
+            /// <param name="optionalArgument"></param>
+			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+            /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
+			public Task<TModel> QueryAsync<TArg, TModel>(TModel instance, Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
+				=> _manager.QueryAsync<TArg, TModel>(instance, query, parameters, -1, null, resultHandler, isTopOne, optionalArgument, this.MockResults, cancellationToken);
 
             /// <summary>
 			/// Connect to the database and return the TModel object returned by the delegate.
@@ -593,8 +984,8 @@ namespace ArgentSea
             /// <param name="optionalArgument"></param>
 			/// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
             /// <returns>An object of type TModel, as created and populated by the provided delegate.</returns>
-			public Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) 
-				=> _manager.QueryAsync<TArg, TModel>(query, parameters, -1, null, resultHandler, isTopOne, optionalArgument, this.MockResults, cancellationToken);
+			public Task<TModel> QueryAsync<TArg, TModel>(Query query, DbParameterCollection parameters, QueryResultModelHandler<TArg, TModel> resultHandler, bool isTopOne, TArg optionalArgument, CancellationToken cancellationToken) where TModel : new()
+                => _manager.QueryAsync<TArg, TModel>(new TModel(), query, parameters, -1, null, resultHandler, isTopOne, optionalArgument, this.MockResults, cancellationToken);
 
 
             /// <summary>
