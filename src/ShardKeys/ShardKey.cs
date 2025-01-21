@@ -6,28 +6,30 @@ using System.Runtime.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Buffers.Text;
+using System.Text;
 
 namespace ArgentSea
 {
-    /// <summary>
-    /// Immutable class representing a sharded record with a “compound” key: the (virtual) shardId and the (database) recordId.
-    /// </summary>
-    [Serializable]
-    public struct ShardKey<TRecord> : IEquatable<ShardKey<TRecord>>, IShardKey, ISerializable where TRecord : IComparable
+	/// <summary>
+	/// Immutable class representing a sharded record with a “compound” key: the (virtual) shardId and the (database) recordId.
+	/// </summary>
+	[Serializable]
+	public struct ShardKey<TRecord> : IEquatable<ShardKey<TRecord>>, IShardKey where TRecord : IComparable
 	{
 		private readonly short _shardId;
 		private readonly TRecord _recordId;
 		private readonly char _origin;
 
-        #region Constructors
-        /// <summary>
-        /// Initializes a new instance of sharded record identifier using constituent parts.
-        /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="shardId"></param>
-        /// <param name="recordId"></param>
-        /// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
-        public ShardKey(char origin, short shardId, TRecord recordId)
+		#region Constructors
+		/// <summary>
+		/// Initializes a new instance of sharded record identifier using constituent parts.
+		/// </summary>
+		/// <param name="origin"></param>
+		/// <param name="shardId"></param>
+		/// <param name="recordId"></param>
+		/// <exception cref="ArgentSea.InvalidShardArgumentsException">Thrown when the DataOrigin is '0' (i.e. is empty), but the the shardId or recordId does not equal zero.</exception>
+		public ShardKey(char origin, short shardId, TRecord recordId)
 		{
 			if (origin == '0' && (shardId != 0 || recordId.CompareTo(default(TRecord)) != 0))
 			{
@@ -37,27 +39,27 @@ namespace ArgentSea
 			_shardId = shardId;
 			_recordId = recordId;
 		}
-        /// <summary>
-        /// ISerializer constructor
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        public ShardKey(SerializationInfo info, StreamingContext context)
-        {
-            if (info.MemberCount == 3)
-            {
-                _origin = info.GetChar("origin");
-                _shardId = (short)info.GetValue("shardId", typeof(short));
-                _recordId = (TRecord)info.GetValue("recordId", typeof(TRecord));
-            }
-            else
-            {
-                var tmp = FromExternalString(info.GetString("shardKey"));
-                _origin = tmp.Origin;
-                _shardId = tmp.ShardId;
-                _recordId = tmp.RecordId;
-            }
-        }
+		/// <summary>
+		/// ISerializer constructor
+		/// </summary>
+		/// <param name="info"></param>
+		/// <param name="context"></param>
+		public ShardKey(SerializationInfo info, StreamingContext context)
+		{
+			if (info.MemberCount == 3)
+			{
+				_origin = info.GetChar("origin");
+				_shardId = (short)info.GetValue("shardId", typeof(short));
+				_recordId = (TRecord)info.GetValue("recordId", typeof(TRecord));
+			}
+			else
+			{
+				var tmp = (ShardKey<TRecord>)FromExternalString(info.GetString("shardKey"));
+				_origin = tmp.Origin;
+				_shardId = tmp.ShardId;
+				_recordId = tmp.RecordId;
+			}
+		}
 
 		/// <summary>
 		/// Initiaizes a new instance from a readonly data array.
@@ -65,18 +67,18 @@ namespace ArgentSea
 		/// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method.</param>
 		public ShardKey(ReadOnlySpan<byte> data)
 		{
-            int orgnLen = data[0] & 3;
-            _origin = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
-            var pos = orgnLen + 1;
-            _shardId = BitConverter.ToInt16(data.Slice(pos));
+			int orgnLen = data[0] & 3;
+			_origin = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
+			var pos = orgnLen + 1;
+			_shardId = BitConverter.ToInt16(data.Slice(pos));
 			pos += 2;
 			_recordId = ConvertFromBytes(data, ref pos, typeof(TRecord));
-        }
+		}
 
-        #endregion
-        #region Public Properties and Method
+		#endregion
+		#region Public Properties and Method
 
-        public short ShardId
+		public short ShardId
 		{
 			get { return _shardId; }
 		}
@@ -174,7 +176,8 @@ namespace ArgentSea
 				//case null:
 				//    return new byte[0];
 				default:
-					if (value is Nullable)
+					var tValue = value.GetType();
+					if (tValue.IsGenericType && Nullable.GetUnderlyingType(tValue) != null)
 					{
 						if (value == null)
 						{
@@ -200,8 +203,8 @@ namespace ArgentSea
 			var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this.Origin });
 			var shardData = GetValueBytes(this._shardId);
 			var recordData = GetValueBytes(this._recordId);
-			var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + 1]; //TODO: var aResult = stackalloc byte[aOrigin.Length + shardData.Length + recordData.Length + 1];
-            aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
+			var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + 1];
+			aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
 			var resultIndex = 1;
 			aOrigin.CopyTo(aResult, resultIndex);
 			resultIndex += aOrigin.Length;
@@ -212,7 +215,7 @@ namespace ArgentSea
 			return aResult;
 		}
 
-        
+
 		internal static dynamic ConvertFromBytes(ReadOnlySpan<byte> data, ref int position, Type valueType)
 		{
 			if (valueType == typeof(int))
@@ -316,43 +319,72 @@ namespace ArgentSea
 				var baseType = Nullable.GetUnderlyingType(valueType);
 				return ConvertFromBytes(data, ref position, baseType);
 			}
-            if (valueType == typeof(Guid))
-            {
-                //var result = new Guid(   new byte[] { data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4], data[position + 5], data[position + 6], data[position + 7], data[position + 8], data[position + 9], data[position + 10], data[position + 11], data[position + 12], data[position + 13], data[position + 14], data[position + 15] });
+			if (valueType == typeof(Guid))
+			{
+				//var result = new Guid(   new byte[] { data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4], data[position + 5], data[position + 6], data[position + 7], data[position + 8], data[position + 9], data[position + 10], data[position + 11], data[position + 12], data[position + 13], data[position + 14], data[position + 15] });
 				var result = new Guid(data.Slice(position));
-                position += 16;
-                return result;
-            }
-            else
+				position += 16;
+				return result;
+			}
+			else
 			{
 				throw new Exception($"Could not recognized the type {valueType.ToString()}.");
 			}
 		}
 
-        /// <summary>
-        /// Serializes ShardKey data into a URL-safe string with a checksum
-        /// </summary>
-        /// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
-        public string ToExternalString()
+		/// <summary>
+		/// Serializes ShardKey data into a URL-safe string with a checksum
+		/// </summary>
+		/// <returns>A string which includes the concurrency stamp if defined and includeConcurrencyStamp is true, otherwise returns a smaller string .</returns>
+		public string ToExternalString()
 		{
-            return StringExtensions.SerializeToExternalString(ToArray());
+			return StringExtensions.SerializeToExternalString(ToArray());
 		}
+
+
+		/// <summary>
+		/// Create a new instance of ShardKey from a URL-safe string; this method is the inverse of ToExternalString().
+		/// </summary>
+		/// <param name="value">A string generated by the ToExternalString() method.</param>
+		/// <returns>An instance of this type.</returns>
 		public static ShardKey<TRecord> FromExternalString(string value)
 		{
 
-            var aValues = StringExtensions.SerializeFromExternalString(value);
-			return new ShardKey<TRecord>(new ReadOnlySpan<byte>(aValues));
-			//short shardId = 0;
-			//TRecord recordId = default(TRecord);
-
-			//int orgnLen = aValues[0] & 3;
-			//var orgn = System.Text.Encoding.UTF8.GetString(aValues, 1, orgnLen)[0];
-			//var pos = orgnLen + 1;
-
-			//shardId = ConvertFromBytes(aValues, ref pos, typeof(short));
-			//recordId = ConvertFromBytes(aValues, ref pos, typeof(TRecord));
-			//return new ShardKey<TRecord>(orgn, shardId, recordId);
+			var aValues = StringExtensions.SerializeFromExternalString(value);
+			return new ShardKey<TRecord>(aValues);
 		}
+
+
+		/// <summary>
+		/// Create a new instance of ShardKey from binary data; this method is the inverse of ToArray().
+		/// </summary>
+		/// <param name="value">A binary value generaeted by the ToArraay() method.</param>
+		/// <returns>An instance of this type.</returns>
+		public static ShardKey<TRecord> FromSpan(ReadOnlySpan<byte> value)
+		{
+			return new ShardKey<TRecord>(value);
+		}
+
+		/// <summary>
+		/// Create a new instance of ShardKey from UTF8 encoded binary data; this method is the inverse of ToUtf8().
+		/// </summary>
+		/// <param name="value">A binary value generaeted by the ToUtf8() method.</param>
+		/// <returns>An instance of this type.</returns>
+		public static ShardKey<TRecord> FromUtf8(ReadOnlySpan<byte> encoded)
+		{
+			return FromSpan(StringExtensions.Decode(encoded));
+		}
+
+
+		/// <summary>
+		/// Serializes ShardKey data into a URL-safe string with a checksum
+		/// </summary>
+		/// <returns>A Uft8 encoded array.</returns>
+		public ReadOnlyMemory<byte> ToUtf8()
+        {
+			var aValues = ToArray();
+            return StringExtensions.EncodeToUtf8(ref aValues);
+        }
 
         /// <summary>
         /// Given a list of Models with ShardKey keys, return a distinct list of shard Ids.

@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace ArgentSea
 {
@@ -655,6 +656,179 @@ namespace ArgentSea
                 return null;
             }
 
+        }
+
+        /// <summary>
+        /// Method make public to share the ShardKey rendering logic with libraries such as ArgentSea.Orleans. Not intended for client use.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static bool ShardKeyInMapProperties(PropertyInfo prop, Type propType, MapShardKeyAttribute shdAttr, bool isNullable, bool isShardKey, bool isShardChild, bool isShardGrandChild, bool isShardGreatGrandChild, Expression expProperty, List<Expression> expressions, List<ParameterExpression> variables, ParameterExpression prmSqlPrms, ParameterExpression expIgnoreParameters, ParameterExpression expLogger, HashSet<string> noDupPrmNameList, MethodInfo miLogTrace, ref bool foundPrms, ILogger logger)
+        {
+            Expression expOriginalProperty = expProperty;
+
+            var foundRecordId = false;
+            var foundChildId = false;
+            var foundGrandChildId = false;
+            var foundGreatGrandChildId = false;
+            expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
+
+            Expression expDetectNullOrEmpty;
+            if (isNullable)
+            {
+                expProperty = Expression.Property(expProperty, propType.GetProperty(nameof(Nullable<int>.Value)));
+                propType = Nullable.GetUnderlyingType(propType);
+                expDetectNullOrEmpty = Expression.Property(expOriginalProperty, prop.PropertyType.GetProperty(nameof(Nullable<int>.HasValue)));
+            }
+            else
+            {
+                expDetectNullOrEmpty = Expression.NotEqual(expOriginalProperty, Expression.Property(null, propType.GetProperty(nameof(ShardKey<int>.Empty))));
+            }
+
+
+            if (shdAttr.ShardParameter is not null)
+            {
+                var expShardProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int>.ShardId)));
+                ParameterExpression expNullableShardId = Expression.Variable(typeof(Nullable<>).MakeGenericType(typeof(short)), prop.Name + "_NullableShardId");
+                variables.Add(expNullableShardId);
+                expressions.Add(Expression.IfThenElse(
+                    expDetectNullOrEmpty,
+                    Expression.Assign(expNullableShardId, Expression.Convert(expShardProperty, expNullableShardId.Type)),
+                    Expression.Assign(expNullableShardId, Expression.Constant(null, expNullableShardId.Type))
+                    ));
+                shdAttr.ShardParameter.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableShardId, expNullableShardId.Type, expLogger, logger);
+            }
+
+            var attrPMs = prop.GetCustomAttributes<ParameterMapAttributeBase>(true);
+
+            foreach (var attrPM in attrPMs)
+            {
+                if (attrPM.Name == shdAttr.RecordIdName)
+                {
+                    foundRecordId = true;
+                    var tDataRecordId = propType.GetGenericArguments()[0];
+                    if (!attrPM.IsValidType(tDataRecordId))
+                    {
+                        throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
+                    }
+                    var expRecordProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int>.RecordId)));
+                    ParameterExpression expNullableRecordId;
+                    if (tDataRecordId.IsValueType)
+                    {
+                        expNullableRecordId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tDataRecordId), prop.Name + "_NullableRecordId");
+                    }
+                    else
+                    {
+                        expNullableRecordId = Expression.Variable(tDataRecordId, prop.Name + "_NullableRecordId");
+                    }
+                    variables.Add(expNullableRecordId);
+                    expressions.Add(Expression.IfThenElse(
+                        expDetectNullOrEmpty,
+                        Expression.Assign(expNullableRecordId, Expression.Convert(expRecordProperty, expNullableRecordId.Type)),
+                        Expression.Assign(expNullableRecordId, Expression.Constant(null, expNullableRecordId.Type))
+                        ));
+                    attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableRecordId, expNullableRecordId.Type, expLogger, logger);
+                    foundPrms = true;
+                }
+                if ((isShardChild || isShardGrandChild || isShardGreatGrandChild) && attrPM.Name == shdAttr.ChildIdName)
+                {
+                    foundChildId = true;
+
+                    var tDataId = propType.GetGenericArguments()[1];
+                    if (!attrPM.IsValidType(tDataId))
+                    {
+                        throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
+                    }
+                    var expChildProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int, int>.ChildId)));
+                    ParameterExpression expNullableChildId;
+                    if (tDataId.IsValueType)
+                    {
+                        expNullableChildId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tDataId), prop.Name + "_NullableChildId");
+                    }
+                    else
+                    {
+                        expNullableChildId = Expression.Variable(tDataId, prop.Name + "_NullableChildId");
+                    }
+                    variables.Add(expNullableChildId);
+                    expressions.Add(Expression.IfThenElse(
+                        expDetectNullOrEmpty,
+                        Expression.Assign(expNullableChildId, Expression.Convert(expChildProperty, expNullableChildId.Type)),
+                        Expression.Assign(expNullableChildId, Expression.Constant(null, expNullableChildId.Type))
+                        ));
+                    attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableChildId, expNullableChildId.Type, expLogger, logger);
+                    foundPrms = true;
+                }
+                if ((isShardGrandChild || isShardGreatGrandChild) && attrPM.Name == shdAttr.GrandChildIdName)
+                {
+                    foundGrandChildId = true;
+                    var tDataId = propType.GetGenericArguments()[2];
+                    if (!attrPM.IsValidType(tDataId))
+                    {
+                        throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
+                    }
+                    var expChildProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int, int, int>.GrandChildId)));
+                    ParameterExpression expNullableChildId;
+                    if (tDataId.IsValueType)
+                    {
+                        expNullableChildId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tDataId), prop.Name + "_NullableGrandChildId");
+                    }
+                    else
+                    {
+                        expNullableChildId = Expression.Variable(tDataId, prop.Name + "_NullableGrandChildId");
+                    }
+                    variables.Add(expNullableChildId);
+                    expressions.Add(Expression.IfThenElse(
+                        expDetectNullOrEmpty,
+                        Expression.Assign(expNullableChildId, Expression.Convert(expChildProperty, expNullableChildId.Type)),
+                        Expression.Assign(expNullableChildId, Expression.Constant(null, expNullableChildId.Type))
+                        ));
+                    attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableChildId, expNullableChildId.Type, expLogger, logger);
+                    foundPrms = true;
+                }
+                if (isShardGreatGrandChild && attrPM.Name == shdAttr.GreatGrandChildIdName)
+                {
+                    foundGreatGrandChildId = true;
+                    var tDataId = propType.GetGenericArguments()[3];
+                    if (!attrPM.IsValidType(tDataId))
+                    {
+                        throw new InvalidMapTypeException(prop, attrPM.SqlType, attrPM.SqlTypeName);
+                    }
+                    var expChildProperty = Expression.Property(expProperty, propType.GetProperty(nameof(ShardKey<int, int, int, int>.GreatGrandChildId)));
+                    ParameterExpression expNullableChildId;
+                    if (tDataId.IsValueType)
+                    {
+                        expNullableChildId = Expression.Variable(typeof(Nullable<>).MakeGenericType(tDataId), prop.Name + "_NullableGreatGrandChildId");
+                    }
+                    else
+                    {
+                        expNullableChildId = Expression.Variable(tDataId, prop.Name + "_NullableGreatGrandChildId");
+                    }
+                    variables.Add(expNullableChildId);
+                    expressions.Add(Expression.IfThenElse(
+                        expDetectNullOrEmpty,
+                        Expression.Assign(expNullableChildId, Expression.Convert(expChildProperty, expNullableChildId.Type)),
+                        Expression.Assign(expNullableChildId, Expression.Constant(null, expNullableChildId.Type))
+                        ));
+                    attrPM.AppendInParameterExpressions(expressions, prmSqlPrms, expIgnoreParameters, noDupPrmNameList, expNullableChildId, expNullableChildId.Type, expLogger, logger);
+                    foundPrms = true;
+                }
+            }
+            if (!foundRecordId)
+            {
+                throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.RecordId, shdAttr.RecordIdName);
+            }
+            if ((isShardChild || isShardGrandChild || isShardGreatGrandChild) && !foundChildId)
+            {
+                throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.ChildId, shdAttr.ChildIdName);
+            }
+            if ((isShardGrandChild || isShardGreatGrandChild) && !foundGrandChildId)
+            {
+                throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.GrandChildId, shdAttr.GrandChildIdName);
+            }
+            if (isShardGreatGrandChild && !foundGreatGrandChildId)
+            {
+                throw new MapAttributeMissingException(MapAttributeMissingException.ShardElement.GreatGrandChildId, shdAttr.GreatGrandChildIdName);
+            }
+            return true;
         }
 
     }

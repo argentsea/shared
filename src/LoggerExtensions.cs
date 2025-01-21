@@ -17,19 +17,19 @@ namespace ArgentSea
     {
         public enum EventIdentifier
         {
-            ConnectionStringBuilt,
-            ExpressionTreeCreation,
-            MapperSqlParameterNotFound,
-            MapperSqlColumnNotFound,
-            MapperCacheStatus,
-            MapperProcessTrace,
-            UnexpectedDbNull,
-            MapperResultsReaderInvalid,
-            CmdExecuted,
-            ConnectRetry,
-            CommandRetry,
-            CircuitBreaker,
-            BatchStep
+            ConnectionStringBuilt = 0,
+            ExpressionTreeCreation = 1,
+            MapperSqlParameterNotFound = 2,
+            MapperSqlColumnNotFound = 3,
+            MapperCacheStatus = 4,
+            MapperProcessTrace = 5,
+            UnexpectedDbNull = 6,
+            MapperResultsReaderInvalid = 7,
+            CmdExecuted = 8,
+            ConnectRetry = 9,
+            CommandRetry = 10,
+            CircuitBreaker = 11,
+            BatchStep = 12
         }
 
         private static readonly Action<ILogger, string, Exception> _sqlConnectionStringBuilt;

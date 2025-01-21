@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 
 namespace ArgentSea
@@ -91,7 +92,7 @@ namespace ArgentSea
 			}
 			return sb.ToString(0, lastNonSeperator);
 		}
-        internal static byte[] SerializeFromExternalString(string value)
+        internal static Span<byte> SerializeFromExternalString(string value)
         {
             if (value is null)
             {
@@ -102,19 +103,21 @@ namespace ArgentSea
             int origCheckSumHigh = CharToCheckSum(value[0]);
             int origCheckSumLow = CharToCheckSum(value[1]);
             int origCheckSum = ((origCheckSumHigh & 0x3f) << 6) | origCheckSumLow;
-            if ((origCheckSum & 0x400) == 0x400)
-            {
-                subValue += "=";
-                if ((origCheckSum & 0x800) == 0x800)
-                {
-                    subValue += "=";
-                }
-            }
-            origCheckSum &= 0x3FF;
-            subValue = subValue.Replace('_', '+').Replace('~', '/');
+            //if ((origCheckSum & 0x400) == 0x400)
+            //{
+            //    subValue += "=";
+            //    if ((origCheckSum & 0x800) == 0x800)
+            //    {
+            //        subValue += "=";
+            //    }
+            //}
+            origCheckSum &= 0xFFF;
+            //subValue = subValue.Replace('_', '+').Replace('~', '/');
 
-            var aValues = Convert.FromBase64String(subValue);
+            //var aValues = Convert.FromBase64String(subValue);
+            var aValues = Decode(subValue);
 
+            int checkSum = 0;
             for (int i = 0; i < aValues.Length; i++)
             {
                 if (i % 6 == 0)
@@ -141,14 +144,10 @@ namespace ArgentSea
                 {
                     aValues[i] ^= 77;
                 }
+                checkSum += aValues[i];
+                checkSum &= 0xFFF;
             }
 
-            int checkSum = 0;
-            foreach (var chr in aValues)
-            {
-                checkSum += chr;
-                checkSum &= 0x3ff;
-            }
             if (origCheckSum != checkSum)
             {
                 throw new Exception("External key string is not valid.");
@@ -164,14 +163,11 @@ namespace ArgentSea
         internal static string SerializeToExternalString(byte[] value)
         {
             int checkSum = 0;
-            foreach (var chr in value)
-            {
-                checkSum += chr;
-                checkSum &= 0x3ff;
-            }
 
             for (int i = 0; i < value.Length; i++)
             {
+                checkSum += value[i];
+                checkSum &= 0xfff;
                 if (i % 6 == 0)
                 {
                     value[i] ^= 119;
@@ -197,19 +193,11 @@ namespace ArgentSea
                     value[i] ^= 77;
                 }
             }
-            var base64Value = Convert.ToBase64String(value).Replace('+', '_').Replace('/', '~');
-            if (base64Value[base64Value.Length - 1] == '=')
-            {
-                checkSum |= 0x400;
-                if (base64Value[base64Value.Length - 2] == '=')
-                {
-                    checkSum |= 0x800;
-                }
-            }
             var checkSumCharHigh = CheckSumToChar(checkSum >> 6).ToString();
             var checkSumCharLow = CheckSumToChar(checkSum & 0x3f).ToString();
 
-            return checkSumCharHigh + checkSumCharLow + base64Value.TrimEnd('=');
+            return checkSumCharHigh + checkSumCharLow  + EncodeToString(ref value);
+
         }
 
         private static char CheckSumToChar(int checkSum)
@@ -229,11 +217,11 @@ namespace ArgentSea
             }
             else if (checkSum == 62)
             {
-                result = '+';
+                result = '-';
             }
             else
             {
-                result = '/';
+                result = '_';
             }
             return result;
         }
@@ -252,11 +240,11 @@ namespace ArgentSea
             {
                 origCheckSum = ((int)charCheckSum - 0x30) + 52;
             }
-            else if ('+' == charCheckSum)
+            else if ('-' == charCheckSum)
             {
                 origCheckSum = 62;
             }
-            else if ('/' == charCheckSum)
+            else if ('_' == charCheckSum)
             {
                 origCheckSum = 63;
             }
@@ -265,6 +253,177 @@ namespace ArgentSea
                 throw new Exception("External key string has been corrupted.");
             }
             return origCheckSum;
+        }
+
+        private const string encodingChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_~";
+        private static readonly char[] s_encode64Chars = encodingChars.ToCharArray();
+        private static readonly byte[] s_encode64Utf8 = Encoding.UTF8.GetBytes(encodingChars);
+        private static readonly byte[] s_decode64 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 0, 0, 0, 0, 62, 0, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 63, 0];
+
+
+        /// <summary>
+        /// Converts a byte array to a URL-safe encoded string.
+        /// </summary>
+        /// <param name="key">The binary value to encode.</param>
+        /// <returns>A string representing the submitted value.</returns>
+        public static string EncodeToString(ref byte[] key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            var keyLength = key.Length;
+            var resultLength = keyLength + (keyLength / 3) + (keyLength % 3 > 0 ? 1 : 0);
+            return string.Create(resultLength, key, (buffer, keyValue) =>
+            {
+                var encodeChars = s_encode64Chars;
+                var keyLength = keyValue.Length;
+                var b_index = 0;
+                var quad = 0;
+                var s_index = 0;
+                for (b_index = 0; b_index < keyLength; b_index = b_index + 3)
+                {
+                    byte value = keyValue[b_index];
+                    buffer[s_index] = encodeChars[value & 63];
+                    s_index++;
+                    quad = ((value & 192) >> 6);
+                    if (b_index + 1 < keyLength)
+                    {
+                        value = keyValue[b_index + 1];
+                        buffer[s_index] = encodeChars[value & 63];
+                        s_index++;
+                        quad = quad | ((value & 192) >> 4);
+                    }
+                    if (b_index + 2 < keyLength)
+                    { 
+                        value = keyValue[b_index + 2];
+                        buffer[s_index] = encodeChars[value & 63];
+                        s_index++;
+                        quad = quad | ((value & 192) >> 2);
+                    }
+                    buffer[s_index] = encodeChars[quad];
+                    s_index++;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Converts a byte array to a URL-safe encoded string.
+        /// </summary>
+        /// <param name="key">The binary value to encode.</param>
+        /// <returns>A string representing the submitted value.</returns>
+        public static byte[] EncodeToUtf8(ref byte[] key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            var keyLength = key.Length;
+            var resultLength = keyLength + (keyLength / 3) + (keyLength % 3 > 0 ? 1 : 0);
+
+            Span<byte> result = stackalloc byte[resultLength];
+            var encodeChars = s_encode64Utf8;
+            var b_index = 0;
+            var quad = 0;
+            var s_index = 0;
+            var keyValue = key;
+            for (b_index = 0; b_index < keyLength; b_index = b_index + 3)
+            {
+                byte value = keyValue[b_index];
+                result[s_index] = encodeChars[value & 63];
+                s_index++;
+                quad = ((value & 192) >> 6);
+                if (b_index + 1 < keyLength)
+                {
+                    value = keyValue[b_index + 1];
+                    result[s_index] = encodeChars[value & 63];
+                    s_index++;
+                    quad = quad | ((value & 192) >> 4);
+                }
+                if (b_index + 2 < keyLength)
+                {
+                    value = keyValue[b_index + 2];
+                    result[s_index] = encodeChars[value & 63];
+                    s_index++;
+                    quad = quad | ((value & 192) >> 2);
+                }
+                result[s_index] = encodeChars[quad];
+                s_index++;
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// Reverts an encoded string back to a byte array.
+        /// </summary>
+        /// <param name="encoded">The encoded string as UTF8 encoded.</param>
+        /// <returns>The orginal bytes that were encoded.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static byte[] Decode(ReadOnlySpan<byte> encoded)
+        {
+            if (encoded == null)
+            {
+                throw new ArgumentNullException(nameof(encoded));
+            }
+            var keyLength = encoded.Length;
+            var resultLength = keyLength - (keyLength / 4) - (keyLength % 4 > 0 ? 1 : 0);
+            Span<byte> result = stackalloc byte[resultLength];
+            var decodeChars = s_decode64;
+            var b_index = 0;
+            byte quad = 0;
+            var s_index = 0;
+
+            while (b_index < keyLength)
+            {
+                if (b_index + 3 < keyLength)
+                {
+                    quad = decodeChars[encoded[b_index + 3]];
+                    result[s_index] = (byte)(decodeChars[encoded[b_index]] | ((quad & 3) << 6));
+                    b_index++;
+                    s_index++;
+                    result[s_index] = (byte)(decodeChars[encoded[b_index]] | ((quad & 12) << 4));
+                    b_index++;
+                    s_index++;
+                    result[s_index] = (byte)(decodeChars[encoded[b_index]] | ((quad & 48) << 2));
+                    b_index = b_index + 2;
+                    s_index++;
+                }
+                else
+                {
+                    quad = decodeChars[encoded[keyLength - 1]];
+                    if (b_index < keyLength - 1)
+                    {
+                        result[s_index] = (byte)(decodeChars[encoded[b_index]] | ((quad & 3) << 6));
+                        b_index++;
+                        s_index++;
+                    }
+                    if (b_index < keyLength - 1)
+                    {
+                        result[s_index] = (byte)(decodeChars[encoded[b_index]] | ((quad & 12) << 4));
+                        b_index++;
+                        s_index++;
+                    }
+                    if (b_index < keyLength - 1)
+                    {
+                        result[s_index] = (byte)(decodeChars[encoded[b_index]] | ((quad & 48) << 2));
+                        b_index++;
+                        s_index++;
+                    }
+                    b_index++;
+                }
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// Reverts an encoded string back to a byte array.
+        /// </summary>
+        /// <param name="encoded">The encoded string.</param>
+        /// <returns>The orginal bytes that were encoded.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static Span<byte> Decode(string encoded)
+        {
+            return Decode(Encoding.UTF8.GetBytes(encoded));
         }
     }
 }

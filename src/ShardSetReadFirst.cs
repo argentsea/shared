@@ -199,6 +199,66 @@ namespace ArgentSea
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
             /// </summary>
             /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="query">The statement or procedure to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or statement.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+                where TModel : new()
+                where TReaderResult : new()
+                => _shardSet.ReadQueryFirstAsync<object, TModel>(query, parameters, null, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult>, null, cancellationToken);
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="query">The statement or procedure to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or statement.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : new()
+                where TReaderResult : new()
+                => _shardSet.ReadQueryFirstAsync<object, TModel>(query, parameters, null, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult>, null, cancellationToken);
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="query">The statement or procedure to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or statement.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
+                where TModel : new()
+                where TReaderResult : new()
+                => _shardSet.ReadQueryFirstAsync<object, TModel>(query, parameters, shardParameterValues, null, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult>, null, cancellationToken);
+
+
+            /// <summary>
+            /// Query across the shards identified by collection of shard parameter values, returns first non-null result using Mapping attributes and the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
+            /// <typeparam name="TReaderResult">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
+            /// <param name="query">The statement or procedure to be invoked on every instance.</param>
+            /// <param name="parameters">The parameters to be passed to the procedure or statement.</param>
+            /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
+            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
+            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
+            /// <returns>The first non=null object result returned from any shard.</returns>
+            public Task<TModel> MapReaderAsync<TModel, TReaderResult>(Query query, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+                where TModel : new()
+                where TReaderResult : new()
+                => _shardSet.ReadQueryFirstAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult>, null, cancellationToken);
+
+            /// <summary>
+            /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
+            /// </summary>
+            /// <typeparam name="TModel">The data object return type for the list</typeparam>
             /// <typeparam name="TReaderResult0">The first result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <typeparam name="TReaderResult1">The second result set from data reader. This will be mapped to any property with a List of this type.</typeparam>
             /// <param name="query">The statement or procedure to be invoked on every instance.</param>
@@ -262,6 +322,13 @@ namespace ArgentSea
                 where TReaderResult0 : new()
                 where TReaderResult1 : new()
                 => _shardSet.ReadQueryFirstAsync<object, TModel>(query, parameters, shardParameterValues, shardParameterName, Mapper.ModelFromReaderResultsHandler<TModel, TReaderResult0, TReaderResult1>, null, cancellationToken);
+
+
+
+
+
+
+
 
             /// <summary>
             /// Query across all shards in the shard set, using mapping attributes to build results from the DataReader.
