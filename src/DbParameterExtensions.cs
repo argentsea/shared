@@ -3,6 +3,7 @@
 
 using System;
 using System.Data.Common;
+using System.Text.Json;
 
 namespace ArgentSea
 {
@@ -265,6 +266,7 @@ namespace ArgentSea
         /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
         /// <returns>The parameter value as a Nullable&lt;TimeSpan&gt;.</returns>
         public static DateOnly? GetNullableDateOnly(this DbParameter prm) => prm.Value as DateOnly?;
+
         /// <summary>
         /// Gets a TimeSpan value from the output parameter.
         /// </summary>
@@ -280,6 +282,14 @@ namespace ArgentSea
         /// <returns>The parameter value as a Nullable&lt;TimeSpan&gt;.</returns>
         public static TimeOnly? GetNullableTimeOnly(this DbParameter prm) => prm.Value as TimeOnly?;
         #endregion
+
+        /// <summary>
+        /// Gets a JsonDocument value from the output parameter.
+        /// </summary>
+        /// <param name="prm">The output parameter, populated with a value (after Execute).</param>
+        /// <returns>The parameter value as a JsonDocument.</returns>
+        /// <exception cref="ArgentSea.UnexpectedNullException">Thrown when a database null value is encountered.</exception>
+        public static JsonDocument GetJson(this DbParameter prm) =>  prm.Value as JsonDocument;
 
         internal static int GetParameterOrdinal(this DbParameterCollection parameters, string name)
         {

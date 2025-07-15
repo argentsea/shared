@@ -342,7 +342,7 @@ namespace ArgentSea
             var grandChildData = ShardKey<TRecord>.GetValueBytes(_key.GrandChildId);
             var greatGrandChildData = ShardKey<TRecord>.GetValueBytes(_greatGrandChildId);
 
-            var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + childData.Length + grandChildData.Length + 1];
+            var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + childData.Length + grandChildData.Length + grandChildData.Length + 1];
             aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
             var resultIndex = 1;
             aOrigin.CopyTo(aResult, resultIndex);

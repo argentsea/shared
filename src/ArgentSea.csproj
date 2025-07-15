@@ -12,26 +12,37 @@
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageProjectUrl>https://www.argentsea.com</PackageProjectUrl>
 	  <SignAssembly>false</SignAssembly>
-	  <Authors>John Hicks</Authors>
+	  <Authors>johnhicks</Authors>
 	  <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
 	  <RepositoryUrl>https://github.com/argentsea/shared</RepositoryUrl>
-	  <Version>2.0.0</Version>
+	  <Version>2.0.0-prelrease-2</Version>
 	  <Description>This is the core ArgentSea library, used by platform-specific implementations like ArgentSea.Sql (Microsoft SQL Server) and ArgentSea.Pg (PostgreSQL).</Description>
 	  <Copyright>© John Hicks</Copyright>
 	  <PackageIconUrl>https://www.argentsea.com/images/argentsea-logo.png</PackageIconUrl>
+	  <Title>ArgentSea core library</Title>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>True</Optimize>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="qsxaxhcc.qlq~" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
