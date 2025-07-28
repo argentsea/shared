@@ -2,8 +2,9 @@
 // See the LICENSE file in the repository root for more information.
 
 using System;
-using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
 
 namespace ArgentSea
 {
@@ -68,45 +69,60 @@ namespace ArgentSea
             var pos = orgnLen + 1;
             var shardId = BitConverter.ToInt16(data.Slice(pos));
             pos += 2;
-            var recordId = ShardKey<TRecord>.ConvertFromBytes(data, ref pos, typeof(TRecord));
-            this._key = new ShardKey<TRecord>(origin, shardId, recordId);
-            this._childId = ShardKey<TRecord>.ConvertFromBytes(data, ref pos, typeof(TChild));
-        }
-
-        public TChild ChildId
-		{
-			get { return _childId; }
-		}
-		public char Origin
-		{
-			get
-			{
-				return _key.Origin;
-			}
-		}
-
-		public short ShardId
-		{
-			get
-			{
-				return _key.ShardId;
-			}
-		}
-		public TRecord RecordId
-		{
-			get
-			{
-				return _key.RecordId;
-			}
-		}
-
-		public bool IsEmpty
-        {
-            get
+            if (!ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TRecord), out dynamic recordId))
             {
-                return this.Key.IsEmpty && this.ChildId.CompareTo(default(TChild)) == 0;
+                throw new InvalidDataException("Could not parse binary record data to create a ShardKey.");
             }
+            this._key = new ShardKey<TRecord>(origin, shardId, recordId);
+            if (!ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TChild), out dynamic childResult))
+            {
+                throw new InvalidDataException("Could not parse binary child data to create a ShardKey.");
+            }
+            this._childId = childResult;
         }
+
+        public bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord, TChild> result)
+        {
+            result = ShardKey<TRecord, TChild>.Empty;
+            if (data.Length < 4) // smallest possible type 1 + 2 + x (origin + short + TRecord.Length)
+            {
+                return false;
+            }
+            int orgnLen = data[0] & 3;
+            if (data.Length < 3 + orgnLen) // new smallest possible type orgn + 2 + x (origin + short + TRecord.Length)
+            {
+                return false;
+            }
+            char orginResult;
+            orginResult = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
+            var pos = orgnLen + 1;
+            short shardIdResult = BitConverter.ToInt16(data.Slice(pos));
+            pos += 2;
+            var success = ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TRecord), out dynamic recordIdresult);
+            if (!success)
+            {
+                return false;
+            }
+            success = ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TChild), out dynamic childIdresult);
+            if (!success)
+            {
+                return false;
+            }
+            result = new ShardKey<TRecord, TChild>(orginResult, shardIdResult, recordIdresult, childIdresult);
+            return true;
+        }
+
+
+        public TChild ChildId { get => _childId; }
+
+		public char Origin { get => _key.Origin; }
+
+
+		public short ShardId { get => _key.ShardId; }
+
+		public TRecord RecordId { get => _key.RecordId;  }
+
+        public bool IsEmpty {  get => this.Key.IsEmpty && this.ChildId.CompareTo(default(TChild)) == 0; }
 
         /// <summary>
         /// Given a list of Models with ShardKChild keys, returns a distinct list of shard Ids, except for the shard Id specified.
@@ -395,11 +411,14 @@ namespace ArgentSea
         {
             return !sc1.Equals(sc2);
         }
+ 
+        private static Lazy<ShardKey<TRecord, TChild>> _lazyEmpty = new Lazy<ShardKey<TRecord, TChild>>(() => new ShardKey<TRecord, TChild>(new ShardKey<TRecord>('0', 0, default(TRecord)), default(TChild)));
+
         public static ShardKey<TRecord, TChild> Empty
         {
             get
             {
-                return new ShardKey<TRecord, TChild>(new ShardKey<TRecord>('0', 0, default(TRecord)), default(TChild));
+                return _lazyEmpty.Value;
             }
         }
         public void GetObjectData(SerializationInfo info, StreamingContext context)

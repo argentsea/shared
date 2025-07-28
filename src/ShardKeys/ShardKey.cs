@@ -2,12 +2,16 @@
 // See the LICENSE file in the repository root for more information.
 
 using System;
-using System.Runtime.Serialization;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Buffers.Text;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Runtime;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ArgentSea
 {
@@ -72,38 +76,52 @@ namespace ArgentSea
 			var pos = orgnLen + 1;
 			_shardId = BitConverter.ToInt16(data.Slice(pos));
 			pos += 2;
-			_recordId = ConvertFromBytes(data, ref pos, typeof(TRecord));
-		}
-
-		#endregion
-		#region Public Properties and Method
-
-		public short ShardId
-		{
-			get { return _shardId; }
-		}
-		public TRecord RecordId
-		{
-			get { return _recordId; }
-		}
-		public char Origin
-		{
-			get
+			if (!TryConvertFromBytes(ref data, ref pos, typeof(TRecord), out dynamic result))
 			{
-				return this._origin;
-			}
-		}
-		public bool IsEmpty
+				throw new InvalidDataException("Could not parse binary data to create a ShardKey.");
+            }
+            _recordId = result;
+        }
+
+        public bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord> result)
 		{
-			get
+            result = ShardKey<TRecord>.Empty;
+            if (data.Length < 4) // smallest possible type 1 + 2 + x (origin + short + TRecord.Length)
 			{
-				return this._origin == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId == 0;
+				return false;
 			}
-		}
-		public override string ToString()
-		{
-			return $"{{ \"origin\": \"{_origin}\", \"shard\": {_shardId.ToString()}, \"id\": \"{_recordId.ToString()}\"}}";
-		}
+            int orgnLen = data[0] & 3;
+            if (data.Length < 3 + orgnLen) // new smallest possible type orgn + 2 + x (origin + short + TRecord.Length)
+            {
+                return false;
+            }
+            char orginResult;
+            orginResult = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
+            var pos = orgnLen + 1;
+            short shardIdResult = BitConverter.ToInt16(data.Slice(pos));
+            pos += 2;
+            var success = ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TRecord), out dynamic recordIdresult);
+            if (!success)
+			{
+                return false;
+            }
+			result = new ShardKey<TRecord>(orginResult, shardIdResult, recordIdresult );
+			return true;
+        }
+
+        #endregion
+        #region Public Properties and Method
+
+        public char Origin { get => _origin; }
+
+
+        public short ShardId { get => _shardId; }
+
+        public TRecord RecordId { get => _recordId;  }
+
+        public bool IsEmpty { get => this._origin == '0' && this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId == 0; }
+        
+		public override string ToString() => $"{{ \"origin\": \"{_origin}\", \"shard\": {_shardId.ToString()}, \"id\": \"{_recordId.ToString()}\"}}";
 
 		#endregion
 
@@ -215,121 +233,164 @@ namespace ArgentSea
 			return aResult;
 		}
 
-
-		internal static dynamic ConvertFromBytes(ReadOnlySpan<byte> data, ref int position, Type valueType)
+		private static bool TryConvertType<T>(ref ReadOnlySpan<byte> data, ref int position, int length, Func<ReadOnlySpan<byte>, T> converter, out T result)
 		{
-			if (valueType == typeof(int))
+            if (data.Length < length)
+            {
+                result = default;
+                return false;
+            }
+            position += length;
+			result = converter(data.Slice(position - length));
+            return true;
+        }
+
+        internal static bool TryConvertFromBytes(ref ReadOnlySpan<byte> data, ref int position, Type valueType, out dynamic result)
+		{
+			var success = false;
+            result = default;
+            if (valueType == typeof(Guid))
+            {
+                if (data.Length >= 16)
+                {
+                    result = new Guid(data.Slice(position));
+                    position += 16;
+                    success = true;
+                }
+                else
+                {
+                    result = Guid.Empty;
+                }
+            }
+            else if (valueType == typeof(int))
 			{
-				position += 4;
-				return BitConverter.ToInt32(data.Slice(position - 4));
+				success = TryConvertType(ref data, ref position, 4, BitConverter.ToInt32, out int converted);
+				result = converted;
 			}
-			if (valueType == typeof(long))
+			else if (valueType == typeof(long))
 			{
-				position += 8;
-				return BitConverter.ToInt64(data.Slice(position - 8));
-			}
-			if (valueType == typeof(byte))
-			{
-				position += 1;
-				return data[position - 1];
-			}
-			if (valueType == typeof(short))
-			{
-				position += 2;
-				return BitConverter.ToInt16(data.Slice(position - 2));
-			}
-			if (valueType == typeof(char))
-			{
-				position += 2;
-				return BitConverter.ToChar(data.Slice(position - 2));
-			}
-			if (valueType == typeof(decimal))
-			{
-				var i0 = BitConverter.ToInt32(data.Slice(position));
-				var i1 = BitConverter.ToInt32(data.Slice(position + 4));
-				var i2 = BitConverter.ToInt32(data.Slice(position + 8));
-				var i3 = BitConverter.ToInt32(data.Slice(position + 12));
-				position += 16;
-				return (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
-			}
-			if (valueType == typeof(double))
-			{
-				position += 8;
-				return BitConverter.ToDouble(data.Slice(position - 8));
-			}
-			if (valueType == typeof(float))
-			{
-				position += 4;
-				return BitConverter.ToSingle(data.Slice(position - 4));
-			}
-			if (valueType == typeof(uint))
-			{
-				position += 4;
-				return BitConverter.ToUInt32(data.Slice(position - 4));
-			}
-			if (valueType == typeof(ulong))
-			{
-				position += 8;
-				return BitConverter.ToUInt64(data.Slice(position - 8));
-			}
-			if (valueType == typeof(ushort))
-			{
-				position += 2;
-				return BitConverter.ToUInt16(data.Slice(position - 2));
-			}
-			if (valueType == typeof(sbyte))
+                success = TryConvertType(ref data, ref position, 8, BitConverter.ToInt64, out long converted);
+                result = converted;
+            }
+            else if (valueType == typeof(byte))
 			{
 				position += 1;
-				return (sbyte)((int)data[position - 1] - 128);
-			}
-			if (valueType == typeof(bool))
+                result = data[position - 1];
+                result = true;
+            }
+            else if (valueType == typeof(short))
+			{
+                success = TryConvertType(ref data, ref position, 2, BitConverter.ToInt16, out short converted);
+                result = converted;
+            }
+            else if (valueType == typeof(char))
+			{
+                success = TryConvertType(ref data, ref position, 2, BitConverter.ToChar, out char converted);
+                result = converted;
+            }
+            else if (valueType == typeof(decimal))
+			{
+				if (data.Length >= 16)
+				{
+					var i0 = BitConverter.ToInt32(data.Slice(position));
+					var i1 = BitConverter.ToInt32(data.Slice(position + 4));
+					var i2 = BitConverter.ToInt32(data.Slice(position + 8));
+					var i3 = BitConverter.ToInt32(data.Slice(position + 12));
+					position += 16;
+					success = true;
+					result = (dynamic)new Decimal(new int[] { i0, i1, i2, i3 });
+				}
+				else
+				{
+                    result = decimal.Zero;
+                }
+            }
+            else if (valueType == typeof(double))
+			{
+                success = TryConvertType(ref data, ref position, 8, BitConverter.ToDouble, out double converted);
+                result = converted;
+            }
+            else if (valueType == typeof(float))
+			{
+                success = TryConvertType(ref data, ref position, 4, BitConverter.ToSingle, out float converted);
+            }
+            else if (valueType == typeof(uint))
+			{
+                success = TryConvertType(ref data, ref position, 4, BitConverter.ToUInt32, out uint converted);
+                result = converted;
+            }
+            else if (valueType == typeof(ulong))
+			{
+                success = TryConvertType(ref data, ref position, 8, BitConverter.ToUInt64, out ulong converted);
+                result = converted;
+            }
+            else if (valueType == typeof(ushort))
+			{
+                success = TryConvertType(ref data, ref position, 2, BitConverter.ToUInt16, out ushort converted);
+                result = converted;
+            }
+            else if (valueType == typeof(sbyte))
 			{
 				position += 1;
-				return BitConverter.ToBoolean(data.Slice(position - 1));
-			}
-			if (valueType == typeof(DateTime))
+                result = (sbyte)((int)data[position - 1] - 128);
+                success = true;
+            }
+            else if (valueType == typeof(bool))
 			{
-				position += 8;
-				return new DateTime(BitConverter.ToInt64(data.Slice(position - 8)));
-			}
-			if (valueType == typeof(string))
+                success = TryConvertType(ref data, ref position, 1, BitConverter.ToBoolean, out bool converted);
+                result = converted;
+            }
+            else if (valueType == typeof(DateTime))
+			{
+                success = TryConvertType(ref data, ref position, 1, BitConverter.ToInt64, out long converted);
+                result = new DateTime(converted);
+            }
+            else if (valueType == typeof(string))
 			{
 				if (data[position] == 0)
 				{
 					position += 1;
-					return (string)null;
-				}
+                    result = (string)null;
+                    return true;
+                }
 				var len = (int)data[position] >> 1;
 				position += len + 1;
-				return System.Text.Encoding.UTF8.GetString(data.Slice(position - len, len));
-			}
-			if (valueType == typeof(Enum))
+                result = System.Text.Encoding.UTF8.GetString(data.Slice(position - len, len));
+                success = true;
+            }
+            else if (valueType == typeof(Half))
+            {
+                success = TryConvertType(ref data, ref position, 1, BitConverter.ToHalf, out Half converted);
+                result = converted;
+            }
+            else if (valueType == typeof(Int128))
+            {
+                success = TryConvertType(ref data, ref position, 1, BitConverter.ToInt128, out Int128 converted);
+                result = converted;
+            }
+            else if (valueType == typeof(UInt128))
+            {
+                success = TryConvertType(ref data, ref position, 1, BitConverter.ToUInt128, out UInt128 converted);
+                result = converted;
+            }
+            else if (valueType == typeof(Enum))
 			{
 				var baseType = Enum.GetUnderlyingType(valueType);
-				return ShardKey<TRecord>.ConvertFromBytes(data, ref position, baseType);
-			}
-			if (valueType == typeof(Nullable))
+				success = TryConvertFromBytes(ref data, ref position, baseType, out result);
+            }
+            else if (valueType == typeof(Nullable))
 			{
 				var isNull = BitConverter.ToBoolean(data.Slice(position));
 				position += 1;
 				if (isNull)
 				{
-					return null;
+                    result = null;
+					success = true;
 				}
 				var baseType = Nullable.GetUnderlyingType(valueType);
-				return ConvertFromBytes(data, ref position, baseType);
-			}
-			if (valueType == typeof(Guid))
-			{
-				//var result = new Guid(   new byte[] { data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4], data[position + 5], data[position + 6], data[position + 7], data[position + 8], data[position + 9], data[position + 10], data[position + 11], data[position + 12], data[position + 13], data[position + 14], data[position + 15] });
-				var result = new Guid(data.Slice(position));
-				position += 16;
-				return result;
-			}
-			else
-			{
-				throw new Exception($"Could not recognized the type {valueType.ToString()}.");
-			}
+                result = TryConvertFromBytes(ref data, ref position, baseType, out result);
+            }
+            return success;
 		}
 
 		/// <summary>
@@ -618,11 +679,14 @@ namespace ArgentSea
 		{
 			return !sk1.Equals(sk2);
 		}
+        
+		private static Lazy<ShardKey<TRecord>> _lazyEmpty = new Lazy<ShardKey<TRecord>>(() => new ShardKey<TRecord>('0', 0, default(TRecord)));
+        
 		public static ShardKey<TRecord> Empty
 		{
 			get
 			{
-				return new ShardKey<TRecord>('0', 0, default(TRecord));
+				return _lazyEmpty.Value;
 			}
 		}
         public void GetObjectData(SerializationInfo info, StreamingContext context)
