@@ -11,10 +11,6 @@ namespace ArgentSea
         {
             get;
         }
-        char Origin
-        {
-            get;
-        }
         bool IsEmpty
         {
             get;
