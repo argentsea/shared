@@ -36,7 +36,7 @@ namespace ArgentSea
 
         IEnumerator<BatchStep<TResult>> IEnumerable<BatchStep<TResult>>.GetEnumerator() => _processes.GetEnumerator();
 
-        abstract internal protected Task<TResult> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken);
+        abstract internal protected Task<TResult> ExecuteAsync(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken);
 
         public bool Remove(BatchStep<TResult> item) => _processes.Remove(item);
 

@@ -13,6 +13,6 @@ namespace ArgentSea
 {
     public abstract class BatchStep<TResult>
     {
-        protected internal abstract Task<TResult> Execute(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken);
+        protected internal abstract Task<TResult> ExecuteAsync(short shardId, DbConnection connection, DbTransaction transaction, string connectionName, IDataProviderServiceFactory services, ILogger logger, CancellationToken cancellationToken);
     }
 }

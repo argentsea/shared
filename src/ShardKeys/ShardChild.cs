@@ -81,7 +81,7 @@ namespace ArgentSea
             this._childId = childResult;
         }
 
-        public bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord, TChild> result)
+        public static bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord, TChild> result)
         {
             result = ShardKey<TRecord, TChild>.Empty;
             if (data.Length < 4) // smallest possible type 1 + 2 + x (origin + short + TRecord.Length)

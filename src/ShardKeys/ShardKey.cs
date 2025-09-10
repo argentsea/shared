@@ -83,7 +83,7 @@ namespace ArgentSea
             _recordId = result;
         }
 
-        public bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord> result)
+        public static bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord> result)
 		{
             result = ShardKey<TRecord>.Empty;
             if (data.Length < 4) // smallest possible type 1 + 2 + x (origin + short + TRecord.Length)
@@ -191,9 +191,15 @@ namespace ArgentSea
 					return BitConverter.GetBytes(ts.Ticks);
 				case Guid g:
 					return g.ToByteArray();
-				//case null:
-				//    return new byte[0];
-				default:
+				case Half h:
+					return BitConverter.GetBytes(h);
+                case Int128 i128:
+                    return BitConverter.GetBytes(i128);
+                case UInt128 u128:
+                    return BitConverter.GetBytes(u128);
+                //case null:
+                //    return new byte[0];
+                default:
 					var tValue = value.GetType();
 					if (tValue.IsGenericType && Nullable.GetUnderlyingType(tValue) != null)
 					{

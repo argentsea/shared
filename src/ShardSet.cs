@@ -211,9 +211,9 @@ namespace ArgentSea
                         }
                         catch (OperationCanceledException) { }
                         catch (AggregateException) { }
-                        catch (Exception err)
+                        catch 
                         {
-                            throw err;
+                            throw;
                         }
                     }
                 }

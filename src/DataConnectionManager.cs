@@ -498,7 +498,7 @@ namespace ArgentSea
                 await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
                 using (var trn = connection.BeginTransaction())
                 {
-                    result = await batch.Execute(_shardId, connection, trn, _connectionName, _dataProviderServices, _logger, cancellationToken);
+                    result = await batch.ExecuteAsync(_shardId, connection, trn, _connectionName, _dataProviderServices, _logger, cancellationToken);
                     trn.Commit();
                 }
             }
