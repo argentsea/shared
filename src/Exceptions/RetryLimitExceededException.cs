@@ -11,7 +11,7 @@ namespace ArgentSea
     /// <summary>
     /// This exception is raise when a transient failure occurs, but automatic retries were not successful.
     /// </summary>
-    public sealed class RetryLimitExceededException : Exception
+    public sealed class RetryLimitExceededException : ApplicationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryLimitExceededException" /> class with no error message.

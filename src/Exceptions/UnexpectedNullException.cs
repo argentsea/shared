@@ -10,8 +10,8 @@ namespace ArgentSea
     /// <summary>
     /// This exception is thrown when a parameter or record column unexpectedly contains a Db Null and cannot be assigned to a non-nullable property.
     /// </summary>
-    class UnexpectedNullException : Exception
-	{
+    class UnexpectedNullException : ApplicationException
+    {
 		/// <summary>
 		/// Initializes a new instance of the <see cref="UnexpectedNullException" /> class with no error message.
 		/// </summary>

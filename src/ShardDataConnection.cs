@@ -116,7 +116,6 @@ namespace ArgentSea
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
         /// <param name="dataName">A value that should match an output parameter name or column name. This value will be used for the result.</param>
         /// <param name="parameters">The query parameters. If “dataName” argument matches an output parameter name, this will be the value returned.</param>
-        /// <param name="shardParameterName">The name of the parameter who value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
         public async Task<TValue> ReturnValueAsync<TValue>(Query query, string dataName, DbParameterCollection parameters, CancellationToken cancellationToken)
@@ -130,39 +129,17 @@ namespace ArgentSea
         }
 
         /// <summary>
-        /// Invokes the query and returns a ShardKey whose ShardId is the current shard and RecordId is obtained from the output parameter or first-row column value whose name matches the “recordDataName”.
-        /// </summary>
-        /// <typeparam name="TRecord">The type of the recordId in the ShardKey</typeparam>
-        /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
-        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
-        /// <param name="parameters">The query parameters. If “recordDataName” argument matches an output parameter name, that value will be used for the ShardKey.</param>
-        /// <param name="shardParameterName">The name of the parameter who value should be set to the shard Id.</param>
-        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns></returns>
-        public async Task<ShardKey<TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string recordDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-            where TRecord : IComparable
-        {
-            if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
-            {
-                return (ShardKey<TRecord>)this.MockResults[query.Name];
-            }
-            return new ShardKey<TRecord>(origin, _shardId, (await _manager.ReturnAsync<TRecord, object, object>(query, recordDataName, null, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken)).Item1);
-        }
-
-        /// <summary>
         /// Invokes the query and returns a ShardKey whose ShardId and RecordId are obtained from the output parameters or first-row column values whose name matches “shardDataName” and “recordDataName” respectively.
         /// </summary>
         /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
         /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
         /// <param name="parameters">The query parameters. If “shardDataName” and/or “recordDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardKey<TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string shardDataName, string recordDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord>> ReturnValueAsync<TRecord>(Query query, string shardDataName, string recordDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
         {
             if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
@@ -170,7 +147,7 @@ namespace ArgentSea
                 return (ShardKey<TRecord>)this.MockResults[query.Name];
             }
             var result = await _manager.ReturnAsync<short, TRecord, object>(query, shardDataName, recordDataName, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
-            return new ShardKey<TRecord>(origin, result.Item1, result.Item2);
+            return new ShardKey<TRecord>(result.Item1, result.Item2);
         }
 
         /// <summary>
@@ -179,13 +156,12 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
         /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -194,7 +170,7 @@ namespace ArgentSea
                 return (ShardKey<TRecord, TChild>)this.MockResults[query.Name];
             }
             var result = await _manager.ReturnAsync<TRecord, TChild, object>(query, recordDataName, childDataName, null, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
-            return new ShardKey<TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
+            return new ShardKey<TRecord, TChild>(_shardId, result.Item1, result.Item2);
         }
 
         /// <summary>
@@ -203,7 +179,6 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
         /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
         /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardKey.</param>
@@ -211,7 +186,7 @@ namespace ArgentSea
         /// <param name="shardParameterName">The name of the parameter whose value should be set to the shard Id.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -220,27 +195,7 @@ namespace ArgentSea
                 return (ShardKey<TRecord, TChild>)this.MockResults[query.Name];
             }
             var result = await _manager.ReturnAsync<short, TRecord, TChild>(query, shardDataName, recordDataName, childDataName, parameters, null, parameters.GetParameterOrdinal(shardParameterName), cancellationToken);
-            return new ShardKey<TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
-        }
-
-        /// <summary>
-        /// Invokes the query and returns a ShardKey whose ShardId is the current shard and RecordId is obtained from the output parameter or first-row column value whose name matches the “recordDataName”.
-        /// </summary>
-        /// <typeparam name="TRecord">The type of the recordId in the ShardKey</typeparam>
-        /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
-        /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
-        /// <param name="parameters">The query parameters. If “recordDataName” argument matches an output parameter name, that value will be used for the ShardKey.</param>
-        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns></returns>
-        public async Task<ShardKey<TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string recordDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
-            where TRecord : IComparable
-        {
-            if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
-            {
-                return (ShardKey<TRecord>)this.MockResults[query.Name];
-            }
-            return new ShardKey<TRecord>(origin, _shardId, (await _manager.ReturnAsync<TRecord, object, object>(query, recordDataName, null, null, parameters, null, -1, cancellationToken)).Item1);
+            return new ShardKey<TRecord, TChild>(result.Item1, result.Item2, result.Item3);
         }
 
         /// <summary>
@@ -248,13 +203,12 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
         /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
         /// <param name="parameters">The query parameters. If “shardDataName” and/or “recordDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardKey<TRecord>> ReturnValueAsync<TRecord>(Query query, char origin, string shardDataName, string recordDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord>> ReturnValueAsync<TRecord>(Query query, string shardDataName, string recordDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
         {
             if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
@@ -262,7 +216,7 @@ namespace ArgentSea
                 return (ShardKey<TRecord>)this.MockResults[query.Name];
             }
             var result = await _manager.ReturnAsync<short, TRecord, object>(query, shardDataName, recordDataName, null, parameters, null, -1, cancellationToken);
-            return new ShardKey<TRecord>(origin, result.Item1, result.Item2);
+            return new ShardKey<TRecord>(result.Item1, result.Item2);
         }
 
         /// <summary>
@@ -271,12 +225,11 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
         /// <param name="parameters">The query parameters. If “recordDataName” and/or “childDataName” argument matches an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -285,7 +238,7 @@ namespace ArgentSea
                 return (ShardKey<TRecord, TChild>)this.MockResults[query.Name];
             }
             var result = await _manager.ReturnAsync<TRecord, TChild, object>(query, recordDataName, childDataName, null, parameters, null, -1, cancellationToken);
-            return new ShardKey<TRecord, TChild>(origin, _shardId, result.Item1, result.Item2);
+            return new ShardKey<TRecord, TChild>(_shardId, result.Item1, result.Item2);
         }
 
         /// <summary>
@@ -294,14 +247,13 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the recordId in the ShardKey.</typeparam>
         /// <typeparam name="TChild"></typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardDataName">A value that should match an output parameter name or column name. This value will be used for the ShardId of the ShardKey.</param>
         /// <param name="recordDataName">A value that should match an output parameter name or column name. This value will be used for the RecordId of the ShardKey.</param>
         /// <param name="childDataName">A value that should match an output parameter name or column name. This value will be used for the ChildId of the ShardKey.</param>
         /// <param name="parameters">The query parameters. If data name arguments match an output parameter name, those values will be used for the ShardKey.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns></returns>
-        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, char origin, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<ShardKey<TRecord, TChild>> ReturnValueAsync<TRecord, TChild>(Query query, string shardDataName, string recordDataName, string childDataName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -310,7 +262,7 @@ namespace ArgentSea
                 return (ShardKey<TRecord, TChild>)this.MockResults[query.Name];
             }
             var result = await _manager.ReturnAsync<short, TRecord, TChild>(query, shardDataName, recordDataName, childDataName, parameters, null, -1, cancellationToken);
-            return new ShardKey<TRecord, TChild>(origin, result.Item1, result.Item2, result.Item3);
+            return new ShardKey<TRecord, TChild>(result.Item1, result.Item2, result.Item3);
         }
 
 
@@ -391,13 +343,12 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
         {
             if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
@@ -408,7 +359,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord>(origin, _shardId, itm.Item1));
+                result.Add(new ShardKey<TRecord>(_shardId, itm.Item1));
             }
             return result;
         }
@@ -418,13 +369,11 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
-        /// <param name="columnName">This should match the name of a column containing the values.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
         {
             if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
@@ -435,7 +384,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord>(origin, _shardId, itm.Item1));
+                result.Add(new ShardKey<TRecord>(_shardId, itm.Item1));
             }
             return result;
         }
@@ -445,14 +394,13 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
         {
             if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
@@ -463,7 +411,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord>(origin, itm.Item1, itm.Item2));
+                result.Add(new ShardKey<TRecord>(itm.Item1, itm.Item2));
             }
             return result;
         }
@@ -473,13 +421,12 @@ namespace ArgentSea
         /// </summary>
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
         {
             if (!(this.MockResults is null) && this.MockResults.Count > 0 && this.MockResults.ContainsKey(query.Name))
@@ -490,7 +437,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord>(origin, itm.Item1, itm.Item2));
+                result.Add(new ShardKey<TRecord>(itm.Item1, itm.Item2));
             }
             return result;
         }
@@ -501,13 +448,12 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -519,7 +465,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
+                result.Add(new ShardKey<TRecord, TChild>(_shardId, itm.Item1, itm.Item2));
             }
             return result;
         }
@@ -530,13 +476,12 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
-        /// <param name="columnName">This should match the name of a column containing the values.</param>
+        /// <param name="recordColumnName">This should match the name of a column containing the values.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -548,7 +493,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord, TChild>(origin, _shardId, itm.Item1, itm.Item2));
+                result.Add(new ShardKey<TRecord, TChild>(_shardId, itm.Item1, itm.Item2));
             }
             return result;
         }
@@ -559,14 +504,13 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -578,7 +522,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                result.Add(new ShardKey<TRecord, TChild>(itm.Item1, itm.Item2, itm.Item3));
             }
             return result;
         }
@@ -589,13 +533,12 @@ namespace ArgentSea
         /// <typeparam name="TRecord">The type of the record Id of the table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <typeparam name="TChild">The type of the child Id of the compound table key, typically: Boolean, Byte, Char, DateTime, DateTimeOffset, Decimal, Double, Float, Guid, Int16, Int32, Int64, or String.</typeparam>
         /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-        /// <param name="origin">Origin value to indicate the ShardKey type.</param>
         /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
         /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
         /// <param name="parameters">The query parameters.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A list containing an object for each data row.</returns>
-        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+        public async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
             where TRecord : IComparable
             where TChild : IComparable
         {
@@ -607,7 +550,7 @@ namespace ArgentSea
             var result = new List<ShardKey<TRecord, TChild>>();
             foreach (var itm in data)
             {
-                result.Add(new ShardKey<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                result.Add(new ShardKey<TRecord, TChild>(itm.Item1, itm.Item2, itm.Item3));
             }
             return result;
         }
@@ -675,7 +618,6 @@ namespace ArgentSea
         /// <summary>
         /// Executes a database procedure or function that does not return a data result.
         /// </summary>
-        /// <param name="sprocName">The stored procedure or function to call.</param>
         /// <param name="parameters">The query parameters with values set.</param>
         /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to null or empty.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -686,7 +628,6 @@ namespace ArgentSea
         /// <summary>
         /// Executes a database procedure or function that does not return a data result.
         /// </summary>
-        /// <param name="sprocName">The stored procedure or function to call.</param>
         /// <param name="parameters">The query parameters with values set.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>Throws an error if not successful.</returns>

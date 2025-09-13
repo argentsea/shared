@@ -14,8 +14,8 @@ namespace ArgentSea
     /// This exception is invoked if a model property has multiple mapping attributes. A single value cannot be mapped to/from multiple parameters or columns.
     /// This exception is not raised in the case of <see cref="ShardKey{TRecord}" /> properties.
     /// </summary>
-	public sealed class MultipleMapAttributesException : Exception
-	{
+	public sealed class MultipleMapAttributesException : ApplicationException
+    {
         /// <summary>
         /// Initializes a new instance of the <see cref="MultipleMapAttributesException" /> class with no error message.
         /// </summary>

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace ArgentSea
 {
-    public interface IShardKey : ISerializable
+    public interface IShardKey
     {
         short ShardId
         {
@@ -15,11 +15,12 @@ namespace ArgentSea
         {
             get;
         }
+
         string ToExternalString();
 
-        byte[] ToArray();
+        ReadOnlyMemory<byte> ToArray();
 
-        void ThrowIfInvalidOrigin(char expectedOrigin);
+        ReadOnlyMemory<byte> ToUtf8();
 
     }
 }

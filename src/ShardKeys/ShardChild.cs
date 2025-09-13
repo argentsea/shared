@@ -1,6 +1,7 @@
 ﻿// © John Hicks. All rights reserved. Licensed under the MIT license.
 // See the LICENSE file in the repository root for more information.
 
+using ArgentSea.ShardKeys;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,67 +15,73 @@ namespace ArgentSea
     /// <typeparam name="TRecord"></typeparam>
     /// <typeparam name="TChild"></typeparam>
     [Serializable]
-    public struct ShardKey<TRecord, TChild> : IEquatable<ShardKey<TRecord, TChild>>, IShardKey, ISerializable
+    public struct ShardKey<TRecord, TChild> : IEquatable<ShardKey<TRecord, TChild>>, IShardKey
         where TRecord : IComparable
         where TChild : IComparable
     {
-        private readonly ShardKey<TRecord> _key;
+        internal readonly ShardKey<TRecord> _key;
         private readonly TChild _childId;
 
-        public ShardKey<TRecord> Key {
-            get { return _key;  }
+        #region Constructors
+        public ShardKey(short shardId, TRecord recordId, TChild childRecordId)
+        {
+            if (!ShardKeySerialization.TryEncodeTypeMetadata(typeof(TRecord), typeof(TChild), out var metadata))
+            {
+                throw new InvalidShardKeyMetadataException();
+            }
+            _key = new ShardKey<TRecord>(metadata, shardId, recordId);
+            _childId = childRecordId;
         }
 
-		public ShardKey(ShardKey<TRecord> key, TChild childRecordId)
+        internal ShardKey(ReadOnlyMemory<byte> typeMetadata, short shardId, TRecord recordId, TChild childRecordId)
         {
-            _key = key;
+            _key = new ShardKey<TRecord>(typeMetadata, shardId, recordId);
             _childId = childRecordId;
-        }
-        public ShardKey(char origin, short shardId, TRecord recordId, TChild childRecordId)
-        {
-            _key = new ShardKey<TRecord>(origin, shardId, recordId);
-            _childId = childRecordId;
-        }
-        /// <summary>
-        /// ISerializer constructor
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        public ShardKey(SerializationInfo info, StreamingContext context)
-        {
-            if (info.MemberCount == 4)
-            {
-                char origin = info.GetChar("origin");
-                var shardId = (short)info.GetValue("shardId", typeof(short));
-                TRecord recordId = (TRecord)info.GetValue("recordId", typeof(TRecord));
-                _key = new ShardKey<TRecord>(origin, shardId, recordId);
-                _childId = (TChild)info.GetValue("childId", typeof(TChild));
-            }
-            else
-            {
-                var tmp = FromExternalString(info.GetString("ShardKey"));
-                _key = tmp.Key;
-                _childId = tmp.ChildId;
-            }
         }
 
         /// <summary>
-        /// Initiaizes a new instance from a readonly data array.
+		/// Initiaizes a new instance from a readonly data array. This can but the raw data (from ToArray()) or UTF8 Span (ToUtf8()).
         /// </summary>
-        /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method.</param>
+        /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method or ToUtf8() method.</param>
         public ShardKey(ReadOnlySpan<byte> data)
         {
-            int orgnLen = data[0] & 3;
-            var origin = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
-            var pos = orgnLen + 1;
+            int metaLen = data[0] & 3;
+            var isUtf8 = ((data[0] & 128) != 128);
+
+            if (isUtf8) // utf8 encoding chars do not use high bits.
+            {
+                data = StringExtensions.Decode(data).Span;
+                metaLen = data[0] & 3;
+            }
+            var typRecord = typeof(TRecord);
+            var typChild = typeof(TChild);
+            if (!ShardKeySerialization.TryEncodeTypeMetadata(typRecord, typChild, out var metadata))
+            {
+                throw new InvalidShardKeyMetadataException();
+            }
+            var metadataSpan = metadata.Span;
+            var saved = data.Slice(1, metaLen);
+            if (metadata.Length != 2 && saved.Length != 2)
+            {
+                throw new InvalidShardKeyMetadataException();
+            }
+            if (metadataSpan[0] != saved[0])
+            {
+                throw new InvalidShardKeyMetadataException(typRecord);
+            }
+            if (metadataSpan[1] != saved[1])
+            {
+                throw new InvalidShardKeyMetadataException(typChild);
+            }
+            var pos = metaLen + 1;
             var shardId = BitConverter.ToInt16(data.Slice(pos));
             pos += 2;
-            if (!ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TRecord), out dynamic recordId))
+            if (!ShardKeySerialization.TryConvertFromBytes(ref data, ref pos, typRecord, out dynamic recordId))
             {
                 throw new InvalidDataException("Could not parse binary record data to create a ShardKey.");
             }
-            this._key = new ShardKey<TRecord>(origin, shardId, recordId);
-            if (!ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TChild), out dynamic childResult))
+            this._key = new ShardKey<TRecord>(metadata, shardId, recordId);
+            if (!ShardKeySerialization.TryConvertFromBytes(ref data, ref pos, typChild, out dynamic childResult))
             {
                 throw new InvalidDataException("Could not parse binary child data to create a ShardKey.");
             }
@@ -84,45 +91,60 @@ namespace ArgentSea
         public static bool TryParse(ReadOnlySpan<byte> data, out ShardKey<TRecord, TChild> result)
         {
             result = ShardKey<TRecord, TChild>.Empty;
-            if (data.Length < 4) // smallest possible type 1 + 2 + x (origin + short + TRecord.Length)
+            if (data.Length < 4) // smallest possible type 1 + 2 + x (metadata + short + TRecord.Length)
             {
                 return false;
             }
-            int orgnLen = data[0] & 3;
-            if (data.Length < 3 + orgnLen) // new smallest possible type orgn + 2 + x (origin + short + TRecord.Length)
+            int metaLen = data[0] & 3;
+            var isUtf8 = ((data[0] & 128) != 128);
+            if (isUtf8) // utf8 encoding chars do not use high bits.
+            {
+                data = StringExtensions.Decode(data).Span;
+                metaLen = data[0] & 3;
+            }
+            if (data.Length < 3 + metaLen) // new smallest possible type orgn + 2 + x (metadata + short + TRecord.Length)
             {
                 return false;
             }
-            char orginResult;
-            orginResult = System.Text.Encoding.UTF8.GetString(data.Slice(1, orgnLen))[0];
-            var pos = orgnLen + 1;
-            short shardIdResult = BitConverter.ToInt16(data.Slice(pos));
+            var typRecord = typeof(TRecord);
+            var typChild = typeof(TChild);
+            if (!ShardKeySerialization.TryEncodeTypeMetadata(typRecord, typChild, out var metadata))
+            {
+                return false;
+            }
+            var metadataSpan = metadata.Span;
+            var saved = data.Slice(1, metaLen);
+            if (metadataSpan.Length != 1 && saved.Length != 1)
+            {
+                return false;
+            }
+            if (metadataSpan[0] != saved[0])
+            {
+                return false;
+            }
+
+            var pos = metaLen + 1;
+            short shardId = BitConverter.ToInt16(data.Slice(pos));
             pos += 2;
-            var success = ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TRecord), out dynamic recordIdresult);
-            if (!success)
+            if (!ShardKeySerialization.TryConvertFromBytes(ref data, ref pos, typRecord, out dynamic recordId))
             {
                 return false;
             }
-            success = ShardKey<TRecord>.TryConvertFromBytes(ref data, ref pos, typeof(TChild), out dynamic childIdresult);
-            if (!success)
+            if (!ShardKeySerialization.TryConvertFromBytes(ref data, ref pos, typChild, out dynamic childId))
             {
                 return false;
             }
-            result = new ShardKey<TRecord, TChild>(orginResult, shardIdResult, recordIdresult, childIdresult);
+            result = new ShardKey<TRecord, TChild>(metadata, shardId, (TRecord)recordId, (TChild)childId);
             return true;
         }
-
-
+        #endregion
         public TChild ChildId { get => _childId; }
-
-		public char Origin { get => _key.Origin; }
-
 
 		public short ShardId { get => _key.ShardId; }
 
 		public TRecord RecordId { get => _key.RecordId;  }
 
-        public bool IsEmpty {  get => this.Key.IsEmpty && this.ChildId.CompareTo(default(TChild)) == 0; }
+        public bool IsEmpty {  get => _key.IsEmpty && this.ChildId.CompareTo(default(TChild)) == 0; }
 
         /// <summary>
         /// Given a list of Models with ShardKChild keys, returns a distinct list of shard Ids, except for the shard Id specified.
@@ -289,7 +311,7 @@ namespace ArgentSea
 
         public bool Equals(ShardKey<TRecord, TChild> other)
         {
-            return (other.Key == this.Key) && (other.ChildId.CompareTo(this.ChildId) == 0);
+            return (other._key == this._key) && (other.ChildId.CompareTo(this.ChildId) == 0);
         }
         public override bool Equals(object obj)
         {
@@ -298,12 +320,12 @@ namespace ArgentSea
                 return false;
             }
             var other = (ShardKey<TRecord, TChild>)obj;
-            return (other.Key == this.Key) && (other.ChildId.CompareTo(this.ChildId) == 0);
+            return (other._key == this._key) && (other.ChildId.CompareTo(this.ChildId) == 0);
         }
 
         public override int GetHashCode()
         {
-            var aSChd = ShardKey<TRecord>.GetValueBytes(this._childId);
+            var aSChd = ShardKeySerialization.GetValueBytes(this._childId);
             var aResult = new byte[4];
             if (!(aSChd is null))
             {
@@ -325,20 +347,20 @@ namespace ArgentSea
                 }
             }
 
-            return this.Key.GetHashCode() | BitConverter.ToInt32(aResult, 0);
+            return this._key.GetHashCode() | BitConverter.ToInt32(aResult, 0);
         }
 
-        public byte[] ToArray()
+        public ReadOnlyMemory<byte> ToArray()
         {
-            var aOrigin = System.Text.Encoding.UTF8.GetBytes(new[] { this._key.Origin });
-            var shardData = ShardKey<TRecord>.GetValueBytes(this._key.ShardId);
-            var recordData = ShardKey<TRecord>.GetValueBytes(this._key.RecordId);
-            var childData = ShardKey<TRecord>.GetValueBytes(this._childId);
-            var aResult = new byte[aOrigin.Length + shardData.Length + recordData.Length + childData.Length + 1];
-            aResult[0] = (byte)(aOrigin.Length | (1 << 2)); //origin length on bits 1 & 2, version (1) on bit 3.
+            var shardData = ShardKeySerialization.GetValueBytes(this._key.ShardId);
+            var recordData = ShardKeySerialization.GetValueBytes(this._key.RecordId);
+            var childData = ShardKeySerialization.GetValueBytes(this._childId);
+            var metaLen = _key._typeMetadata.Length;
+            var aResult = new byte[metaLen + shardData.Length + recordData.Length + childData.Length + 1];
+            aResult[0] = (byte)(metaLen | 128); //metadata length on bits 1 & 2, No-utf8 flag on bit 8.
             var resultIndex = 1;
-            aOrigin.CopyTo(aResult, resultIndex);
-            resultIndex += aOrigin.Length;
+            _key._typeMetadata.ToArray().CopyTo(aResult, resultIndex);
+            resultIndex += metaLen;
             shardData.CopyTo(aResult, resultIndex);
             resultIndex += shardData.Length;
             recordData.CopyTo(aResult, resultIndex);
@@ -355,11 +377,11 @@ namespace ArgentSea
         /// <returns>A URL-safe string that can be re-serialized into a shard child.</returns>
         public string ToExternalString()
         {
-            return StringExtensions.SerializeToExternalString(ToArray());
+            return StringExtensions.SerializeToExternalString(ToArray().Span);
         }
         public override string ToString()
         {
-            return $"{{ \"origin\": \"{_key.Origin}\", \"shard\": {_key.ShardId.ToString()}, \"ids\": [\"{_key.RecordId.ToString()}\", \"{this._childId.ToString()}\"]}}";
+            return $"{{ \"shard\": {_key.ShardId.ToString()}, \"ids\": [\"{_key.RecordId.ToString()}\", \"{this._childId.ToString()}\"]}}";
         }
 
         /// <summary>
@@ -370,7 +392,7 @@ namespace ArgentSea
         public static ShardKey<TRecord, TChild> FromExternalString(string value)
         {
             var aValues = StringExtensions.SerializeFromExternalString(value);
-            return new ShardKey<TRecord, TChild> (aValues);
+            return new ShardKey<TRecord, TChild> (aValues.Span);
         }
 
         /// <summary>
@@ -378,20 +400,20 @@ namespace ArgentSea
         /// </summary>
         /// <param name="value">A binary value generaeted by the ToArraay() method.</param>
         /// <returns>An instance of this type.</returns>
-        public static ShardKey<TRecord, TChild> FromSpan(ReadOnlySpan<byte> value)
-        {
-            return new ShardKey<TRecord, TChild>(value);
-        }
+        //public static ShardKey<TRecord, TChild> FromSpan(ReadOnlySpan<byte> value)
+        //{
+        //    return new ShardKey<TRecord, TChild>(value);
+        //}
 
         /// <summary>
         /// Create a new instance of ShardKey from UTF8 encoded binary data; this method is the inverse of ToUtf8().
         /// </summary>
         /// <param name="value">A binary value generaeted by the ToUtf8() method.</param>
         /// <returns>An instance of this type.</returns>
-        public static ShardKey<TRecord, TChild> FromUtf8(ReadOnlySpan<byte> encoded)
-        {
-            return FromSpan(StringExtensions.Decode(encoded));
-        }
+        //public static ShardKey<TRecord, TChild> FromUtf8(ReadOnlySpan<byte> encoded)
+        //{
+        //    return FromSpan(StringExtensions.Decode(encoded).Span);
+        //}
 
         /// <summary>
         /// Serializes ShardKey data into a URL-safe string with a checksum
@@ -400,7 +422,7 @@ namespace ArgentSea
         public ReadOnlyMemory<byte> ToUtf8()
         {
             var aValues = ToArray();
-            return StringExtensions.EncodeToUtf8(ref aValues);
+            return StringExtensions.EncodeToUtf8(aValues.Span);
         }
 
         public static bool operator ==(ShardKey<TRecord, TChild> sc1, ShardKey<TRecord, TChild> sc2)
@@ -412,25 +434,14 @@ namespace ArgentSea
             return !sc1.Equals(sc2);
         }
  
-        private static Lazy<ShardKey<TRecord, TChild>> _lazyEmpty = new Lazy<ShardKey<TRecord, TChild>>(() => new ShardKey<TRecord, TChild>(new ShardKey<TRecord>('0', 0, default(TRecord)), default(TChild)));
+        private static Lazy<ShardKey<TRecord, TChild>> _lazyEmpty = new Lazy<ShardKey<TRecord, TChild>>(() 
+            => new ShardKey<TRecord, TChild>(0, default(TRecord), default(TChild)));
 
         public static ShardKey<TRecord, TChild> Empty
         {
             get
             {
                 return _lazyEmpty.Value;
-            }
-        }
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("shardKey", ToExternalString());
-            //info.AddValue("Ids", $"{_key.ShardId.ToString()}, {_key.RecordId.ToString()},{_childId.ToString()}");
-        }
-        public void ThrowIfInvalidOrigin(char expectedOrigin)
-        {
-            if (_key.Origin != expectedOrigin)
-            {
-                throw new InvalidDataOriginException(expectedOrigin, _key.Origin);
             }
         }
     }

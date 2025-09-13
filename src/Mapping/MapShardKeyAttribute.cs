@@ -10,9 +10,6 @@ using Microsoft.Extensions.Logging;
 
 namespace ArgentSea
 {
-
-
-
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public abstract class MapShardKeyAttribute : Attribute
     {
@@ -31,16 +28,13 @@ namespace ArgentSea
         /// </code>
         /// </example>
         /// <param name="shardId">Optional information about shard data to be passed to the database about this record.</param>
-        /// <param name="origin">The origin char value representing the type of value.</param>
         /// <param name="recordIdName">The name of the data column, which must exactly match the database attribute.</param>
         /// <param name="childIdName">The name of the optional 2nd data column, if a compound key, which must exactly match the corresponding database attribute.</param>
         /// <param name="grandChildIdName">The name of the optional 3rd data column, if a compound key, which must exactly match the corresponding database attribute.</param>
         /// <param name="greatGrandChildIdName">The name of the optional 4th data column, if a compound key, which must exactly match the corresponding database attribute.</param>
         /// <param name="isRecordIdentifier">A optional value which indicates whether the property is the record identifier. Defaults to True if not set.</param>
-        public MapShardKeyAttribute(ParameterMapAttributeBase shardId, char origin, string recordIdName, string childIdName, string grandChildIdName, string greatGrandChildIdName, bool isRecordIdentifier)
+        public MapShardKeyAttribute(ParameterMapAttributeBase shardId, string recordIdName, string childIdName, string grandChildIdName, string greatGrandChildIdName, bool isRecordIdentifier)
         {
-            this.Origin = origin;
-
             _shardId = shardId;
             this.RecordIdName = recordIdName;
             this.ChildIdName = childIdName;
@@ -48,8 +42,6 @@ namespace ArgentSea
             this.GreatGrandChildIdName = greatGrandChildIdName;
             this.IsRecordIdentifier = isRecordIdentifier;
         }
-
-        public char Origin { get; set; }
 
 		public virtual string ShardIdName {
             get {

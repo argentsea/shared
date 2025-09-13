@@ -92,7 +92,7 @@ namespace ArgentSea
 			}
 			return sb.ToString(0, lastNonSeperator);
 		}
-        internal static Span<byte> SerializeFromExternalString(string value)
+        internal static ReadOnlyMemory<byte> SerializeFromExternalString(string value)
         {
             if (value is null)
             {
@@ -115,7 +115,7 @@ namespace ArgentSea
             //subValue = subValue.Replace('_', '+').Replace('~', '/');
 
             //var aValues = Convert.FromBase64String(subValue);
-            var aValues = Decode(subValue);
+            var aValues = Decode(subValue).ToArray();
 
             int checkSum = 0;
             for (int i = 0; i < aValues.Length; i++)
@@ -152,16 +152,13 @@ namespace ArgentSea
             {
                 throw new Exception("External key string is not valid.");
             }
-
-            if ((aValues[0] & 12) != (1 << 2))
-            {
-                throw new Exception("The serialization version is invalid. Cannot deserialize this external string.");
-            }
             return aValues;
 
         }
-        internal static string SerializeToExternalString(byte[] value)
+        internal static string SerializeToExternalString(ReadOnlySpan<byte> span)
         {
+            Span<byte> value = stackalloc byte[span.Length];
+            span.CopyTo(value);
             int checkSum = 0;
 
             for (int i = 0; i < value.Length; i++)
@@ -196,7 +193,7 @@ namespace ArgentSea
             var checkSumCharHigh = CheckSumToChar(checkSum >> 6).ToString();
             var checkSumCharLow = CheckSumToChar(checkSum & 0x3f).ToString();
 
-            return checkSumCharHigh + checkSumCharLow  + EncodeToString(ref value);
+            return checkSumCharHigh + checkSumCharLow  + EncodeToString(value);
 
         }
 
@@ -266,9 +263,9 @@ namespace ArgentSea
         /// </summary>
         /// <param name="key">The binary value to encode.</param>
         /// <returns>A string representing the submitted value.</returns>
-        public static string EncodeToString(ref byte[] key)
+        public static string EncodeToString(ReadOnlySpan<byte> key)
         {
-            if (key == null)
+            if (key.IsEmpty)
             {
                 throw new ArgumentNullException(nameof(key));
             }
@@ -312,9 +309,9 @@ namespace ArgentSea
         /// </summary>
         /// <param name="key">The binary value to encode.</param>
         /// <returns>A string representing the submitted value.</returns>
-        public static byte[] EncodeToUtf8(ref byte[] key)
+        public static ReadOnlyMemory<byte> EncodeToUtf8(ReadOnlySpan<byte> key)
         {
-            if (key == null)
+            if (key.IsEmpty)
             {
                 throw new ArgumentNullException(nameof(key));
             }
@@ -359,9 +356,9 @@ namespace ArgentSea
         /// <param name="encoded">The encoded string as UTF8 encoded.</param>
         /// <returns>The orginal bytes that were encoded.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static byte[] Decode(ReadOnlySpan<byte> encoded)
+        public static ReadOnlyMemory<byte> Decode(ReadOnlySpan<byte> encoded)
         {
-            if (encoded == null)
+            if (encoded.IsEmpty)
             {
                 throw new ArgumentNullException(nameof(encoded));
             }
@@ -421,7 +418,7 @@ namespace ArgentSea
         /// <param name="encoded">The encoded string.</param>
         /// <returns>The orginal bytes that were encoded.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static Span<byte> Decode(string encoded)
+        public static ReadOnlyMemory<byte> Decode(string encoded)
         {
             return Decode(Encoding.UTF8.GetBytes(encoded));
         }

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ArgentSea
 {
-    public sealed class UnexpectedMultiRowResultException : Exception
+    public sealed class UnexpectedMultiRowResultException : ApplicationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UnexpectedMultiRowResultException" /> class with an error message.

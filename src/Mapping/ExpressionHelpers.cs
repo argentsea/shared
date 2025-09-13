@@ -149,8 +149,23 @@ namespace ArgentSea
 
             }
         }
+        public static void InParameterBinaryBuilder(string parameterName, Type propertyType, ParameterExpression expSprocParameters, ParameterExpression expIgnoreParameters, Expression expProperty, IList<Expression> expressions, Type staticType, string addMethod, ConstantExpression thirdArg, ConstantExpression forthArg, HashSet<string> parameterNames, ParameterExpression expLogger, ILogger logger)
+        {
+            if (parameterNames.Add(parameterName))
+            {
+                if (propertyType == typeof(byte[]))
+                {
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, expProperty, staticType, addMethod, thirdArg, forthArg, expIgnoreParameters));
+                }
+                else // propertyType == typeof(ReadOnlyMemory<byte>) || propertyType == typeof(ReadOnlySpan<byte>)
+                {
+                    var expConvert = Expression.Call(expProperty, typeof(ReadOnlySpan<byte>).GetMethod(nameof(ReadOnlySpan<byte>.ToArray)));
+                    expressions.Add(InParmHelper(parameterName, expSprocParameters, expConvert, staticType, addMethod, thirdArg, forthArg, expIgnoreParameters));
+                }
+            }
+        }
 
-		public static void ReadOutParameterStringExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
+        public static void ReadOutParameterStringExpressions(string parameterName, Type staticType, string getMethodName, Expression expProperty, IList<Expression> expressions, ParameterExpression expPrms, ParameterExpression expPrm, Type propertyType, ParameterExpression expLogger, ILogger logger)
         {
 
             var miGetString = staticType.GetMethod(getMethodName);

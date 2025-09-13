@@ -10,7 +10,7 @@ namespace ArgentSea
     /// <summary>
     /// The exception is thrown when an output parameter is expected, but not found, when ExecuteQueryToValueAsync is invoked.
     /// </summary>
-    public sealed class UnexpectedSqlResultException : Exception
+    public sealed class UnexpectedSqlResultException : ApplicationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UnexpectedSqlResultException" /> class with no error message.

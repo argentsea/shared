@@ -1105,10 +1105,6 @@ namespace ArgentSea
                     variableExpressions.Add(expDataGreatGrandChildId);
                 }
 
-                ConstantExpression expDataOrigin;
-
-                expDataOrigin = Expression.Constant(shdAttr.Origin, typeof(char));
-
                 if (!(shdAttr.ShardParameter is null))
                 {
                     nonrequiredExpressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(expDataShardId.Name)));
@@ -1253,66 +1249,65 @@ namespace ArgentSea
                 //Type tShard;
                 if (isShardGreatGrandChild)
                 {
-                    constructorTypes = new[] { typeof(char), typeof(short), tRecordId, tChildId, tGrandChildId, tGreatGrandChildId };
-                    constructorArgs = new Expression[6];
+                    constructorTypes = new[] { typeof(short), tRecordId, tChildId, tGrandChildId, tGreatGrandChildId };
+                    constructorArgs = new Expression[5];
                 }
                 else if (isShardGrandChild)
                 {
-                    constructorTypes = new[] { typeof(char), typeof(short), tRecordId, tChildId, tGrandChildId };
-                    constructorArgs = new Expression[5];
+                    constructorTypes = new[] { typeof(short), tRecordId, tChildId, tGrandChildId };
+                    constructorArgs = new Expression[4];
                 }
                 if (isShardChild)
                 {
-                    constructorTypes = new[] { typeof(char), typeof(short), tRecordId, tChildId };
-                    constructorArgs = new Expression[4];
+                    constructorTypes = new[] { typeof(short), tRecordId, tChildId };
+                    constructorArgs = new Expression[3];
                 }
                 else
                 {
-                    constructorTypes = new[] { typeof(char), typeof(short), tRecordId };
-                    constructorArgs = new Expression[3];
+                    constructorTypes = new[] { typeof(short), tRecordId };
+                    constructorArgs = new Expression[2];
                 }
-				constructorArgs[0] = expDataOrigin;
-				constructorArgs[1] = Expression.Property(expDataShardId, expDataShardId.Type.GetProperty(nameof(Nullable<int>.Value)));
+				constructorArgs[0] = Expression.Property(expDataShardId, expDataShardId.Type.GetProperty(nameof(Nullable<int>.Value)));
 
                 if (tRecordId.IsValueType)
 				{
-					constructorArgs[2] = Expression.Property(expDataRecordId, expDataRecordId.Type.GetProperty(nameof(Nullable<int>.Value)));
+					constructorArgs[1] = Expression.Property(expDataRecordId, expDataRecordId.Type.GetProperty(nameof(Nullable<int>.Value)));
 				}
 				else
 				{
-					constructorArgs[2] = expDataRecordId;
+					constructorArgs[1] = expDataRecordId;
 				}
                 if (isShardChild || isShardGrandChild || isShardGreatGrandChild)
                 {
                     if (tChildId.IsValueType)
 					{
-						constructorArgs[3] = Expression.Property(expDataChildId, expDataChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
+						constructorArgs[2] = Expression.Property(expDataChildId, expDataChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
 					}
 					else
 					{
-						constructorArgs[3] = expDataChildId;
+						constructorArgs[2] = expDataChildId;
 					}
 				}
                 if (isShardGrandChild || isShardGreatGrandChild)
                 {
                     if (tGrandChildId.IsValueType)
                     {
-                        constructorArgs[4] = Expression.Property(expDataGrandChildId, expDataGrandChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
+                        constructorArgs[3] = Expression.Property(expDataGrandChildId, expDataGrandChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
                     }
                     else
                     {
-                        constructorArgs[4] = expDataGrandChildId;
+                        constructorArgs[3] = expDataGrandChildId;
                     }
                 }
                 if (isShardGreatGrandChild)
                 {
                     if (tGreatGrandChildId.IsValueType)
                     {
-                        constructorArgs[5] = Expression.Property(expDataGreatGrandChildId, expDataGreatGrandChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
+                        constructorArgs[4] = Expression.Property(expDataGreatGrandChildId, expDataGreatGrandChildId.Type.GetProperty(nameof(Nullable<int>.Value)));
                     }
                     else
                     {
-                        constructorArgs[5] = expDataGreatGrandChildId;
+                        constructorArgs[4] = expDataGreatGrandChildId;
                     }
                 }
                 var expNewShardInstance = Expression.New(propType.GetConstructor(constructorTypes), constructorArgs);

@@ -7,7 +7,7 @@ namespace ArgentSea
     /// <summary>
     /// The exception is thrown when a statement or procedure has a parameter names set, but a query is missing a parameter in the set.
     /// </summary>
-    public sealed class ParameterNotFoundException : Exception
+    public sealed class ParameterNotFoundException : ApplicationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ParameterNotFoundException" /> class with no error message.

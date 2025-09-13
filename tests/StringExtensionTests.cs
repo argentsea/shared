@@ -70,12 +70,12 @@ Another test "  + StringExtensionTests.Emoji;
 		public void TestEncodeDecode(string validateThis)
 		{
             var testBytes = Encoding.UTF8.GetBytes(validateThis);
-			var encoded = StringExtensions.EncodeToString(ref testBytes);
+			var encoded = StringExtensions.EncodeToString(testBytes);
 			var decoded = StringExtensions.Decode(encoded);
-			Encoding.UTF8.GetString(decoded).Should().Be(validateThis);
-            var encoded2 = StringExtensions.EncodeToUtf8(ref testBytes);
-            var decoded2 = StringExtensions.Decode(encoded2);
-			Encoding.UTF8.GetString(decoded2).Should().Be(validateThis);
+			Encoding.UTF8.GetString(decoded.ToArray()).Should().Be(validateThis);
+            var encoded2 = StringExtensions.EncodeToUtf8(testBytes);
+            var decoded2 = StringExtensions.Decode(encoded2.ToArray());
+			Encoding.UTF8.GetString(decoded2.ToArray()).Should().Be(validateThis);
         }
     }
 }

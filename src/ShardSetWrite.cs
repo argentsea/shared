@@ -1713,66 +1713,6 @@ namespace ArgentSea
                 => _shardSet.ListAsync<TValue>(query, parameters, columnName, null, null, cancellationToken);
 
             /// <summary>
-            /// Connect to the shard set and return a combined list of ShardKey values using the specified record Id column and the ShardId of the current shard.
-            /// </summary>
-            /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
-            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
-            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
-            /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
-                where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, recordColumnName, parameters, null, shardParameterName, cancellationToken);
-
-            /// <summary>
-            /// Connect to the shard set and return a combined list of ShardKey values using the specified record Id column and the ShardId of the current shard.
-            /// </summary>
-            /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
-            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
-            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
-            /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterValues"></param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
-                where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, recordColumnName, parameters, shardParameterValues, null, cancellationToken);
-
-            /// <summary>
-            /// Connect to the shard set and return a combined list of ShardKey values using the specified record Id column and the ShardId of the current shard.
-            /// </summary>
-            /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
-            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
-            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
-            /// <param name="parameters">The query parameters.</param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
-                where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, recordColumnName, parameters, null, null, cancellationToken);
-
-            /// <summary>
-            /// Connect to the shard set and return a combined list of ShardKey values using the specified record Id column and the ShardId of the current shard.
-            /// </summary>
-            /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
-            /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
-            /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
-            /// <param name="parameters">The query parameters.</param>
-            /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
-            /// <param name="shardParameterValues"></param>
-            /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
-            /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
-                where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, recordColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
-
-            /// <summary>
             /// Connect to the shard set and return a combined list of ShardKey values from the specified columns.
             /// </summary>
             /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
@@ -1784,9 +1724,9 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, shardColumnName, recordColumnName, parameters, null, shardParameterName, cancellationToken);
+                => _shardSet.ListAsync<TRecord>(query, shardColumnName, recordColumnName, parameters, null, shardParameterName, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardKey values from the specified columns.
@@ -1800,9 +1740,9 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
                 where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, shardColumnName, recordColumnName, parameters, shardParameterValues, null, cancellationToken);
+                => _shardSet.ListAsync<TRecord>(query, shardColumnName, recordColumnName, parameters, shardParameterValues, null, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardKey values from the specified columns.
@@ -1815,9 +1755,9 @@ namespace ArgentSea
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, shardColumnName, recordColumnName, parameters, null, null, cancellationToken);
+                => _shardSet.ListAsync<TRecord>(query, shardColumnName, recordColumnName, parameters, null, null, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardKey values from the specified columns.
@@ -1832,9 +1772,9 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardKey values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
-                => _shardSet.ListAsync<TRecord>(query, origin, shardColumnName, recordColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
+                => _shardSet.ListAsync<TRecord>(query, shardColumnName, recordColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values using the specified record Id column and the ShardId of the current shard.
@@ -1842,17 +1782,16 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, recordColumnName, childColumnName, parameters, null, shardParameterName, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, recordColumnName, childColumnName, parameters, null, shardParameterName, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values using the specified record Id column and the ShardId of the current shard.
@@ -1860,17 +1799,16 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="shardParameterValues"></param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, recordColumnName, childColumnName, parameters, shardParameterValues, null, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, recordColumnName, childColumnName, parameters, shardParameterValues, null, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values using the specified record Id column and the ShardId of the current shard.
@@ -1878,16 +1816,15 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, recordColumnName, childColumnName, parameters, null, null, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, recordColumnName, childColumnName, parameters, null, null, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values using the specified record Id column and the ShardId of the current shard.
@@ -1895,7 +1832,6 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
             /// <param name="parameters">The query parameters.</param>
@@ -1903,10 +1839,10 @@ namespace ArgentSea
             /// <param name="shardParameterValues"></param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, recordColumnName, childColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, recordColumnName, childColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values from the specified columns.
@@ -1914,7 +1850,6 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
@@ -1922,10 +1857,10 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, shardColumnName, recordColumnName, childColumnName, parameters, null, shardParameterName, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, null, shardParameterName, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values from the specified columns.
@@ -1933,7 +1868,6 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
@@ -1941,10 +1875,10 @@ namespace ArgentSea
             /// <param name="shardParameterValues">A list of shards to be queried, and shard-specific values to use for named parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, shardColumnName, recordColumnName, childColumnName, parameters, shardParameterValues, null, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, shardParameterValues, null, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values from the specified columns.
@@ -1952,17 +1886,16 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
             /// <param name="parameters">The query parameters.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, shardColumnName, recordColumnName, childColumnName, parameters, null, null, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, null, null, cancellationToken);
 
             /// <summary>
             /// Connect to the shard set and return a combined list of ShardChild values from the specified columns.
@@ -1970,7 +1903,6 @@ namespace ArgentSea
             /// <typeparam name="TRecord">The type of the record id component in the ShardChild result.</typeparam>
             /// <typeparam name="TChild">The type of the child id component in the ShardChild result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardChild type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardChild.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardChild.</param>
             /// <param name="childColumnName">This should match the name of a column containing the ChildID component of the ShardChild.</param>
@@ -1979,10 +1911,10 @@ namespace ArgentSea
             /// <param name="shardParameterName">The name of the ShardId parameter, to be set for each connection before it is called.</param>
             /// <param name="cancellationToken">A token which allows the query to be cancelled.</param>
             /// <returns>A list of ShardChild values representing the combined results of all of the shards or the specified shards.</returns>
-            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            public Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
-                => _shardSet.ListAsync<TRecord, TChild>(query, origin, shardColumnName, recordColumnName, childColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
+                => _shardSet.ListAsync<TRecord, TChild>(query, shardColumnName, recordColumnName, childColumnName, parameters, shardParameterValues, shardParameterName, cancellationToken);
 
             #endregion
         }

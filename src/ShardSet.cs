@@ -332,7 +332,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
             {
                 var result = new List<ShardKey<TRecord>>();
@@ -387,7 +387,7 @@ namespace ArgentSea
                         {
                             foreach (var itm in interim)
                             {
-                                result.Add(new ShardKey<TRecord>(origin, shardIds[tsk], itm.Item1));
+                                result.Add(new ShardKey<TRecord>(shardIds[tsk], itm.Item1));
                             }
                         }
                     }
@@ -395,7 +395,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, char origin, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardKey<TRecord>>> ListAsync<TRecord>(Query query, string shardColumnName, string recordColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
             {
                 var result = new List<ShardKey<TRecord>>();
@@ -447,7 +447,7 @@ namespace ArgentSea
                         {
                             foreach (var itm in interim)
                             {
-                                result.Add(new ShardKey<TRecord>(origin, itm.Item1, itm.Item2));
+                                result.Add(new ShardKey<TRecord>(itm.Item1, itm.Item2));
                             }
                         }
                     }
@@ -455,7 +455,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
             {
@@ -511,7 +511,7 @@ namespace ArgentSea
                         {
                             foreach (var itm in interim)
                             {
-                                result.Add(new ShardKey<TRecord, TChild>(origin, shardIds[tsk], itm.Item1, itm.Item2));
+                                result.Add(new ShardKey<TRecord, TChild>(shardIds[tsk], itm.Item1, itm.Item2));
                             }
                         }
                     }
@@ -519,7 +519,7 @@ namespace ArgentSea
                 return result;
             }
 
-            internal async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, char origin, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
+            internal async Task<List<ShardKey<TRecord, TChild>>> ListAsync<TRecord, TChild>(Query query, string shardColumnName, string recordColumnName, string childColumnName, DbParameterCollection parameters, ShardsValues shardParameterValues, string shardParameterName, CancellationToken cancellationToken)
                 where TRecord : IComparable
                 where TChild : IComparable
             {
@@ -572,7 +572,7 @@ namespace ArgentSea
                         {
                             foreach (var itm in interim)
                             {
-                                result.Add(new ShardKey<TRecord, TChild>(origin, itm.Item1, itm.Item2, itm.Item3));
+                                result.Add(new ShardKey<TRecord, TChild>(itm.Item1, itm.Item2, itm.Item3));
                             }
                         }
                     }

@@ -15,44 +15,44 @@ namespace ArgentSea
     {
         #region Shard Extension Methods
 
-        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyStep<TRecord>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName));
+            batch.Add(new KeyStep<TRecord>(query, parameters, shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyStep<TRecord>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName));
+            batch.Add(new KeyStep<TRecord>(query, new ParameterCollection(), shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildStep<TRecord, TChild>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildStep<TRecord, TChild>(query, parameters, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildStep<TRecord, TChild>(query, new ParameterCollection(), shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, DbParameterCollection parameters, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyStep<TRecord>(query, parameters, dataOrigin, null, recordIdColumnName));
+            batch.Add(new KeyStep<TRecord>(query, parameters, null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, char dataOrigin, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<ShardKey<TRecord>> Add<TRecord>(this ShardBatch<ShardKey<TRecord>> batch, Query query, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyStep<TRecord>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName));
+            batch.Add(new KeyStep<TRecord>(query, new ParameterCollection(), null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, DbParameterCollection parameters, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildStep<TRecord, TChild>(query, parameters, dataOrigin, null, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildStep<TRecord, TChild>(query, parameters, null, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<ShardKey<TRecord, TChild>> Add<TRecord, TChild>(this ShardBatch<ShardKey<TRecord, TChild>> batch, Query query, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildStep<TRecord, TChild>(query, new ParameterCollection(), null, recordIdColumnName, childIdColumnName));
             return batch;
         }
 
@@ -78,88 +78,88 @@ namespace ArgentSea
             return batch;
         }
 
-        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyListStep<TRecord>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName));
+            batch.Add(new KeyListStep<TRecord>(query, parameters, shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName));
+            batch.Add(new KeyListStep<TRecord>(query, new ParameterCollection(), shardIdColumnName, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildListStep<TRecord, TChild>(query, parameters, shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
-            return batch;
-        }
-
-        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
-        {
-            ((IList)batch).Add(new KeyListStep<TRecord>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName));
-            return batch;
-        }
-        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
-        {
-            ((IList)batch).Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName));
-            return batch;
-        }
-        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
-        {
-            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
-            return batch;
-        }
-        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
-        {
-            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, shardIdColumnName, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), shardIdColumnName, recordIdColumnName, childIdColumnName));
             return batch;
         }
 
+        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
+        {
+            ((IList)batch).Add(new KeyListStep<TRecord>(query, parameters, shardIdColumnName, recordIdColumnName));
+            return batch;
+        }
+        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, string shardIdColumnName, string recordIdColumnName) where TRecord : IComparable
+        {
+            ((IList)batch).Add(new KeyListStep<TRecord>(query, new ParameterCollection(), shardIdColumnName, recordIdColumnName));
+            return batch;
+        }
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        {
+            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, parameters, shardIdColumnName, recordIdColumnName, childIdColumnName));
+            return batch;
+        }
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, string shardIdColumnName, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        {
+            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), shardIdColumnName, recordIdColumnName, childIdColumnName));
+            return batch;
+        }
 
-        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName) where TRecord : IComparable
+
+        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyListStep<TRecord>(query, parameters, dataOrigin, null, recordIdColumnName));
+            batch.Add(new KeyListStep<TRecord>(query, parameters, null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, char dataOrigin, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<IList<ShardKey<TRecord>>> batch, Query query, string recordIdColumnName) where TRecord : IComparable
         {
-            batch.Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName));
+            batch.Add(new KeyListStep<TRecord>(query, new ParameterCollection(), null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, null, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildListStep<TRecord, TChild>(query, parameters, null, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<IList<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<IList<ShardKey<TRecord, TChild>>> batch, Query query, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            batch.Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName, childIdColumnName));
+            batch.Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), null, recordIdColumnName, childIdColumnName));
             return batch;
         }
 
-        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, DbParameterCollection parameters, string recordIdColumnName) where TRecord : IComparable
         {
-            ((IList)batch).Add(new KeyListStep<TRecord>(query, parameters, dataOrigin, null, recordIdColumnName));
+            ((IList)batch).Add(new KeyListStep<TRecord>(query, parameters, null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, char dataOrigin, string recordIdColumnName) where TRecord : IComparable
+        public static ShardBatch<List<ShardKey<TRecord>>> Add<TRecord>(this ShardBatch<List<ShardKey<TRecord>>> batch, Query query, string recordIdColumnName) where TRecord : IComparable
         {
-            ((IList)batch).Add(new KeyListStep<TRecord>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName));
+            ((IList)batch).Add(new KeyListStep<TRecord>(query, new ParameterCollection(), null, recordIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, DbParameterCollection parameters, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, parameters, dataOrigin, null, recordIdColumnName, childIdColumnName));
+            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, parameters, null, recordIdColumnName, childIdColumnName));
             return batch;
         }
-        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, char dataOrigin, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
+        public static ShardBatch<List<ShardKey<TRecord, TChild>>> Add<TRecord, TChild>(this ShardBatch<List<ShardKey<TRecord, TChild>>> batch, Query query, string recordIdColumnName, string childIdColumnName) where TRecord : IComparable where TChild : IComparable
         {
-            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), dataOrigin, null, recordIdColumnName, childIdColumnName));
+            ((IList)batch).Add(new ChildListStep<TRecord, TChild>(query, new ParameterCollection(), null, recordIdColumnName, childIdColumnName));
             return batch;
         }
 
@@ -242,14 +242,12 @@ namespace ArgentSea
             private readonly string _shardIdColumnName;
             private readonly string _recordIdColumnName;
             private readonly Query _query;
-            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
-            public KeyStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName)
+            public KeyStep(Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName)
             {
                 _query = query;
                 _parameters = parameters;
-                _dataOrigin = dataOrigin;
                 _shardIdColumnName = shardIdColumnName;
                 _recordIdColumnName = recordIdColumnName;
             }
@@ -278,7 +276,7 @@ namespace ArgentSea
                                 shardIdData = dataReader.GetFieldValue<short>(shardOrd);
                             }
                             var recordid = dataReader.GetFieldValue<TRecord>(recordOrd);
-                            return new ShardKey<TRecord>(_dataOrigin, shardIdData, recordid);
+                            return new ShardKey<TRecord>(shardIdData, recordid);
                         }
                     }
                 }
@@ -291,14 +289,12 @@ namespace ArgentSea
             private readonly string _recordIdColumnName;
             private readonly string _childIdColumnName;
             private readonly Query _query;
-            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
-            public ChildStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName)
+            public ChildStep(Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName, string childIdColumnName)
             {
                 _query = query;
                 _parameters = parameters;
-                _dataOrigin = dataOrigin;
                 _shardIdColumnName = shardIdColumnName;
                 _recordIdColumnName = recordIdColumnName;
                 _childIdColumnName = childIdColumnName;
@@ -331,7 +327,7 @@ namespace ArgentSea
                             }
                             var recordid = dataReader.GetFieldValue<TRecord>(recordOrd);
                             var childid = dataReader.GetFieldValue<TChildId>(childOrd);
-                            return new ShardKey<TRecord, TChildId>(_dataOrigin, shardIdData, recordid, childid);
+                            return new ShardKey<TRecord, TChildId>(shardIdData, recordid, childid);
                         }
                     }
                 }
@@ -408,14 +404,12 @@ namespace ArgentSea
             private readonly string _shardIdColumnName;
             private readonly string _recordIdColumnName;
             private readonly Query _query;
-            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
-            public KeyListStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName)
+            public KeyListStep(Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName)
             {
                 _query = query;
                 _parameters = parameters;
-                _dataOrigin = dataOrigin;
                 _shardIdColumnName = shardIdColumnName;
                 _recordIdColumnName = recordIdColumnName;
             }
@@ -445,7 +439,7 @@ namespace ArgentSea
                                 shardIdData = dataReader.GetFieldValue<short>(shardOrd);
                             }
                             var recordid = dataReader.GetFieldValue<TRecord>(recordOrd);
-                            result.Add(new ShardKey<TRecord>(_dataOrigin, shardIdData, recordid));
+                            result.Add(new ShardKey<TRecord>(shardIdData, recordid));
                         }
                     }
                 }
@@ -459,14 +453,12 @@ namespace ArgentSea
             private readonly string _recordIdColumnName;
             private readonly string _childIdColumnName;
             private readonly Query _query;
-            private readonly char _dataOrigin;
             private readonly DbParameterCollection _parameters;
 
-            public ChildListStep(Query query, DbParameterCollection parameters, char dataOrigin, string shardIdColumnName, string recordIdColumnName, string childIdColumnName)
+            public ChildListStep(Query query, DbParameterCollection parameters, string shardIdColumnName, string recordIdColumnName, string childIdColumnName)
             {
                 _query = query;
                 _parameters = parameters;
-                _dataOrigin = dataOrigin;
                 _shardIdColumnName = shardIdColumnName;
                 _recordIdColumnName = recordIdColumnName;
                 _childIdColumnName = childIdColumnName;
@@ -500,7 +492,7 @@ namespace ArgentSea
                             }
                             var recordid = dataReader.GetFieldValue<TRecord>(recordOrd);
                             var childid = dataReader.GetFieldValue<TChild>(childOrd);
-                            result.Add(new ShardKey<TRecord, TChild>(_dataOrigin, shardIdData, recordid, childid));
+                            result.Add(new ShardKey<TRecord, TChild>(shardIdData, recordid, childid));
                         }
                     }
                 }

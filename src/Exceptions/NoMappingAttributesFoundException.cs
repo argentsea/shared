@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ArgentSea
 {
-    public class NoMappingAttributesFoundException : Exception
+    public class NoMappingAttributesFoundException : ApplicationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NoMappingAttributesFoundException" /> class with no error message.

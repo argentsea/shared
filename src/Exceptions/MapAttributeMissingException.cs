@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ArgentSea
 {
-    public class MapAttributeMissingException : Exception
+    public class MapAttributeMissingException : ApplicationException
     {
         public enum ShardElement {
             ShardId,

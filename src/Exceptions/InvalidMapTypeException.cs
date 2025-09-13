@@ -14,7 +14,7 @@ namespace ArgentSea
     /// This exception is raise when a model property has a database mapping attribute that is not of the correct type.
     /// </summary>
     /// <example>An attempt to map a string property to an integer parameter would generate this error.</example>
-    public sealed class InvalidMapTypeException : Exception
+    public sealed class InvalidMapTypeException : ApplicationException
     {
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InvalidMapTypeException" /> class with no error message.
