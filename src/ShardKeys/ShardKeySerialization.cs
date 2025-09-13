@@ -434,7 +434,7 @@ internal static class ShardKeySerialization
         {
             position += 1;
             result = data[position - 1];
-            result = true;
+            success = true;
         }
         else if (valueType == typeof(short))
         {

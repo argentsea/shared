@@ -42,6 +42,15 @@ namespace ArgentSea
         }
 
         /// <summary>
+		/// Initiaizes a new instance from a readonly data array. This can be the raw data (from ToArray()) or UTF8 Span (ToUtf8()).
+        /// </summary>
+        /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method or ToUtf8() method.</param>
+        public ShardKey(ReadOnlyMemory<byte> data) : this(new ReadOnlySpan<byte>(data.ToArray()))
+        {
+
+        }
+
+        /// <summary>
 		/// Initiaizes a new instance from a readonly data array. This can but the raw data (from ToArray()) or UTF8 Span (ToUtf8()).
         /// </summary>
         /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method or ToUtf8() method.</param>
@@ -391,7 +400,7 @@ namespace ArgentSea
             var greatGrandChildData = ShardKeySerialization.GetValueBytes(_greatGrandChildId);
             var metaLen = _key._key._key._typeMetadata.Length;
 
-            var aResult = new byte[metaLen+ shardData.Length + recordData.Length + childData.Length + grandChildData.Length + grandChildData.Length + 1];
+            var aResult = new byte[metaLen+ shardData.Length + recordData.Length + childData.Length + grandChildData.Length + greatGrandChildData.Length + 1];
             aResult[0] = (byte)(metaLen | 128); //metadata length on bits 1 & 2, No-utf8 flag on bit 8.
             var resultIndex = 1;
             _key._key._key._typeMetadata.ToArray().CopyTo(aResult, resultIndex);
@@ -431,7 +440,7 @@ namespace ArgentSea
         public static ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild> FromExternalString(string value)
         {
             var aValues = StringExtensions.SerializeFromExternalString(value);
-            return new ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>(aValues.ToArray());
+            return new ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>(aValues.Span);
         }
 
         /// <summary>

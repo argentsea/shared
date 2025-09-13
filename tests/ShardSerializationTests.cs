@@ -5,6 +5,7 @@ using ArgentSea;
 using FluentAssertions;
 using System.Text;
 using System.Runtime;
+using ArgentSea.ShardKeys;
 
 namespace ArgentSea.Test
 {
@@ -35,7 +36,7 @@ namespace ArgentSea.Test
             var sk2 = new ShardKey<Guid>(rom.Span);
             sk2.Should().Be(sk1, "because the serialized array creates an equivalent shardKey");
             var str = Encoding.UTF8.GetString(rom.Span);
-            var utf8 = Encoding.UTF8.GetBytes(str);
+            var utf8 = Encoding.UTF8.GetBytes(str).AsSpan<byte>();
             //var sk3 = new ShardKey<Guid>(utf8);
             var sk3 = new ShardKey<Guid>(utf8);
             sk3.Should().Be(sk1, "because the serialized array creates an equivalent shardKey");
@@ -103,6 +104,22 @@ namespace ArgentSea.Test
             var str = sc1.ToExternalString();
             var sc2 = ShardKey<int, short>.FromExternalString(str);
             sc2.Should().Be(sc1, "because the serialized string creates an equivalent shardChild");
+        }
+        [Fact]
+        public void TestShardGhostSerializationRawArray()
+        {
+            var sc1 = new ShardKey<int, short, byte, string>(1, 6, 7, 8 , "9");
+            var araw = sc1.ToArray();
+            var obj = new GhostShardKey(araw);
+            sc1.ToString().Should().Be(obj.ToString(), "because the ghost was created from shard binary serialization.");
+        }
+        [Fact]
+        public void TestShardGhostSerializationUtf8Array()
+        {
+            var sc1 = new ShardKey<int, short, byte, string>(1, 6, 7, 8, "9");
+            var utfString = sc1.ToUtf8();
+            var obj = new GhostShardKey(utfString);
+            sc1.ToString().Should().Be(obj.ToString(), "because the ghost was created from shard utf8 serialization.");
         }
     }
 }

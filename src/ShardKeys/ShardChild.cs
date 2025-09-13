@@ -40,7 +40,16 @@ namespace ArgentSea
         }
 
         /// <summary>
-		/// Initiaizes a new instance from a readonly data array. This can but the raw data (from ToArray()) or UTF8 Span (ToUtf8()).
+		/// Initiaizes a new instance from a readonly data array. This can be the raw data (from ToArray()) or UTF8 Span (ToUtf8()).
+        /// </summary>
+        /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method or ToUtf8() method.</param>
+        public ShardKey(ReadOnlyMemory<byte> data) : this(new ReadOnlySpan<byte>(data.ToArray()))
+        {
+
+        }
+
+        /// <summary>
+		/// Initiaizes a new instance from a readonly data array. This can be the raw data (from ToArray()) or UTF8 Span (ToUtf8()).
         /// </summary>
         /// <param name="data">The readonly span containing the shardKey data. This can be generated using the ToArray() method or ToUtf8() method.</param>
         public ShardKey(ReadOnlySpan<byte> data)
