@@ -267,7 +267,7 @@ internal static class ShardKeySerialization
             throw new InvalidShardKeyMetadataException(keyType);
         }
         var saved = meta.Span;
-        if (metadata.Length != 1 && saved.Length != 1)
+        if (metadata.Length != 1 || saved.Length != 1)
         {
             throw new InvalidShardKeyMetadataException();
         }
@@ -283,7 +283,7 @@ internal static class ShardKeySerialization
             throw new InvalidShardKeyMetadataException(keyType);
         }
         var saved = meta.Span;
-        if (metadata.Length != 2 && saved.Length != 2)
+        if (metadata.Length != 2 || saved.Length != 2)
         {
             throw new InvalidShardKeyMetadataException();
         }
@@ -303,7 +303,7 @@ internal static class ShardKeySerialization
             throw new InvalidShardKeyMetadataException(keyType);
         }
         var saved = meta.Span;
-        if (metadata.Length != 3 && saved.Length != 3)
+        if (metadata.Length != 3 || saved.Length != 3)
         {
             throw new InvalidShardKeyMetadataException();
         }
@@ -328,7 +328,7 @@ internal static class ShardKeySerialization
             throw new InvalidShardKeyMetadataException(keyType);
         }
         var saved = meta.Span;
-        if (metadata.Length != 3 && saved.Length != 3)
+        if (metadata.Length != 3 || saved.Length != 3)
         {
             throw new InvalidShardKeyMetadataException();
         }

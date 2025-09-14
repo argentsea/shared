@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 namespace ArgentSea
 {
     /// <summary>
-	/// Immutable class representing a sharded record with a database compound key. The ShardKey consist of the (virtual) shardId, the recordId, and the childId.
+	/// Immutable class representing a sharded record with a database compound key. The ShardKey consist of the (virtual) shardId, the recordId, the childId, the grandChildId, and the greatGrandChildId.
     /// </summary>
     /// <typeparam name="TRecord"></typeparam>
     /// <typeparam name="TChild"></typeparam>
@@ -71,7 +71,7 @@ namespace ArgentSea
             }
             var metadataSpan = metadata.Span;
             var saved = data.Slice(1, metaLen);
-            if (metadata.Length != 3 && saved.Length != 3)
+            if (metadata.Length != 3 || saved.Length != 3)
             {
                 throw new InvalidShardKeyMetadataException();
             }
@@ -134,11 +134,7 @@ namespace ArgentSea
             }
             var metadataSpan = metadata.Span;
             var saved = data.Slice(1, metaLen);
-            if (metadataSpan.Length != 1 && saved.Length != 1)
-            {
-                return false;
-            }
-            if (metadataSpan[0] != saved[0])
+            if (metadataSpan.Length != 3 && saved.Length != 3 && metadataSpan[0] != saved[0] && metadataSpan[1] != saved[1] && metadataSpan[2] != saved[2])
             {
                 return false;
             }
@@ -278,7 +274,7 @@ namespace ArgentSea
                 throw new ArgumentNullException(nameof(replacements));
             }
             var result = new List<TModel>(master);
-            var track = new bool[replacements.Count];
+            var matched = new bool[replacements.Count];
             for (var i = 0; i < result.Count; i++)
             {
                 for (var j = 0; j < replacements.Count; j++)
@@ -286,16 +282,16 @@ namespace ArgentSea
                     if (result[i].Key.Equals(replacements[j].Key))
                     {
                         result[i] = replacements[j];
-                        track[j] = true;
+                        matched[j] = true;
                         break;
                     }
                 }
             }
             if (appendUnmatchedReplacements)
             {
-                for (var i = 0; i < track.Length; i++)
+                for (var i = 0; i < matched.Length; i++)
                 {
-                    if (track[i])
+                    if (!matched[i])
                     {
                         result.Add(replacements[i]);
                     }
@@ -375,7 +371,7 @@ namespace ArgentSea
                 }
             }
 
-            return _key.GetHashCode() | BitConverter.ToInt32(aResult, 0);
+            return _key.GetHashCode() ^ BitConverter.ToInt32(aResult, 0);
         }
 
         public ReadOnlyMemory<byte> ToArray()
