@@ -180,7 +180,7 @@ namespace ArgentSea
 
         public static void NullShardChildArguments<TRecord, TChild>(this ILogger logger, string propertyName, ShardKey<TRecord, TChild> shardChild) where TRecord : IComparable where TChild : IComparable
         {
-            if (shardChild._key.ShardId.Equals(null) || shardChild._key.RecordId.Equals(null) || shardChild.ChildId.Equals(null))
+            if (shardChild.ShardId.Equals(null) || shardChild.RecordId.Equals(null) || shardChild.ChildId.Equals(null))
             {
                 _sqlShardChildNull(logger, propertyName, shardChild.ToString(), null);
             }

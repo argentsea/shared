@@ -147,7 +147,7 @@ namespace ArgentSea
 
         public TRecord RecordId { get => _recordId;  }
 
-        public bool IsEmpty { get => this.RecordId.CompareTo(default(TRecord)) == 0 && this.ShardId == 0; }
+        public bool IsEmpty { get => _recordId.CompareTo(default(TRecord)) == 0 && _shardId == 0; }
         
 		public override string ToString() => $"{{ \"shard\": {_shardId.ToString()}, \"id\": \"{_recordId.ToString()}\"}}";
 

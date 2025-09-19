@@ -19,8 +19,10 @@ namespace ArgentSea
         where TRecord : IComparable
         where TChild : IComparable
     {
-        internal readonly ShardKey<TRecord> _key;
+        private readonly short _shardId;
+        private readonly TRecord _recordId;
         private readonly TChild _childId;
+        internal readonly ReadOnlyMemory<byte> _typeMetadata;
 
         #region Constructors
         public ShardKey(short shardId, TRecord recordId, TChild childRecordId)
@@ -29,13 +31,17 @@ namespace ArgentSea
             {
                 throw new InvalidShardKeyMetadataException();
             }
-            _key = new ShardKey<TRecord>(metadata, shardId, recordId);
+            _typeMetadata = metadata;
+            _shardId = shardId;
+            _recordId = recordId;
             _childId = childRecordId;
         }
 
         internal ShardKey(ReadOnlyMemory<byte> typeMetadata, short shardId, TRecord recordId, TChild childRecordId)
         {
-            _key = new ShardKey<TRecord>(typeMetadata, shardId, recordId);
+            _typeMetadata = typeMetadata;
+            _shardId = shardId;
+            _recordId = recordId;
             _childId = childRecordId;
         }
 
@@ -89,7 +95,9 @@ namespace ArgentSea
             {
                 throw new InvalidDataException("Could not parse binary record data to create a ShardKey.");
             }
-            this._key = new ShardKey<TRecord>(metadata, shardId, recordId);
+            _typeMetadata = metadata;
+            _shardId = shardId;
+            _recordId = recordId;
             if (!ShardKeySerialization.TryConvertFromBytes(ref data, ref pos, typChild, out dynamic childResult))
             {
                 throw new InvalidDataException("Could not parse binary child data to create a ShardKey.");
@@ -145,11 +153,11 @@ namespace ArgentSea
         #endregion
         public TChild ChildId { get => _childId; }
 
-		public short ShardId { get => _key.ShardId; }
+		public short ShardId { get => _shardId; }
 
-		public TRecord RecordId { get => _key.RecordId;  }
+		public TRecord RecordId { get => _recordId;  }
 
-        public bool IsEmpty {  get => _key.IsEmpty && this.ChildId.CompareTo(default(TChild)) == 0; }
+        public bool IsEmpty {  get => _recordId.CompareTo(default(TRecord)) == 0 && _shardId == 0 && _childId.CompareTo(default(TChild)) == 0; }
 
         /// <summary>
         /// Given a list of Models with ShardKChild keys, returns a distinct list of shard Ids, except for the shard Id specified.
@@ -208,7 +216,7 @@ namespace ArgentSea
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public ShardsValues ForeignShards(IList<ShardKey<TRecord, TChild>> records)
-            => ShardsValues.ShardListForeign<TRecord, TChild>(_key.ShardId, records);
+            => ShardsValues.ShardListForeign<TRecord, TChild>(_shardId, records);
 
         /// <summary>
         /// Given a list of ShardKey values, returns a distinct list of shard Ids, except for the shard Id of the current shard.
@@ -217,7 +225,7 @@ namespace ArgentSea
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public ShardsValues ForeignShards(List<ShardKey<TRecord, TChild>> records)
-            => ShardsValues.ShardListForeign<TRecord, TChild>(_key.ShardId, (IList<ShardKey<TRecord, TChild>>)records);
+            => ShardsValues.ShardListForeign<TRecord, TChild>(_shardId, (IList<ShardKey<TRecord, TChild>>)records);
 
         /// <summary>
         /// Given a list of Models with ShardChld keys, returns a distinct list of shard Ids, except for the shard Id of the current shard.
@@ -226,7 +234,7 @@ namespace ArgentSea
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public ShardsValues ForeignShards<TModel>(IList<TModel> records) where TModel : IKeyedModel<TRecord, TChild>
-            => ShardsValues.ShardListForeign<TRecord, TChild, TModel>(_key.ShardId, records);
+            => ShardsValues.ShardListForeign<TRecord, TChild, TModel>(_shardId, records);
 
         /// <summary>
         /// Given a list of Models with ShardChld keys, returns a distinct list of shard Ids, except for the shard Id of the current shard.
@@ -235,7 +243,7 @@ namespace ArgentSea
         /// <param name="records">The list of ShardKeys to evaluate.</param>
         /// <returns>A ShardsValues collection, with the shards listed. The values dictionary will be null.</returns>
         public ShardsValues ForeignShards<TModel>(List<TModel> records) where TModel : IKeyedModel<TRecord, TChild>
-            => ShardsValues.ShardListForeign<TRecord, TChild, TModel>(_key.ShardId, (IList<TModel>)records);
+            => ShardsValues.ShardListForeign<TRecord, TChild, TModel>(_shardId, (IList<TModel>)records);
 
         /// <summary>
         /// Merge two lists by iterating master list and using replacement entry where keys match.
@@ -316,7 +324,7 @@ namespace ArgentSea
 
         public bool Equals(ShardKey<TRecord, TChild> other)
         {
-            return (other._key == this._key) && (other.ChildId.CompareTo(this.ChildId) == 0);
+            return ((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0)) && (other.ChildId.CompareTo(this.ChildId) == 0);
         }
         public override bool Equals(object obj)
         {
@@ -325,11 +333,65 @@ namespace ArgentSea
                 return false;
             }
             var other = (ShardKey<TRecord, TChild>)obj;
-            return (other._key == this._key) && (other.ChildId.CompareTo(this.ChildId) == 0);
+            return ((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0)) && (other.ChildId.CompareTo(this.ChildId) == 0);
         }
 
         public override int GetHashCode()
         {
+            var aShd = ShardKeySerialization.GetValueBytes(this._shardId);
+            var aRec = ShardKeySerialization.GetValueBytes(this._recordId);
+            byte[] aDtm = null;
+
+            var result1 = 0;
+            var result2 = 0;
+            var result3 = 0;
+            var result4 = 0;
+            if (!(aShd is null))
+            {
+                if (aShd.Length > 0)
+                {
+                    result1 |= aShd[0];
+                }
+                if (aShd.Length > 1)
+                {
+                    result2 |= aShd[1];
+                }
+                if (aShd.Length > 2)
+                {
+                    result3 |= aShd[2];
+                }
+                if (aShd.Length > 3)
+                {
+                    result4 |= aShd[3];
+                }
+            }
+            if (!(aRec is null))
+            {
+                if (aRec.Length > 0)
+                {
+                    result1 |= aRec[0];
+                }
+                if (aRec.Length > 1)
+                {
+                    result2 |= aRec[1];
+                }
+                if (aRec.Length > 2)
+                {
+                    result3 |= aRec[2];
+                }
+                if (aRec.Length > 3)
+                {
+                    result4 |= aRec[3];
+                }
+            }
+            if (!(aDtm is null))
+            {
+                result1 |= aRec[0];
+                result2 |= aRec[1];
+                result3 |= aRec[2];
+                result4 |= aRec[3];
+            }
+
             var aSChd = ShardKeySerialization.GetValueBytes(this._childId);
             var aResult = new byte[4];
             if (!(aSChd is null))
@@ -352,19 +414,19 @@ namespace ArgentSea
                 }
             }
 
-            return this._key.GetHashCode() ^ BitConverter.ToInt32(aResult, 0);
+            return BitConverter.ToInt32(new byte[] { (byte)result1, (byte)result2, (byte)result3, (byte)result4 }, 0);
         }
 
         public ReadOnlyMemory<byte> ToArray()
         {
-            var shardData = ShardKeySerialization.GetValueBytes(this._key.ShardId);
-            var recordData = ShardKeySerialization.GetValueBytes(this._key.RecordId);
+            var shardData = ShardKeySerialization.GetValueBytes(this._shardId);
+            var recordData = ShardKeySerialization.GetValueBytes(this._recordId);
             var childData = ShardKeySerialization.GetValueBytes(this._childId);
-            var metaLen = _key._typeMetadata.Length;
+            var metaLen = _typeMetadata.Length;
             var aResult = new byte[metaLen + shardData.Length + recordData.Length + childData.Length + 1];
             aResult[0] = (byte)(metaLen | 128); //metadata length on bits 1 & 2, No-utf8 flag on bit 8.
             var resultIndex = 1;
-            _key._typeMetadata.ToArray().CopyTo(aResult, resultIndex);
+            _typeMetadata.ToArray().CopyTo(aResult, resultIndex);
             resultIndex += metaLen;
             shardData.CopyTo(aResult, resultIndex);
             resultIndex += shardData.Length;
@@ -386,7 +448,7 @@ namespace ArgentSea
         }
         public override string ToString()
         {
-            return $"{{ \"shard\": {_key.ShardId.ToString()}, \"ids\": [\"{_key.RecordId.ToString()}\", \"{this._childId.ToString()}\"]}}";
+            return $"{{ \"shard\": {_shardId.ToString()}, \"ids\": [\"{_recordId.ToString()}\", \"{_childId.ToString()}\"]}}";
         }
 
         /// <summary>

@@ -15,7 +15,7 @@
 	  <Authors>johnhicks</Authors>
 	  <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
 	  <RepositoryUrl>https://github.com/argentsea/shared</RepositoryUrl>
-	  <Version>2.0.0-prelrease-4</Version>
+	  <Version>2.0.0-prerelease-6</Version>
 	  <Description>This is the core ArgentSea library, used by platform-specific implementations like ArgentSea.Sql (Microsoft SQL Server) and ArgentSea.Pg (PostgreSQL).</Description>
 	  <Copyright>© John Hicks</Copyright>
 	  <PackageIconUrl>https://www.argentsea.com/images/argentsea-logo.png</PackageIconUrl>
