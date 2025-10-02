@@ -1,8 +1,7 @@
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using FluentAssertions;
 using Xunit;
 
 namespace ArgentSea.Test
@@ -61,6 +60,15 @@ namespace ArgentSea.Test
             var k4 = ShardKey<int, short, byte, long>.Empty;
             k4.IsEmpty.Should().BeTrue();
             k4.GreatGrandChildId.Should().Be(0L);
+        }
+
+        [Fact]
+        public void Empty_String_Defaults()
+        {
+            var k1 = ShardKey<string>.Empty;
+            k1.IsEmpty.Should().BeTrue();
+            k1.ShardId.Should().Be(0);
+            k1.RecordId.Should().Be(string.Empty);
         }
 
         [Fact]
@@ -160,7 +168,7 @@ namespace ArgentSea.Test
         [Fact]
         public void TryParse_GrandChildKey_Succeeds_AfterFix()
         {
-            var key = new ShardKey<int, short, byte>(45,1, 2, 3);
+            var key = new ShardKey<int, short, byte>(45, 1, 2, 3);
             var data = key.ToArray();
             var ok = ShardKey<int, short, byte>.TryParse(data.Span, out var parsed);
             ok.Should().BeTrue();
