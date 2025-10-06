@@ -12,7 +12,6 @@ namespace ArgentSea
 {
     /// <summary>
     /// This error is raised upon an attempt to create an Empty ShardKey or ShardChild, but the IDs are not zero.
-    /// Essentially, any shard object with a DataOrigin of '0' (Empty) must also have zeroed IDs (be equal to ShardKey.Empty or ShardChild.Empty).
     /// </summary>
     public sealed class InvalidShardArgumentsException : ApplicationException
     {

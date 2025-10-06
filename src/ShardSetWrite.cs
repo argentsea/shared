@@ -1717,7 +1717,6 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
             /// <param name="parameters">The query parameters.</param>
@@ -1733,7 +1732,6 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
             /// <param name="parameters">The query parameters.</param>
@@ -1749,7 +1747,6 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
             /// <param name="parameters">The query parameters.</param>
@@ -1764,7 +1761,6 @@ namespace ArgentSea
             /// </summary>
             /// <typeparam name="TRecord">The type of the record id component in the ShardKey result.</typeparam>
             /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
-            /// <param name="origin">Origin value to indicate the ShardKey type.</param>
             /// <param name="shardColumnName">This should match the name of a column containing the ShardID component of the ShardKey.</param>
             /// <param name="recordColumnName">This should match the name of a column containing the RecordID component of the ShardKey.</param>
             /// <param name="parameters">The query parameters.</param>

@@ -448,7 +448,7 @@ namespace ArgentSea
         }
         public override string ToString()
         {
-            return $"{{ \"shard\": {_shardId.ToString()}, \"ids\": [\"{_recordId.ToString()}\", \"{_childId.ToString()}\"]}}";
+            return $"\"shard\": {_shardId.ToString()}, \"ids\": [\"{_recordId.ToString()}\", \"{_childId.ToString()}\"";
         }
 
         /// <summary>

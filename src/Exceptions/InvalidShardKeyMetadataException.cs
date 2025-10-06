@@ -40,7 +40,6 @@ namespace ArgentSea
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidShardKeyMetadataException" /> class which includes the orgin values in the error message.
         /// </summary>
-        /// <param name="actualOrigin"></param>
         public InvalidShardKeyMetadataException(Type expected)
             : base($"The metadata embedded in the serialized shardkey does not match the prescribed data type of {expected.ToString()} required by the current shardkey definition. The data is corrupt.")
         {
