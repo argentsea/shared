@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.InteropServices;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ArgentSea.ShardKeys;
 
@@ -134,7 +128,7 @@ public class GhostShardKey
             span = StringExtensions.Decode(span).Span;
         }
         var orgnLen = span[0] & 3;
-        var pos = orgnLen + 3;
+        var pos = orgnLen + 1;
         return BitConverter.ToInt16(span.Slice(pos));
     }
 }
