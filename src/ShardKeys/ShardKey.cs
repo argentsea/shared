@@ -350,6 +350,8 @@ namespace ArgentSea
 
         public bool Equals(ShardKey<TRecord> other)
         {
+            if (_recordId is null || other.RecordId is null)
+                return _recordId is null && other.RecordId is null && other.ShardId.CompareTo(_shardId) == 0;
             return ((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0));
         }
         public override bool Equals(object obj)
@@ -360,6 +362,8 @@ namespace ArgentSea
             }
 
             var other = (ShardKey<TRecord>)obj;
+            if (_recordId is null || other.RecordId is null)
+                return _recordId is null && other.RecordId is null && other.ShardId.CompareTo(_shardId) == 0;
             return (other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0);
         }
         public override int GetHashCode()
