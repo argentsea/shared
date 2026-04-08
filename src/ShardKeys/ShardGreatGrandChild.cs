@@ -364,7 +364,7 @@ namespace ArgentSea
 
         public bool Equals(ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild> other)
         {
-            return ((((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0)) && (other.ChildId.CompareTo(this.ChildId) == 0)) && (other.GrandChildId.CompareTo(_grandChildId) == 0)) && (other.GreatGrandChildId.CompareTo(_greatGrandChildId) == 0);
+            return ((other.ShardId.CompareTo(_shardId) == 0) && ShardKeySerialization.IsEqualWithNulls<TRecord>(_recordId, other.RecordId) && ShardKeySerialization.IsEqualWithNulls<TChild>(_childId, other.ChildId) && ShardKeySerialization.IsEqualWithNulls<TGrandChild>(_grandChildId, other.GrandChildId) && ShardKeySerialization.IsEqualWithNulls<TGreatGrandChild>(_greatGrandChildId, other.GreatGrandChildId));
         }
         public override bool Equals(object obj)
         {
@@ -373,7 +373,7 @@ namespace ArgentSea
                 return false;
             }
             var other = (ShardKey<TRecord, TChild, TGrandChild, TGreatGrandChild>)obj;
-            return ((((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0)) && (other.ChildId.CompareTo(this.ChildId) == 0)) && (other.GrandChildId.CompareTo(_grandChildId) == 0)) && (other.GreatGrandChildId.CompareTo(_greatGrandChildId) == 0);
+            return ((other.ShardId.CompareTo(_shardId) == 0) && ShardKeySerialization.IsEqualWithNulls<TRecord>(_recordId, other.RecordId) && ShardKeySerialization.IsEqualWithNulls<TChild>(_childId, other.ChildId) && ShardKeySerialization.IsEqualWithNulls<TGrandChild>(_grandChildId, other.GrandChildId) && ShardKeySerialization.IsEqualWithNulls<TGreatGrandChild>(_greatGrandChildId, other.GreatGrandChildId));
         }
 
         public override int GetHashCode()

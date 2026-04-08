@@ -675,4 +675,17 @@ internal static class ShardKeySerialization
                 }
         }
     }
+
+    internal static bool IsEqualWithNulls<TValue>(TValue left, TValue right) where TValue : IComparable
+    {
+        if (left is null && right is null)
+        {
+            return true;
+        }
+        if (left is null || right is null)
+        {
+            return false;
+        }
+        return left.CompareTo(right) == 0;
+    }
 }

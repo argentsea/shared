@@ -324,7 +324,7 @@ namespace ArgentSea
 
         public bool Equals(ShardKey<TRecord, TChild> other)
         {
-            return ((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0)) && (other.ChildId.CompareTo(this.ChildId) == 0);
+            return ((other.ShardId.CompareTo(_shardId) == 0) && ShardKeySerialization.IsEqualWithNulls<TRecord>(_recordId, other.RecordId) && ShardKeySerialization.IsEqualWithNulls<TChild>(_childId, other.ChildId));
         }
         public override bool Equals(object obj)
         {
@@ -333,7 +333,7 @@ namespace ArgentSea
                 return false;
             }
             var other = (ShardKey<TRecord, TChild>)obj;
-            return ((other.ShardId.CompareTo(_shardId) == 0) && (other.RecordId.CompareTo(_recordId) == 0)) && (other.ChildId.CompareTo(this.ChildId) == 0);
+            return ((other.ShardId.CompareTo(_shardId) == 0) && ShardKeySerialization.IsEqualWithNulls<TRecord>(_recordId, other.RecordId) && ShardKeySerialization.IsEqualWithNulls<TChild>(_childId, other.ChildId));
         }
 
         public override int GetHashCode()
