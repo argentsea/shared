@@ -14,6 +14,7 @@ using System.Linq;
 using ArgentSea;
 using System.Threading;
 using System.ComponentModel;
+using System.Collections.Immutable;
 using System.Data.SqlTypes;
 
 namespace ArgentSea
@@ -29,6 +30,8 @@ namespace ArgentSea
         private static readonly ConcurrentDictionary<Type, Lazy<Delegate>> _getOutParamReadCache = new ConcurrentDictionary<Type, Lazy<Delegate>>();
         private static readonly ConcurrentDictionary<string, Lazy<Delegate>> _getOutObjectCache = new ConcurrentDictionary<string, Lazy<Delegate>>();
         private static readonly ConcurrentDictionary<string, Lazy<Delegate>> _getRstObjectCache = new ConcurrentDictionary<string, Lazy<Delegate>>();
+        private static readonly ConcurrentDictionary<Type, (PropertyInfo Property, Type ElementType)[]> _collectionMapPropertiesCache = new ConcurrentDictionary<Type, (PropertyInfo, Type)[]>();
+        private static readonly ConcurrentDictionary<Type, Lazy<Delegate>> _collectionHydrationCache = new ConcurrentDictionary<Type, Lazy<Delegate>>();
 
         #region Public methods
 
@@ -460,8 +463,80 @@ namespace ArgentSea
                     ExpressionHelpers.TryInstantiateMapToModel(prop, expProperty, expressions);
 					IterateInMapProperties(prop.PropertyType, expressions, variables, prmSqlPrms, expProperty, expIgnoreParameters, expLogger, noDupPrmNameList, ref foundPrms, logger);
 				}
+                else if (prop.GetCustomAttribute<CollectionMapAttributeBase>() is { } collectionAttr)
+                {
+                    // Determine element type from IEnumerable<T>, ImmutableArray<T>, List<T>, etc.
+                    var elementType = GetCollectionElementType(prop.PropertyType);
+                    if (elementType is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Property '{prop.Name}' on '{tModel.Name}' has [CollectionMap] attribute but is not a recognized collection type.");
+                    }
+
+                    expressions.Add(Expression.Call(miLogTrace, expLogger, Expression.Constant(prop.Name)));
+                    collectionAttr.AppendCollectionInParameterExpressions(
+                        expressions, prmSqlPrms, expProperty, elementType, expLogger, logger);
+                    foundPrms = true;
+                }
 			}
         }
+
+        private static Type GetCollectionElementType(Type collectionType)
+        {
+            // Handle ImmutableArray<T>
+            if (collectionType.IsGenericType && collectionType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
+                return collectionType.GetGenericArguments()[0];
+
+            // Handle IEnumerable<T>, IList<T>, List<T>, IReadOnlyList<T>, etc.
+            foreach (var iface in collectionType.GetInterfaces())
+            {
+                if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    return iface.GetGenericArguments()[0];
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns (and caches) the properties on <paramref name="tModel"/> that carry a <see cref="CollectionMapAttributeBase"/>-derived
+        /// attribute, ordered deterministically by metadata token (which matches declaration order for an ordinary class), paired
+        /// with each property's collection element type. The query backing a model with collection properties must return its
+        /// child result sets in this same order: the first extra result set hydrates the first collection property below, and so on.
+        /// </summary>
+        private static (PropertyInfo Property, Type ElementType)[] GetCollectionMapProperties(Type tModel)
+        {
+            return _collectionMapPropertiesCache.GetOrAdd(tModel, static t =>
+            {
+                var found = new List<(PropertyInfo Property, Type ElementType)>();
+                foreach (var prop in t.GetProperties())
+                {
+                    if (prop.GetCustomAttribute<CollectionMapAttributeBase>() is null)
+                    {
+                        continue;
+                    }
+                    var elementType = GetCollectionElementType(prop.PropertyType);
+                    if (elementType is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Property '{prop.Name}' on '{t.Name}' has [CollectionMap] attribute but is not a recognized collection type.");
+                    }
+                    found.Add((prop, elementType));
+                }
+                // Type.GetProperties() order is not a documented contract (partial classes and inheritance can perturb it);
+                // sort by metadata token so "declaration order" is actually guaranteed and reproducible.
+                found.Sort((a, b) => a.Property.MetadataToken.CompareTo(b.Property.MetadataToken));
+                return found.ToArray();
+            });
+        }
+
+        /// <summary>
+        /// Returns true when <paramref name="modelType"/> has at least one property decorated with a
+        /// <see cref="CollectionMapAttributeBase"/>-derived attribute. Consumers such as Orleans grain persistence use this
+        /// to decide whether the collection-hydrating reader path is required, leaving models without collections on the
+        /// original single-result-set path.
+        /// </summary>
+        public static bool HasCollectionMapProperties(Type modelType)
+            => GetCollectionMapProperties(modelType).Length > 0;
 
 
         ////public static Func<ReadOnlyMemory<byte>, ParameterCollection, ILogger, IShardKey> BuildShardKeyQueryDelegate(Type tModel, ILogger logger)
@@ -2498,6 +2573,137 @@ namespace ArgentSea
             var lazySqlObjectDelegate = _getOutObjectCache.GetOrAdd(queryKey, new Lazy<Delegate>(() => BuildModelFromResultsExpressions<TReaderResult0, TReaderResult1, TReaderResult2, TReaderResult3, TReaderResult4, TReaderResult5, TReaderResult6, TReaderResult7, TModel>(instance, shardId, sprocName, 511, logger), LazyThreadSafetyMode.ExecutionAndPublication));
             var sqlObjectDelegate = (Func<TModel, short, string, List<TReaderResult0>, List<TReaderResult1>, List<TReaderResult2>, List<TReaderResult3>, List<TReaderResult4>, List<TReaderResult5>, List<TReaderResult6>, List<TReaderResult7>, ILogger, TModel>)lazySqlObjectDelegate.Value;
             return (TModel)sqlObjectDelegate(instance, shardId, sprocName, resultList0, resultList1, resultList2, resultList3, resultList4, resultList5, resultList6, resultList7, logger);
+        }
+        #endregion
+
+        #region Handle Models with CollectionMap child result sets
+        /// <summary>
+        /// A <see cref="ArgentSea.QueryResultModelHandler{TArg, TModel}" /> compatible method which populates a model's scalar
+        /// properties from the first data reader result set, then hydrates each of its <see cref="CollectionMapAttributeBase"/>-decorated
+        /// collection properties from the subsequent result sets, one result set per property, in property declaration order.
+        /// This is the read-side counterpart to writing those same properties as table-valued parameters.
+        /// </summary>
+        /// <typeparam name="TModel">The type of the return value, whose collection properties determine how many additional result sets are read.</typeparam>
+        /// <param name="instance">An existing object instance whose attributes can be populated with data.</param>
+        /// <param name="shardId">The shard identifier.</param>
+        /// <param name="sprocName">The name of the stored procedure or function, which is used for logging, if any.</param>
+        /// <param name="notUsed">An optional argument required by the delegate definition.</param>
+        /// <param name="rdr">The open data reader, positioned at the model's scalar result set.</param>
+        /// <param name="parameters">The output parameter set, which is not used.</param>
+        /// <param name="connectionDescription">The connection description is used in logging.</param>
+        /// <param name="logger">A logging instance.</param>
+        /// <returns>An instance of TModel, or null (default) if the first result set contained no rows.</returns>
+        /// <exception cref="ArgentSea.InvalidMapTypeException">Thrown when the property data type is not supported by the MapTo* atribute type.</exception>
+        /// <exception cref="ArgentSea.UnexpectedMultiRowResultException">Thrown when the data reader root type has multiple rows.</exception>
+        /// <exception cref="ArgentSea.UnexpectedSqlResultException">Thrown when the query returns fewer result sets than the model has collection properties.</exception>
+        public static TModel ModelFromReaderWithCollectionsHandler<TModel>
+            (
+            TModel instance,
+            short shardId,
+            string sprocName,
+            object notUsed,
+            DbDataReader rdr,
+            DbParameterCollection parameters,
+            string connectionDescription,
+            ILogger logger)
+        {
+            ValidateDataReader(sprocName, rdr, connectionDescription, logger);
+            var result = rdr.SetModel(instance, shardId, logger);
+            if (result is not null)
+            {
+                var tModel = typeof(TModel);
+                var lazyHydrate = _collectionHydrationCache.GetOrAdd(tModel, key => new Lazy<Delegate>(() => BuildCollectionHydrationDelegate<TModel>(logger), LazyThreadSafetyMode.ExecutionAndPublication));
+                ((Action<TModel, DbDataReader, short, ILogger>)lazyHydrate.Value)(result, rdr, shardId, logger);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Builds (and caches, per TModel) a compiled delegate that reads one additional data reader result set per
+        /// <see cref="CollectionMapAttributeBase"/>-decorated property found on TModel, in declaration order, using the
+        /// same per-row reader expressions that back <see cref="ToList{TModel}(DbDataReader, short, ILogger)"/>.
+        /// A result set that is present but empty hydrates an empty collection. A result set that is entirely missing
+        /// (the query returned fewer result sets than the model declares collection properties) is a contract violation
+        /// between the model and its query, so it throws rather than silently producing an empty collection - which,
+        /// for a grain-state consumer, would look like "this record has no children" and could destructively overwrite
+        /// real child rows on the next save.
+        /// </summary>
+        private static Action<TModel, DbDataReader, short, ILogger> BuildCollectionHydrationDelegate<TModel>(ILogger logger)
+        {
+            var tModel = typeof(TModel);
+            var collectionProps = GetCollectionMapProperties(tModel);
+
+            var expModel = Expression.Parameter(tModel, "model");
+            var expRdr = Expression.Parameter(typeof(DbDataReader), "rdr");
+            var expShardId = Expression.Parameter(typeof(short), "shardId");
+            var expLogger = Expression.Parameter(typeof(ILogger), "logger");
+
+            var miNextResult = typeof(DbDataReader).GetMethod(nameof(DbDataReader.NextResult), Type.EmptyTypes);
+            var miToList = typeof(Mapper).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .First(m => m.Name == nameof(Mapper.ToList)
+                    && m.IsGenericMethodDefinition
+                    && m.GetParameters().Length == 3
+                    && m.GetParameters()[0].ParameterType == typeof(DbDataReader)
+                    && m.GetParameters()[1].ParameterType == typeof(short));
+            var ciMissingResultSet = typeof(UnexpectedSqlResultException).GetConstructor(new[] { typeof(string) });
+
+            var blockExpressions = new List<Expression>();
+            var resultSetPosition = 1; // result set 1 is the model's own scalar row; collections start at 2.
+            foreach (var (prop, elementType) in collectionProps)
+            {
+                resultSetPosition++;
+                var listType = typeof(List<>).MakeGenericType(elementType);
+                var expListVar = Expression.Variable(listType, "list_" + prop.Name);
+                var miToListClosed = miToList.MakeGenericMethod(elementType);
+
+                var missingResultSetMessage = $"Model '{tModel.Name}' declares collection property '{prop.Name}' " +
+                    $"which expects data reader result set #{resultSetPosition} (result set 1 is the model's own row), " +
+                    $"but the query returned no such result set. The query and the model are out of sync.";
+                var expThrowMissingResultSet = Expression.Throw(
+                    Expression.New(ciMissingResultSet, Expression.Constant(missingResultSetMessage)));
+
+                var expReadResultSet = Expression.IfThenElse(
+                    Expression.Call(expRdr, miNextResult),
+                    Expression.Assign(expListVar, Expression.Call(miToListClosed, expRdr, expShardId, expLogger)),
+                    expThrowMissingResultSet);
+
+                var expConvertedValue = ConvertListToCollectionPropertyType(expListVar, prop.PropertyType, elementType, listType);
+                var expSetProperty = Expression.Assign(Expression.Property(expModel, prop), expConvertedValue);
+
+                blockExpressions.Add(Expression.Block(new[] { expListVar }, expReadResultSet, expSetProperty));
+            }
+
+            Expression body = blockExpressions.Count > 0 ? Expression.Block(blockExpressions) : Expression.Empty();
+            var lambda = Expression.Lambda<Action<TModel, DbDataReader, short, ILogger>>(body, expModel, expRdr, expShardId, expLogger);
+            return lambda.Compile();
+        }
+
+        /// <summary>
+        /// Converts a compiled expression producing a <c>List&lt;TElement&gt;</c> into an expression compatible with the
+        /// target collection property's type: the list itself (or an interface it implements), or an <see cref="ImmutableArray{T}"/>.
+        /// </summary>
+        private static Expression ConvertListToCollectionPropertyType(ParameterExpression expList, Type propertyType, Type elementType, Type listType)
+        {
+            if (propertyType == listType)
+            {
+                return expList;
+            }
+            if (propertyType.IsAssignableFrom(listType))
+            {
+                return Expression.Convert(expList, propertyType);
+            }
+            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
+            {
+                var miCreateRange = typeof(ImmutableArray).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .First(m => m.Name == nameof(ImmutableArray.CreateRange)
+                        && m.IsGenericMethodDefinition
+                        && m.GetParameters().Length == 1
+                        && m.GetParameters()[0].ParameterType.IsGenericType
+                        && m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    .MakeGenericMethod(elementType);
+                return Expression.Call(miCreateRange, expList);
+            }
+            throw new InvalidOperationException($"Collection property of type '{propertyType}' cannot be populated from a List<{elementType.Name}> result set.");
         }
         #endregion
 
