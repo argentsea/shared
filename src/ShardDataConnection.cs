@@ -1433,6 +1433,20 @@ namespace ArgentSea
             => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel>, false, null, this.MockResults, cancellationToken);
 
         /// <summary>
+        /// Connect to the database and return an object of the specified type, mapping its scalar properties from the first
+        /// data reader result and any <see cref="CollectionMapAttributeBase"/>-decorated collection properties from the
+        /// subsequent result sets, in property declaration order.
+        /// </summary>
+        /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
+        /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+        /// <param name="parameters">The query parameters.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns></returns>
+        public Task<TModel> MapReaderWithCollectionsAsync<TModel>(Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+            where TModel : new()
+            => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, -1, null, Mapper.ModelFromReaderWithCollectionsHandler<TModel>, false, null, this.MockResults, cancellationToken);
+
+        /// <summary>
         /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
         /// </summary>
         /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
@@ -1620,6 +1634,21 @@ namespace ArgentSea
         public Task<TModel> MapReaderAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TModel : new()
             => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderResultsHandler<TModel>, false, null, this.MockResults, cancellationToken);
+
+        /// <summary>
+        /// Connect to the database and return an object of the specified type, mapping its scalar properties from the first
+        /// data reader result and any <see cref="CollectionMapAttributeBase"/>-decorated collection properties from the
+        /// subsequent result sets, in property declaration order.
+        /// </summary>
+        /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
+        /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+        /// <param name="parameters">The query parameters.</param>
+        /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns></returns>
+        public Task<TModel> MapReaderWithCollectionsAsync<TModel>(Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            where TModel : new()
+            => _manager.QueryAsync<object, TModel>(new TModel(), query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderWithCollectionsHandler<TModel>, false, null, this.MockResults, cancellationToken);
 
         /// <summary>
         /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
@@ -1819,6 +1848,20 @@ namespace ArgentSea
             => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderResultsHandler<TModel>, false, null, this.MockResults, cancellationToken);
 
         /// <summary>
+        /// Connect to the database and return an object of the specified type, mapping its scalar properties from the first
+        /// data reader result and any <see cref="CollectionMapAttributeBase"/>-decorated collection properties from the
+        /// subsequent result sets, in property declaration order.
+        /// </summary>
+        /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
+        /// <param name="instance">An object instance to populate with values.</param>
+        /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+        /// <param name="parameters">The query parameters.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns></returns>
+        public Task<TModel> MapReaderWithCollectionsAsync<TModel>(TModel instance, Query query, DbParameterCollection parameters, CancellationToken cancellationToken)
+            => _manager.QueryAsync<object, TModel>(instance, query, parameters, -1, null, Mapper.ModelFromReaderWithCollectionsHandler<TModel>, false, null, this.MockResults, cancellationToken);
+
+        /// <summary>
         /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
         /// </summary>
         /// <typeparam name="TModel">This is the expected return type of the query. It must also be the same type as one of the TReaderResult values.</typeparam>
@@ -2007,6 +2050,22 @@ namespace ArgentSea
         public Task<TModel> MapReaderAsync<TModel>(TModel instance, Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
             where TModel : new()
             => _manager.QueryAsync<object, TModel>(instance, query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderResultsHandler<TModel>, false, null, this.MockResults, cancellationToken);
+
+        /// <summary>
+        /// Connect to the database and return an object of the specified type, mapping its scalar properties from the first
+        /// data reader result and any <see cref="CollectionMapAttributeBase"/>-decorated collection properties from the
+        /// subsequent result sets, in property declaration order.
+        /// </summary>
+        /// <typeparam name="TModel">This is the expected return type of the query.</typeparam>
+        /// <param name="instance">An object instance to populate with values.</param>
+        /// <param name="query">The SQL procedure or statement to invoke to fetch the data.</param>
+        /// <param name="parameters">The query parameters.</param>
+        /// <param name="shardParameterName">The ordinal position of a parameter that should be automatically set to the current shard number value. If there is no such parameter, set to -1.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns></returns>
+        public Task<TModel> MapReaderWithCollectionsAsync<TModel>(TModel instance, Query query, DbParameterCollection parameters, string shardParameterName, CancellationToken cancellationToken)
+            where TModel : new()
+            => _manager.QueryAsync<object, TModel>(instance, query, parameters, parameters.GetParameterOrdinal(shardParameterName), null, Mapper.ModelFromReaderWithCollectionsHandler<TModel>, false, null, this.MockResults, cancellationToken);
 
         /// <summary>
         /// Connect to the database and return an object of the specified type built from the corresponding data reader results.
